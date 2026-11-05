@@ -1565,5 +1565,5 @@ FodyWeavers.xsd
 
 # probing files
 test-files/
-results/
-Config/Local.xcconfig
+test-results/
+probe/Config/Local.xcconfig
