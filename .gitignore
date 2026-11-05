@@ -1,5 +1,5 @@
-# Created by https://www.toptal.com/developers/gitignore/api/osx,less,node,sass,bower,grunt,linux,pydev,xcode,python,android,angular,eclipse,laravel,pycharm,vagrant,windows,composer,intellij,netbeans,phpstorm,textmate,webstorm,qtcreator,sublimetext,intellij+iml,visualstudio,androidstudio,swift,swiftpackagemanager,swiftpm
-# Edit at https://www.toptal.com/developers/gitignore?templates=osx,less,node,sass,bower,grunt,linux,pydev,xcode,python,android,angular,eclipse,laravel,pycharm,vagrant,windows,composer,intellij,netbeans,phpstorm,textmate,webstorm,qtcreator,sublimetext,intellij+iml,visualstudio,androidstudio,swift,swiftpackagemanager,swiftpm
+# Created by https://www.toptal.com/developers/gitignore/api/osx,less,node,sass,bower,grunt,linux,pydev,swift,xcode,python,android,angular,eclipse,laravel,pycharm,vagrant,windows,composer,intellij,netbeans,phpstorm,textmate,webstorm,qtcreator,sublimetext,intellij+iml,visualstudio,androidstudio
+# Edit at https://www.toptal.com/developers/gitignore?templates=osx,less,node,sass,bower,grunt,linux,pydev,swift,xcode,python,android,angular,eclipse,laravel,pycharm,vagrant,windows,composer,intellij,netbeans,phpstorm,textmate,webstorm,qtcreator,sublimetext,intellij+iml,visualstudio,androidstudio
 
 ### Android ###
 # Gradle files
@@ -1012,15 +1012,6 @@ fastlane/test_output
 
 iOSInjectionProject/
 
-### SwiftPackageManager ###
-Packages
-xcuserdata
-*.xcodeproj
-
-
-### SwiftPM ###
-
-
 ### TextMate ###
 *.tmproj
 *.tmproject
@@ -1647,7 +1638,7 @@ FodyWeavers.xsd
 ### VisualStudio Patch ###
 # Additional files built by Visual Studio
 
-# End of https://www.toptal.com/developers/gitignore/api/osx,less,node,sass,bower,grunt,linux,pydev,xcode,python,android,angular,eclipse,laravel,pycharm,vagrant,windows,composer,intellij,netbeans,phpstorm,textmate,webstorm,qtcreator,sublimetext,intellij+iml,visualstudio,androidstudio,swift,swiftpackagemanager,swiftpm
+# End of https://www.toptal.com/developers/gitignore/api/osx,less,node,sass,bower,grunt,linux,pydev,swift,xcode,python,android,angular,eclipse,laravel,pycharm,vagrant,windows,composer,intellij,netbeans,phpstorm,textmate,webstorm,qtcreator,sublimetext,intellij+iml,visualstudio,androidstudio
 
 # probing files
 test-files/
