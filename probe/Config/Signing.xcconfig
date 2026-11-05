@@ -1,0 +1,11 @@
+// Ad-hoc signing by default. If Mail does not list the extension, sign with your Apple team
+// by creating Config/Local.xcconfig with these lines:
+//   CODE_SIGN_STYLE = Automatic
+//   CODE_SIGN_IDENTITY = Apple Development
+//   DEVELOPMENT_TEAM = YOUR_TEAM_ID
+
+CODE_SIGN_STYLE = Manual
+CODE_SIGN_IDENTITY = -
+DEVELOPMENT_TEAM =
+
+#include? "Local.xcconfig"
