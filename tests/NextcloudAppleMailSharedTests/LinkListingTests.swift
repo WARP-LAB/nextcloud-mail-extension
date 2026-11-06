@@ -60,6 +60,54 @@ struct LinkListingTests {
         #expect(!body.contains("/s/file"))
     }
 
+    @Test func putsNeighbouringFilesLinksOnLinesOfTheirOwn() throws {
+        // Files dropped next to each other, as the Mail checks found (T5b): their placeholders touch, and a file
+        // that stays keeps its placeholder.
+        let data = Data(
+            """
+            Subject: Neighbours
+            Content-Type: multipart/alternative; boundary="b"
+
+            --b
+            Content-Type: text/plain; charset=utf-8
+
+            Text above.
+            \u{FFFC}\u{FFFC}\u{FFFC} after
+            --b
+            Content-Type: multipart/mixed; boundary="m"
+
+            --m
+            Content-Type: text/html; charset=utf-8
+
+            <html><body>Text above.</body></html>
+            --m
+            Content-Type: application/octet-stream; name="a.bin"
+            Content-Disposition: attachment; filename="a.bin"
+
+            YQ==
+            --m
+            Content-Type: application/octet-stream; name="b.bin"
+            Content-Disposition: attachment; filename="b.bin"
+
+            Yg==
+            --m
+            Content-Type: application/octet-stream; name="c.bin"
+            Content-Disposition: attachment; filename="c.bin"
+
+            Yw==
+            --m--
+            --b--
+
+            """.utf8)
+        let input = MimeMessage(data)
+        let links = try Links.links(Array(input.files.prefix(2)))
+        let output = MimeMessage(LinkRewriter().rewrite(input, links: links, folder: nil, passwordNotice: false))
+        let plain = try #require(output.text("plain").first)
+        let first = text.plain(try #require(links[0]))
+        let second = text.plain(try #require(links[1]))
+        #expect(plain.hasPrefix("Text above.\n\(first)\n\(second)\n\u{FFFC} after"))
+    }
+
     @Test func listsAForwardedFileAboveTheQuote() throws {
         let (links, output) = try listing("t20-second")
         #expect(output.files.isEmpty)
