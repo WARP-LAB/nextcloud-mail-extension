@@ -64,7 +64,7 @@ indent_style = space
 indent_size = 4
 
 # --------------------------------
-# Align with https://github.com/realm/SwiftLint/
+# Layout: swift-format (.swift-format). Code quality: SwiftLint (.swiftlint.yml). See docs/TESTING.md
 
 [*.swift]
 indent_style = space
