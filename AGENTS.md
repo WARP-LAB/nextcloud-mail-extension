@@ -98,6 +98,7 @@ Only what isn't obvious from directory names:
 - A `.gitignore` rule containing `/` is anchored to the repository root, so `Config/Local.xcconfig` doesn't match `probe/Config/Local.xcconfig`.
 - macOS pads `wc -l` and `wc -c` output with spaces, and has no `timeout`. In zsh, `status` is a read-only variable, so `status=$?` fails.
 - macOS registers every bare `.app` and `.appex` on disk, the Trash included, and an old copy with the same bundle ID can stand in for the installed one: for its icon, its extension, or its Local Network rule. So only the installed copy is ever a bundle: `scripts/build.sh` keeps the build as a zip and deletes the bare bundles, and `scripts/install.sh` unpacks the zip into `~/Applications`. Don't leave a copy anywhere else, such as Xcode's DerivedData.
+- Adding `NSLocalNetworkUsageDescription` to either `Info.plist`: with it, macOS never asks for the extension and refuses its requests to a server on the local network (D27). Test Local Network changes from a clean state: uninstall the app, restart the Mac, then reinstall.
 - Reading Mail's Sign state at compose start instead of at send, or detecting auto-saves by headers instead of the message's `state` (`docs/MAIL.md`).
 - An unescaped `|` inside a Markdown table cell splits the cell, so avoid pipes in code within tables.
 - In Swift, `"\r\n"` is one `Character`, so `hasSuffix("\n")` is false for CRLF text. `MimePart.text` returns text with `\n` line endings for this reason. The package builds in Swift 5 mode, where a bare `/…/` regex literal doesn't compile: write `#/…/#`.

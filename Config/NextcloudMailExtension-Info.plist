@@ -4,7 +4,5 @@
 <dict>
 	<key>NCMEAppGroupIdentifier</key>
 	<string>$(TeamIdentifierPrefix)lv.warp.nextcloudmailextension</string>
-	<key>NSLocalNetworkUsageDescription</key>
-	<string>NextcloudMailExtension uploads email attachments to your Nextcloud server, which may be on your local network.</string>
 </dict>
 </plist>

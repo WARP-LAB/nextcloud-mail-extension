@@ -148,8 +148,9 @@ What could go wrong, how we'd notice, and what's being done about it. Each entry
 - **Risk:** the extension using the network during `encode()` is untested.
 - **Tested** (T2, 2026-11-06): inside Mail, the extension read the settings and the app password, but its requests to the test server, which is on the local network, failed with "offline" because of Local Network privacy ([MAIL.md](MAIL.md#network)). Servers on the internet aren't affected by that, and haven't been tried from the extension yet. Once the user allowed the app's local network access, Test from Mail passed (T2b). After a new build is installed, macOS refuses its first local network request once, which a retry covers (T5b, [MAIL.md](MAIL.md#network)).
 - **Signal:** uploads fail with sandbox or connection errors.
-- **Mitigation:** the host app declares `NSLocalNetworkUsageDescription`, so macOS asks the user, and the extension shares the app's permission. The offline error and the setup help say where to allow it. Test from Mail checks it (T2b).
-- **Judgment call:** if it's blocked, stop and ask.
+- **Tested** (T14, 2026-11-07): the extension needs its own Local Network permission, which macOS only asks for when neither `Info.plist` has `NSLocalNetworkUsageDescription`, and only from the popover, not from a send ([MAIL.md](MAIL.md#network), D27).
+- **Mitigation:** neither `Info.plist` has `NSLocalNetworkUsageDescription`. The popover checks the connection as it opens, which makes macOS ask for the extension, and shows a problem in red. The setup help says to open the toolbar button once and allow both entries, and the offline error names both. Apple recommends the key, so if a later macOS or the Mac App Store's review requires it, this needs testing again (OD3).
+- **Judgment call:** if it's blocked, stop and ask. Never add `NSLocalNetworkUsageDescription` back without testing a fresh install on a clean state.
 
 ### R19: Nextcloud behaves differently from what was tested
 

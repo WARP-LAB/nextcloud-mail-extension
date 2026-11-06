@@ -69,7 +69,8 @@ macOS asks for these permissions, for the app that runs the terminal, such as Vi
 | Automation of System Events | Automation, under the terminal's app | The first AppleScript sent to System Events | Reading Mail's alerts and clicking their buttons |
 | Accessibility | Accessibility | Not asked for: System Events fails at once with "osascript is not allowed assistive access", and the user turns the terminal's app on in the list by hand | Alerts, Undo Send, Send Later and the Mail Drop prompt |
 | Screen Recording | Screen & System Audio Recording | The first `screencapture` | Screenshots of Mail's windows, to see an alert or a layout |
-| Local Network, for NextcloudMailExtension | Local Network | The app's first request to a server on the local network, opened normally rather than from a terminal | The extension's uploads to such a server ([MAIL.md](MAIL.md#network)) |
+| Local Network, for NextcloudMailExtension | Local Network | The app's first request to a server on the local network, opened normally rather than from a terminal | The app's login and Test connection with such a server |
+| Local Network, for NextcloudMailExtensionPlugIn | Local Network | The popover's first connection check, as “NextcloudMailEx” | The extension's uploads to such a server ([MAIL.md](MAIL.md#network)) |
 
 Mail itself needs the extension turned on and chosen for message security, and Sign on, which AppleScript can't read or change. After `scripts/install.sh` replaces a build, quit and reopen Mail. Until then, sends stop with Mail's own alert, "An error occurred while trying to encrypt your message", because Mail can't reach the replaced extension.
 

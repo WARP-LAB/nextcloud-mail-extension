@@ -257,10 +257,12 @@ private struct CheckResultView: View {
 /// How to set up Mail, and the limits worth knowing (FR5, FR10, R12, R13, R15, R21).
 private struct SetupHelp: View {
     private let steps = [
-        "Log in above. If macOS asks whether NextcloudMailExtension may find devices on your local network, allow it. "
-            + "The extension in Mail uses the same permission to reach a server on your local network.",
+        "Log in above. If macOS asks whether NextcloudMailExtension may find devices on your local network, allow it.",
         "In Mail, open Settings > Extensions, turn on NextcloudMailExtension, and choose it in the message security "
             + "popup. Then quit and reopen Mail.",
+        "Open a new message and click the toolbar button with Nextcloud's logo. If macOS asks whether "
+            + "“NextcloudMailEx” may find devices on your local network, allow it: the extension in Mail needs its own "
+            + "permission, which System Settings lists as NextcloudMailExtensionPlugIn.",
         "In each message window, turn on Sign, the badge button at the right of the subject line. Files become "
             + "links only while it's on, and it stays on for later messages.",
         "If Mail asks about Mail Drop for a large email, choose Try Sending in Email and tick “Don't ask again for "
