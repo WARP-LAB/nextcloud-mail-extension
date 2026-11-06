@@ -21,11 +21,11 @@ The extension's toolbar button in the message window opens a popover, where the 
 | --- | --- | --- | --- |
 | Settings UI and login | Host app | Settings for FR2–FR6, FR8, FR9 and D17, Nextcloud login, Test connection and the setup help | Done: [App/](../App/) |
 | `SecurityHandler` | Extension | Status, `encode()`, and stubs for decoding | Done: [SecurityHandler.swift](../Extension/SecurityHandler.swift), which hands each call to `Sender` |
-| `ComposeHandler` | Extension | FR5 and FR6 warnings, the password popover (FR7) | [ComposeHandler.swift](../probe/MailProbeExtension/ComposeHandler.swift) |
+| `ComposeHandler` | Extension | FR5 and FR6 warnings, the password popover (FR7) | Done: [ComposeHandler.swift](../Extension/ComposeHandler.swift), with `SendWarnings` in [Shared/Send/](../Shared/Send/) |
 | `MimeMessage` | Extension | Parse the message and write it out again | Done: [Shared/Mime/](../Shared/Mime/) |
 | `LinkPolicy` | Extension | Decide which files become links (FR3) and which count as attachments (FR6) | Done for FR3: [LinkPolicy.swift](../Shared/Links/LinkPolicy.swift) |
 | `LinkRewriter`, `LinkText` | Extension | Put each file's links in the message (FR8), and the links to all files and the password notice (FR7, FR9) | Done: [Shared/Links/](../Shared/Links/) |
-| `TextCheck` | Extension | Find FR6 phrases in the text the user wrote | New |
+| `TextCheck` | Extension | Find FR6 phrases in the text the user wrote | Done: [TextCheck.swift](../Shared/Links/TextCheck.swift) |
 | `NextcloudClient` | Both | Login, folders, uploads, shares, server limits | Done: [Shared/Nextcloud/](../Shared/Nextcloud/), with `LinkExpiry` (FR4) and `NextcloudNames` (FR2) |
 | `Sender`, `SendFlow`, `UploadLedger` | Extension | Run each `encode()` call: the uploads, shares and links, the failure memo and the Mail Drop clean-up, with each message's folder and finished uploads remembered | Done: [Shared/Send/](../Shared/Send/), tested against a fake Nextcloud |
 | `MessagePasswords` | Extension | Passwords typed in the popover, with their Keychain copies | Done: [MessagePasswords.swift](../Shared/Send/MessagePasswords.swift) |
@@ -146,8 +146,8 @@ Both warnings come from `allowMessageSendForSession`, which returns at most one 
 ### FR6: text mentions an attachment
 
 1. If the phrase list is empty, there's no check.
-2. Count the files in `rawData` under `LinkPolicy`'s FR6 rule. With Sign on, the first call has already turned files into links, so it records how many it linked for the message ID, and the check adds those. If there are any, there's no warning.
-3. Take the text from the HTML part, because the plain-text part is empty at this point (t34, t35). Remove tags, decode entities and collapse spaces. Skip `<div class="AppleOriginalContents">`, `<blockquote type="cite">` and `<div id="AppleMailSignature">`.
+2. Count the files in `rawData`, leaving out the signature's images, which its HTML marks. With Sign on, the first call has already turned files into links, and the ledger has them under the message ID, so the check adds those. If there are any, there's no warning.
+3. Take the text from the HTML part, because the plain-text part is empty at this point (t34, t35). Remove tags, decode entities and collapse spaces. Skip `<div class="AppleOriginalContents">`, `<blockquote type="cite">` and `<div id="AppleMailSignature">`, but keep the blockquote of shared content inside `Apple-Mail-URLShareWrapperClass`. Without HTML, use the plain text without `>` lines and without a signature after `-- `.
 4. Look for each phrase ignoring case, including inside longer words. Report the first one found: "Your message mentions "see attached" but has no attachment."
 
 ## Passwords in the message window (FR7)

@@ -17,7 +17,7 @@ Risk register: `docs/RISKS.md`.
 > - Write Acceptance Criteria or a explicit Definition of Done
 > - Take tasks in order unless told otherwise. Do not start the next task without being asked.
 
-None. T7 is next.
+None. T8 is next.
 
 ## ❓ Open Decisions (human to resolve)
 
@@ -41,8 +41,6 @@ Judgment calls and known risks are tracked separately in `docs/RISKS.md`.
 
 ## 📋 Backlog (To Be Done)
 
-- **T7: Send warnings (FR5, FR6).** Both warnings in the send check (R10).
-  - **Acceptance:** the send-warning Mail checks pass.
 - **T8: Progress display.** A notification when uploads start and finish, or the host app's window (R3).
   - **Acceptance:** a slow upload shows progress, and its end, without the user having to watch Mail.
 - **T9b: Check AGENTS.md in each agent tool (needs the user, optional).** At the end of the project, if at all (the user's choice). Open the repository once in each tool you use, ask what the repository's instructions say about commits, and note any tool that doesn't know. Claude Code 2.1.310 is checked, because this session loaded AGENTS.md. For Copilot in VS Code, `chat.useAgentsMdFile` must be on.
@@ -51,6 +49,7 @@ Judgment calls and known risks are tracked separately in `docs/RISKS.md`.
 ## ✅ Completed Tasks (Done)
 
 - **Probing Mail with MailProbe (2026-11-05).** Four rounds of tests found what Mail does with an extension. See `probe/docs/` and `docs/MAIL.md`.
+- **T7: Send warnings (2026-11-06).** Verified: `swift test` passes 131 unit tests, with FR5 naming the files with Sign off and not warning with Sign on, with the setting off or with only files the size rule keeps, and FR6 finding a phrase inside longer words, ignoring case, in the user's own text only, not in the subject, quotes or signature, counting every file and those the first call linked, but not signature images. In Mail, with `tests/mail-window-checks.py`: with Sign off, the alert named the file and said how to turn on Sign, Cancel kept the window, and with Sign back on the email went out with links (t33), while Send Anyway sent the file attached with nothing uploaded (t23). A phrase with no attachment gave the alert naming it, with Sign on and off, Cancel kept the window, and Send Anyway sent the email as written (t34, t35). A phrase only in the subject or a reply's quote gave none. Sign was turned back on after each check.
 - **T6: Password per email (2026-11-06).** Verified: `swift test` passes 123 unit tests, with a password found through a reopened draft's new context, through the Keychain copy after a restart, cleared, pruned after 30 days, given to the shares, changed and removed after Undo Send, and required by the server. With `tests/mail-window-checks.py`, in Mail: a password typed in the toolbar popover made every link, the all-files link too, show the password page, while the file came with the password, and the email said a password is needed without containing it (t36). The password held through a saved and reopened draft (t37), and through restarting Mail before reopening it, which only the Keychain copy could cover (R8). A password the policy refused stopped the send with the server's reason, and a password the server required stopped it with the alert asking for one, each sending once a valid one was typed. The server's settings were put back. The plain send checks still pass. NEXTCLOUD.md records that an empty password removes one.
 - **T5c: The rest of T5's Mail checks (2026-11-06).** Run by the agent with `tests/mail-window-checks.py`, through System Events. All passed: an upload failure's alert named the server's reason, kept the window open with its file, and sending again went through (t7). Undo Send brought the window back, and sending again reused the upload, with one folder on Nextcloud (t21). Send Later uploaded the file at scheduling, and the scheduled copy in the SendLater mailbox had working links (t22, twice; the second run checked by hand after the script's sheet handling was fixed, and both emails go out at 21:00). A pasted image became links to a PNG (t30). A reply made in Mail's window kept its quote, with the file's links above it (t34). Over the size limit, Try Sending in Email gave a small email whose 30 MB file downloaded intact (t38), and Use Mail Drop gave Mail Drop's link with nothing left on Nextcloud (t39). "Don't ask again" was never ticked. The user found the emails right in Gmail on the web and Outlook.
 - **T11: Phrases as tags (2026-11-06).** The user's request: the FR6 field turns each word or phrase entered with Return into a bubble with an x. Verified: the window drawn with `--render-window` shows three tags, one of two words, with their x buttons, and the custom period's fields, with "hour" for 1. The build has no warnings, lint is clean, and a Mail check passed on the installed build, whose folder carried the new time-stamped name.
