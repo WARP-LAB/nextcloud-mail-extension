@@ -17,7 +17,9 @@ Risk register: `docs/RISKS.md`.
 > - Write Acceptance Criteria or a explicit Definition of Done
 > - Take tasks in order unless told otherwise. Do not start the next task without being asked.
 
-None. The backlog has only T9b, which the user left for the end of the project.
+- 🔄 **T13: Popover expiry, Settings button, icons, version and settings wording (waiting for the user's look).** The user's requests: the toolbar popover gives an email its own link expiry and opens the app's settings, the toolbar button shows Nextcloud's blue logo mark, and the app has Nextcloud's macOS app icon. With OD4's answers, the upload directory's default is `MailAttachments` (D21). In a second round: the mark is 18 pt high inside the button, `Config/Local.example.xcconfig` lists the signing keys, the version is `0.1.0` and shows in the app's footer (D22), the size limit keeps decimals and applies to each file or all files together (FR3), and settings get the user's wording (D23). The user approved the toolbar icon, and all but the app icon is committed. The app icon waits for the user's look.
+  - **Acceptance:** the popover's own expiry applies to that email's links only and follows a change after Undo Send, Settings… opens the app, and the user approves how the icons look. The app's footer shows "Version 0.1.0 (1)". A size typed as "0.2" stays 0.2, and with all files together, two files that are each under the limit but together over it both become links.
+  - Verified so far: `swift test` passes 138 unit tests, and the server test for changing a share's expiry passes. In Mail, `own-expiry`, `open-settings`, `size-rule`, `size-together` and `size-together-under` pass. Typing "10,25" and then "0.2" in the app's size field stored 10.25 and 0.2, and the footer shows "Version 0.1.0 (1)".
 
 ## ❓ Open Decisions (human to resolve)
 
@@ -25,7 +27,6 @@ Agents: do not guess these. Record questions here and stop.
 Judgment calls and known risks are tracked separately in `docs/RISKS.md`.
 
 - **OD3: Distribution.** How the app is distributed: Developer ID, the Mac App Store, or local builds only. Both of the first two need the renewed paid membership (D11). The supported versions are decided (D12).
-- **OD4: Defaults chosen by an agent.** Confirm or change: the upload directory "Mail attachments" (FR2), all attachments becoming links (FR3), links expiring in a month (FR4), FR5's warning on, FR6's phrase list empty, FR8's view and download links, FR9's all-files links off, the list of file names above the folder's links when FR8 gives only those (D17), the email saying that links need a password (FR7), upload notifications only after 2 seconds (T8).
 - **OD5: Proposed requirements.** Confirm or change the non-functional requirements and the out-of-scope list in the PRD.
 - **OD6: Testing "Don't ask again".** Whether to test it in Mail's Mail Drop prompt, knowing it changes the account's behaviour and may be hard to undo (R2).
 
