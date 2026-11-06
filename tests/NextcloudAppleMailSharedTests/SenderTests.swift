@@ -121,8 +121,10 @@ struct SenderTests {
         let world = World()
         let first = try Fixture.data("t29-first")
         let second = try Fixture.data("t29-second")
-        async let one = world.sender.encode(first, isAutoSave: false, contextID: UUID())
-        async let two = world.sender.encode(second, isAutoSave: false, contextID: UUID())
+        // One reference before the calls: two calls reaching the lazy property at once could each make a sender.
+        let sender = world.sender
+        async let one = sender.encode(first, isAutoSave: false, contextID: UUID())
+        async let two = sender.encode(second, isAutoSave: false, contextID: UUID())
         let results = await [one, two]
         #expect(results.allSatisfy { if case .rewritten = $0 { true } else { false } })
         #expect(world.nextcloud.uploads == 2)

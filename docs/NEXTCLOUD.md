@@ -70,13 +70,15 @@ By default the extension uses one share per email, of its folder (D17, R21).
 | Download a shared file | `/s/<token>/download`, which answers 303 to `/public.php/dav/files/<token>` |
 | View a shared folder | The folder share's `url` |
 | Download a shared folder | The folder share's `/s/<token>/download`, which answers 303 to `/public.php/dav/files/<token>?accept=zip` |
-| Download one file from a folder share | `/s/<token>/download?files=<name>` |
+| Download one file from a folder share | `/s/<token>/download?files=<name>`, which answers 303 to `/public.php/dav/files/<token>/<name>` |
 
 - **Folder zips:** `application/zip`, named `<folder>.zip`, with the folder as the zip's top level. Names are UTF-8 with the zip's UTF-8 flag set, so macOS's Archive Utility shows accents correctly. The old `unzip` command doesn't.
 - **Password pages:** without the password, the view link goes to `/s/<token>/authenticate/showshare` and the download link to `/s/<token>/authenticate/downloadshare`. Both are password pages with status 200, so a script downloading the link gets HTML, not the file.
 - **Public WebDAV:** `/public.php/dav/files/<token>` accepts Basic auth with the user `anonymous` and the share's password. A wrong password gives 401.
 - **Hidden downloads:** a share with "hide download" set fails to download. Shares created without that setting are unaffected.
 - **No view page for one file in a folder share.** Whether a link can open one file in the folder's page is untested.
+- **One file of a folder share, by name:** the redirect puts the name into the WebDAV path without encoding it, so a name with `#`, `%` or `?` is cut or broken and gets 404 or an error. Spaces, accents, `&`, `+`, `;`, `=`, `@`, `,`, quotes, brackets and full-width characters worked. A file's own share downloads any name. Tested 2026-11-06.
+- **One file of a password-protected folder share:** `?files=` survives the password page. After the password, the page redirects to that file alone (`downloadsOneFileOfAFolderShareAfterItsPassword`).
 
 ## Passwords
 

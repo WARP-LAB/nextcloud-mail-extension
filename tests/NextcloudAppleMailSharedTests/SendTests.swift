@@ -189,6 +189,11 @@ struct SendFlowTests {
         #expect(nextcloud.shares.first?.expireDate == "2026-11-09")
     }
 
+    @Test func replacesWhatBreaksAFolderShareDownload() {
+        #expect(NextcloudNames.folderShareName("Pārskats #1 100% ok?.pdf") == "Pārskats _1 100_ ok_.pdf")
+        #expect(NextcloudNames.folderShareName("a&b+c;d [1].pdf") == "a&b+c;d [1].pdf")
+    }
+
     @Test func encodesNamesInTheDownloadLink() throws {
         let url = try #require(URL(string: "https://cloud.example.test/s/abc"))
         let share = Share(id: "1", url: url)

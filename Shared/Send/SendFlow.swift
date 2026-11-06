@@ -73,8 +73,9 @@ struct SendFlow {
         let options = LinkOptions(expireDate: expireDate, password: password)
         let folder = try await folder(for: message, record)
         let eachFile = settings.sharing == .eachFile
+        let names = files.map { eachFile ? $0.filename : NextcloudNames.folderShareName($0.filename) }
         var stored: [Int: UploadLedger.StoredFile] = [:]
-        for (file, name) in zip(files, NextcloudNames.uniqueFiles(files.map(\.filename))) {
+        for (file, name) in zip(files, NextcloudNames.uniqueFiles(names)) {
             do {
                 stored[file.index] = try await put(
                     file, named: name, in: folder, share: eachFile ? options : nil, record)

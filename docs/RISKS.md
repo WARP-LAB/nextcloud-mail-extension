@@ -139,7 +139,7 @@ What could go wrong, how we'd notice, and what's being done about it. Each entry
 
 ### R19: Nextcloud behaves differently from what was tested
 
-- **Risk:** everything in [NEXTCLOUD.md](NEXTCLOUD.md) has now been run against the test server's Nextcloud 35.0.2, the enforced settings included (T3, T3b). Other servers may run other versions, apps or settings, such as Nextcloud 34, a different password policy, or a proxy in front.
+- **Risk:** everything in [NEXTCLOUD.md](NEXTCLOUD.md) has now been run against the test server's Nextcloud 35.0.2, the enforced settings included (T3, T3b). T5 found that a folder share's download of one file breaks on names with `#`, `%` or `?`, and adapted the names. Other servers may run other versions, apps or settings, such as Nextcloud 34, a different password policy, or a proxy in front.
 - **Signal:** shares, links or expiry dates behave differently from what NEXTCLOUD.md says.
 - **Mitigation:** the server tests (`scripts/test-nextcloud.sh`, and `--server-settings` for the enforced settings, D18), which can be run against another test server.
 - **Judgment call:** an agent may adapt to what the server really does, and update NEXTCLOUD.md.

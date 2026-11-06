@@ -238,12 +238,13 @@ struct NextcloudServerTests {
     @Test func downloadsOneFileOfAFolderShareAfterItsPassword() async throws {
         try await TestServer.withFolder("folder password") { client, folder in
             let first = Data("first\n".utf8)
-            try await client.upload(first, to: NextcloudClient.join(folder, "Pārskats #1.txt"))
+            let name = NextcloudNames.folderShareName("Pārskats #1 100% ā?.txt")
+            try await client.upload(first, to: NextcloudClient.join(folder, name))
             try await client.upload(Data("second\n".utf8), to: NextcloudClient.join(folder, "b.txt"))
             let password = TestServer.newPassword()
             let share = try await client.share(folder, expireDate: "", password: password)
             var single = try #require(URLComponents(url: share.downloadURL, resolvingAgainstBaseURL: false))
-            single.queryItems = [URLQueryItem(name: "files", value: "Pārskats #1.txt")]
+            single.percentEncodedQuery = "files=" + NextcloudClient.encode(name)
             let url = try #require(single.url)
 
             let (page, locked) = try await TestServer.get(url)
