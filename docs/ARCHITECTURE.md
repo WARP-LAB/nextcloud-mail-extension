@@ -140,8 +140,8 @@ Both warnings come from `allowMessageSendForSession`, which returns at most one 
 ## Settings and credentials
 
 - **Where they live:** the settings UI is in the host app: server, directory, the FR3 rule and pasted-images option, FR4 expiry, the FR5 checkbox, the FR6 phrases, and the FR8 and FR9 options. Settings are shared through an App Group, and the app password through a shared Keychain group (R17). The per-email password isn't a setting.
-- **The App Group:** `<team ID>.lv.warp.nextcloudapplemail`. The build writes it into each target's `Info.plist` as `NCAMAppGroupIdentifier`, from `$(TeamIdentifierPrefix)`, and `SharedStorage` reads it from there. Its container and settings work with the free Personal Team, but the shared Keychain item needs a provisioning profile (R17).
-- **Entitlements:** both targets need the sandbox, `com.apple.security.network.client` and the App Group, and the Keychain group once a provisioning profile is possible (R17, R18). Leave out `files.user-selected.read-only`, which only dropping files on the popover needed.
+- **The App Group:** `<team ID>.lv.warp.nextcloudapplemail`. The build writes it into each target's `Info.plist` as `NCAMAppGroupIdentifier`, from `$(TeamIdentifierPrefix)`, and `SharedStorage` reads it from there. Its container and settings work with the free Personal Team. The shared Keychain item works once the Mac is registered with the team (D16, R17).
+- **Entitlements:** both targets need the sandbox, `com.apple.security.network.client` and the App Group, and `keychain-access-groups` with the App Group's identifier (D16, R17, R18). Leave out `files.user-selected.read-only`, which only dropping files on the popover needed.
 - **Server URLs:** accept `https://` only, because App Transport Security blocks plain HTTP by default.
 - **Not set up yet:** if the extension isn't set up when a file would become a link, stop the send with an error saying so. Reporting `canSign: false` instead would send the files as attachments with no warning.
 

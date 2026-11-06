@@ -30,6 +30,7 @@ This file covers how to work in the repository.
 - macOS 27 and Xcode 27, on Apple silicon. The probing baseline is macOS 27.0.1 with Mail 16.0.
 - Linters: `brew install swiftlint shellcheck markdownlint-cli2`. swift-format comes with Xcode.
 - Signing: create `Config/Local.xcconfig`, which git ignores, with `CODE_SIGN_STYLE = Automatic`, `CODE_SIGN_IDENTITY = Apple Development` and `DEVELOPMENT_TEAM = <team ID>`. The free Personal Team works for local builds (D11). Without the file, builds are ad-hoc signed and the App Group fails.
+- Provisioning: the shared Keychain item needs provisioning profiles, which need the Mac registered with the team (D16). Once per Mac, run `xcodebuild -project NextcloudAppleMail.xcodeproj -scheme NextcloudAppleMail -destination 'platform=macOS' -allowProvisioningUpdates -allowProvisioningDeviceRegistration build`, since `scripts/build.sh` builds without a destination, which can't register one. The Personal Team's profiles last 7 days, and `scripts/build.sh` renews them.
 - The Nextcloud test server and account (D14): copy `.env.example` to `.env`, which git ignores, and fill it in.
 - To use the extension in Mail: run `scripts/install.sh`, then in Mail open Settings > Extensions, enable NextcloudAppleMail, choose it for message security, and restart Mail.
 
@@ -43,7 +44,7 @@ scripts/test-nextcloud.sh   # the server tests, against the test server in .env
 scripts/nextcloud.sh        # run single Nextcloud requests by hand, with no arguments for the list
 scripts/lint.sh [--fix]     # all linters on every file git doesn't ignore, with --fix applying automatic fixes first
 scripts/install.sh          # copy the build to ~/Applications and register the extension (see Boundaries)
-~/Applications/NextcloudAppleMail.app/Contents/MacOS/NextcloudAppleMail --check-storage   # App Group check
+~/Applications/NextcloudAppleMail.app/Contents/MacOS/NextcloudAppleMail --check-storage   # App Group and Keychain check
 ```
 
 The probe has its own commands, in `probe/README.md`.

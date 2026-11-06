@@ -93,3 +93,9 @@ Settled decisions, and why they were made. The current design is in [ARCHITECTUR
   | Amazon Kiro | Steering: a root `AGENTS.md` is always included |
 
   One file means the instructions can't drift apart. A tool-specific file would only be needed for rules that differ by tool, and there are none.
+
+## D16: Register this Mac with the Personal Team (2026-11-06)
+
+- **Decision:** this Mac is registered as a device with the free Personal Team, which resolves OD7. Xcode then makes a provisioning profile for each target, so both targets can have `keychain-access-groups` with `<team ID>.lv.warp.nextcloudapplemail`, the App Group's identifier, and share the app password's Keychain item.
+- **Why:** the user's choice. The alternative was R17's fallback, logging in from the extension.
+- **How:** registering needs a build with a destination, given in AGENTS.md's setup. Building in Xcode's window before the entitlement was added didn't register the Mac, because nothing needed a profile then. The Personal Team's profiles last 7 days, and `scripts/build.sh` renews them with `-allowProvisioningUpdates`.
