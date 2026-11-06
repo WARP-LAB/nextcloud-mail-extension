@@ -805,11 +805,84 @@ def check_phrase_elsewhere(run):
     run.fetch(reply, 'phrase-quote-reply.eml')
 
 
+# MARK: Progress (R3, T8)
+
+NOTIFICATION_TEXTS = """
+on walk(element, depth, found)
+    tell application "System Events"
+        set kids to {}
+        try
+            set kids to UI elements of element
+        end try
+        repeat with kid in kids
+            try
+                if role of kid is "AXStaticText" then set found to found & (value of kid as text) & linefeed
+            end try
+            if depth < 8 then set found to my walk(kid, depth + 1, found)
+        end repeat
+    end tell
+    return found
+end walk
+
+tell application "System Events" to tell process "NotificationCenter" to set ws to every window
+set found to ""
+repeat with w in ws
+    set found to my walk(w, 1, found)
+end repeat
+return found
+"""
+
+
+def notification_texts():
+    """The texts of the notifications on screen."""
+    return osa(NOTIFICATION_TEXTS, timeout=60)
+
+
+def notifications_allowed():
+    """Whether macOS lets NextcloudAppleMail notify, from Notification Center's settings for it."""
+    exported = subprocess.run(['defaults', 'export', 'com.apple.ncprefs', '-'], capture_output=True).stdout
+    converted = subprocess.run(['plutil', '-convert', 'json', '-o', '-', '-'], input=exported, capture_output=True)
+    apps = __import__('json').loads(converted.stdout or b'{}').get('apps', [])
+    return any('nextcloudapplemail' in str(app.get('bundle-id', '')).lower() for app in apps)
+
+
+def check_t8(run):
+    """A slow upload shows a notification while it runs, and another when it's done (R3)."""
+    if not notifications_allowed():
+        raise CheckError('NextcloudAppleMail may not notify yet: allow it when macOS asks')
+    subject = run.subject('t8-progress')
+    data_path = run.file('t8.bin', 30_000_000)
+    checks.app_settings(checks.DEFAULTS)
+    checks.mail('compose', 'A', 'B', subject, 'Check t8: a slow upload.', 'none', str(data_path))
+    click_send(subject)
+    # 30 MB is over the account's size limit, so Mail asks about Mail Drop first.
+    wait(lambda: sheet(subject) is not None or not window_exists(subject), 120, 'neither a prompt nor a send')
+    prompt = sheet(subject)
+    if prompt and 'Try Sending in Email' in prompt[1]:
+        ticked = in_mail('return value of every checkbox of sheet 1 of window (item 1 of argv)', subject)
+        if '1' in ticked.split(', '):
+            raise CheckError('"Don\'t ask again" is ticked, which this check never does')
+        click_sheet_button(subject, 'Try Sending in Email')
+    seen = {'Uploading 1 file (30 MB) to Nextcloud…': False, 'Uploaded 1 file (30 MB) in': False}
+    end = time.time() + 240
+    while time.time() < end and not all(seen.values()):
+        texts = notification_texts()
+        for text in seen:
+            seen[text] = seen[text] or text in texts
+        time.sleep(0.5)
+    run.expect('a notification while the upload runs', seen['Uploading 1 file (30 MB) to Nextcloud…'])
+    run.expect('a notification when it\'s done', seen['Uploaded 1 file (30 MB) in'])
+    _, attached, found = file_links(run.fetch(subject, 't8-received.eml', 900))
+    run.expect('the email arrived with the file as links', downloads_match(found, 't8.bin', data_path.read_bytes())
+               and not attached)
+
+
 CHECKS = {'t7': check_t7, 't21': check_t21, 't22': check_t22, 't30': check_t30, 't34': check_t34,
           't38': check_t38, 't39': check_t39, 't36': check_t36, 't37': check_t37,
           't37-restart': check_t37_restart, 'password-refused': check_password_refused,
           'password-required': check_password_required, 't33': check_t33, 't23': check_t23,
-          't34-phrase': check_t34_phrase, 't35-phrase': check_t35_phrase, 'phrase-elsewhere': check_phrase_elsewhere}
+          't34-phrase': check_t34_phrase, 't35-phrase': check_t35_phrase, 'phrase-elsewhere': check_phrase_elsewhere,
+          't8': check_t8}
 
 
 def main():
