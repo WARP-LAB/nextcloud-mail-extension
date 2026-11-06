@@ -89,10 +89,14 @@ enum HTML {
     }
 
     /// Where the user's own text ends: before quoted messages, or else before `</body>`, or else at the end.
+    ///
+    /// A `blockquote type="cite"` straight inside `<div class="Apple-Mail-URLShareWrapperClass">` isn't a quote:
+    /// Mail puts what's shared from another app, or set by AppleScript, there (docs/MAIL.md).
     static func endOfOwnText(in html: String) -> String.Index {
-        let quote = #"<div[^>]*class=["']AppleOriginalContents["']|<blockquote[^>]*type=["']cite["']"#
-        if let range = html.range(of: quote, options: [.regularExpression, .caseInsensitive]) {
-            return range.lowerBound
+        let quote = #/<div[^>]*class=["']AppleOriginalContents["']|<blockquote[^>]*type=["']cite["']/#.ignoresCase()
+        let shared = #/<div[^>]*class=["']Apple-Mail-URLShareWrapperClass["'][^>]*>\s*$/#.ignoresCase()
+        for match in html.matches(of: quote) where html[..<match.range.lowerBound].firstMatch(of: shared) == nil {
+            return match.range.lowerBound
         }
         if let range = html.range(of: "</body>", options: [.caseInsensitive, .backwards]) {
             return range.lowerBound

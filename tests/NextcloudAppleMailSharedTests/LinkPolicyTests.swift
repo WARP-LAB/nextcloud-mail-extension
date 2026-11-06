@@ -66,6 +66,15 @@ struct HTMLTests {
         #expect(html[..<end].hasSuffix("See attached.<br id=\"lineBreakAtBeginningOfMessage\">"))
     }
 
+    @Test func treatsSharedContentAsOwnText() {
+        let html =
+            #"<body><div class="Apple-Mail-URLShareWrapperClass" style="position: relative;">"#
+            + #"<blockquote type="cite" style="border-left-style: none;">Mine</blockquote></div>"#
+            + #"<blockquote type="cite">Theirs</blockquote></body>"#
+        let end = HTML.endOfOwnText(in: html)
+        #expect(html[end...].hasPrefix(#"<blockquote type="cite">Theirs"#))
+    }
+
     @Test func endsOwnTextBeforeTheBodyEndsWithoutQuotes() {
         let html = "<html><body>Hello</body></html>"
         #expect(html[..<HTML.endOfOwnText(in: html)] == "<html><body>Hello")
