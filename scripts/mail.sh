@@ -2,7 +2,7 @@
 # Drives Apple Mail with AppleScript for the Mail checks, between the two accounts in .env (docs/TESTING.md,
 # "Driving Mail from the command line"). Their addresses stay in .env.
 # Usage:
-#   scripts/mail.sh send <A|B> <A|B> <subject> <body> <signature|none> [file ...]
+#   scripts/mail.sh send <A|B> <A|B> <subject> <body> <signature|none> [file ...]   signature: NCAM_MAIL_SIGNATURE
 #   scripts/mail.sh fetch <inbox|sent> <subject> <output file> [seconds to wait, default 240]
 #   scripts/mail.sh respond <reply|forward> <subject> <forward to: A|B> [file ...]   for a message in the inboxes
 #   scripts/mail.sh app <option> [argument]   the installed Debug build's options, such as --settings or --debug-dumps
@@ -40,8 +40,15 @@ case "${command}" in
         [[ $# -ge 5 ]] || usage
         from="$(address "$1")"
         to="$(address "$2")"
-        shift 2
-        osascript "${root}/scripts/mail/send.applescript" "${from}" "${to}" "$@" > /dev/null
+        subject="$3"
+        body="$4"
+        signature="none"
+        if [[ "$5" == "signature" ]]; then
+            signature="${NCAM_MAIL_SIGNATURE:?NCAM_MAIL_SIGNATURE is not set in .env}"
+        fi
+        shift 5
+        osascript "${root}/scripts/mail/send.applescript" "${from}" "${to}" "${subject}" "${body}" "${signature}" "$@" \
+            > /dev/null
         ;;
     fetch)
         [[ $# -ge 3 ]] || usage
