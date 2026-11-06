@@ -124,7 +124,7 @@ What could go wrong, how we'd notice, and what's being done about it. Each entry
 
 - **Risk:** the host app and the extension share settings through the App Group, and the app password through a Keychain item in the same group.
 - **Tested** (T1, 2026-11-06, with the free Personal Team): the App Group's container and settings work without a provisioning profile. The shared Keychain item fails with `-34018`, because it needs the `keychain-access-groups` entitlement. That entitlement needs a provisioning profile, which Xcode can only create once this Mac is registered as a device with the team.
-- **Tested** (T1b, 2026-11-06, with this Mac registered, D16): the host app's storage check passes for the container, the settings and the Keychain item. The extension's read of the Keychain item is checked by T2's Test connection, which reads the app password from it.
+- **Tested** (T1b, 2026-11-06, with this Mac registered, D16): the host app's storage check passes for the container, the settings and the Keychain item. The extension's read of the Keychain item is checked by Test from Mail, which runs the connection check in the extension and reads the app password from it.
 - **Signal:** the Keychain line of the host app's storage check fails, or the extension can't read the app password.
 - **Mitigation:** this Mac is registered with the Personal Team (D16). On another Mac, register it the same way. The fallback is doing the login in the extension and keeping the app password in the extension's own Keychain.
 - **Judgment call:** registering a Mac, or switching to the fallback, is the user's call.

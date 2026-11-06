@@ -64,31 +64,34 @@ private final class PasswordPopover: MEExtensionViewController {
         nil
     }
 
+    /// The popover is as high as its content, and follows it when the custom expiry's fields show or hide.
     override func loadView() {
-        let hosting = NSHostingView(rootView: PopoverView(context: context))
-        hosting.frame = NSRect(x: 0, y: 0, width: 400, height: PopoverView.height)
+        let hosting = NSHostingView(
+            rootView: PopoverView(context: context) { [weak self] size in
+                self?.preferredContentSize = size
+            })
+        hosting.frame = NSRect(origin: .zero, size: hosting.fittingSize)
         view = hosting
-        preferredContentSize = hosting.frame.size
+        preferredContentSize = hosting.fittingSize
     }
 }
 
 /// Which of the email's files become links (FR3), its password (FR7), its own link expiry if it should differ from
 /// the settings' (FR4), and a way to the app's settings.
 private struct PopoverView: View {
-    static let height: CGFloat = 450
-
     let context: UUID
+    /// Told the view's size whenever it changes.
+    let resized: (CGSize) -> Void
     private let settings: Settings
     @State private var choice: LinkChoice
     @State private var password: String
     @State private var passwordShown = false
     @State private var ownExpiry: Bool
     @State private var expiry: LinkExpiry
-    @State private var report: ConnectionCheck.Report?
-    @State private var checking = false
 
-    init(context: UUID) {
+    init(context: UUID, resized: @escaping (CGSize) -> Void) {
         self.context = context
+        self.resized = resized
         let settings =
             SharedStorage.appGroupIdentifier.flatMap(SettingsStore.init(groupIdentifier:))?.load() ?? Settings()
         self.settings = settings
@@ -120,25 +123,12 @@ private struct PopoverView: View {
                 Spacer()
                 Button("Settings…", action: Self.openApp)
                     .help(Self.settingsHelp)
-                Button(checking ? "Checking…" : "Test connection") {
-                    checking = true
-                    Task {
-                        report = await ConnectionCheck.runWithSharedStorage()
-                        checking = false
-                    }
-                }
-                .disabled(checking)
             }
-            if let report {
-                Text(report.text)
-                    .font(.footnote)
-                    .foregroundStyle(report.passed ? Color.primary : Color.red)
-                    .textSelection(.enabled)
-            }
-            Spacer(minLength: 0)
         }
         .padding(16)
-        .frame(width: 400, height: Self.height, alignment: .topLeading)
+        .frame(width: 400, alignment: .topLeading)
+        .fixedSize(horizontal: false, vertical: true)
+        .onGeometryChange(for: CGSize.self, of: \.size) { resized($0) }
     }
 
     /// FR3, for this email.
