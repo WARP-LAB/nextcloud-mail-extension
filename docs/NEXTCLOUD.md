@@ -89,6 +89,7 @@ By default the extension uses one share per email, of its folder (D17, R21).
 ## Expiry
 
 - **`expireDate`** takes a date as `YYYY-MM-DD`. The response's `expiration` is that date at `23:59:59`, when the link expires, in the server's or account's time zone.
+- **No time of day:** a time sent with the date, as `2026-11-07 15:30:00` or `2026-11-07T15:30:00+02:00`, is accepted and dropped. The link still expires at `23:59:59` that day (tested 2026-11-06).
 - **An empty string** means no expiry, and `expiration` is null.
 - **Omitting it** applies the server default. With none, as on the test server, the link doesn't expire.
 - **A date far ahead,** such as 2099-01-01, is accepted when there's no enforced maximum.

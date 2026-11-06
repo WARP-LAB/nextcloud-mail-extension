@@ -69,7 +69,7 @@ struct SendFlow {
         if limits.passwordEnforced && password == nil {
             throw SendError.passwordRequired
         }
-        let expireDate = settings.expiry.expireDate(today: today, limits: limits)
+        let expireDate = settings.expiry.expireDate(from: today, limits: limits)
         let options = LinkOptions(expireDate: expireDate, password: password)
         let folder = try await folder(for: message, record)
         let eachFile = settings.sharing == .eachFile

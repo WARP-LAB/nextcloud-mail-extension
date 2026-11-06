@@ -162,7 +162,7 @@ struct NextcloudServerTests {
             }
             let path = NextcloudClient.join(folder, "Pārskats #1 %.txt")
             try await client.upload(file, to: path)
-            let date = LinkExpiry.week.expireDate(today: Date(), limits: try await client.sharingLimits())
+            let date = LinkExpiry.week.expireDate(from: Date(), limits: try await client.sharingLimits())
             let share = try await client.share(path, expireDate: date, password: nil)
             #expect(share.expiration == ExpiryDate(server: date))
 

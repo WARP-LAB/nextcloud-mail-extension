@@ -165,17 +165,38 @@ struct LinkExpiryTests {
         (.months(3), "2026-04-30"), (.years(2), "2028-01-31"), (.never, ""),
     ])
     func addsThePeriodByCalendar(expiry: LinkExpiry, date: String) {
-        #expect(expiry.expireDate(today: Self.today, calendar: Self.calendar, limits: Self.limits()) == date)
+        #expect(expiry.expireDate(from: Self.today, calendar: Self.calendar, limits: Self.limits()) == date)
+    }
+
+    @Test(arguments: [
+        (LinkExpiry.Period(hours: 1), "2026-01-31"), (LinkExpiry.Period(hours: 13), "2026-02-01"),
+        (LinkExpiry.Period(months: 2, days: 3, hours: 1), "2026-04-03"), (LinkExpiry.Period(), "2026-01-31"),
+        (LinkExpiry.Period(years: 1, months: 1, days: 1, hours: 1), "2027-03-01"),
+    ])
+    func addsACustomPeriodFromTheTimeOfSending(period: LinkExpiry.Period, date: String) {
+        #expect(
+            LinkExpiry.after(period).expireDate(from: Self.today, calendar: Self.calendar, limits: Self.limits())
+                == date)
+    }
+
+    @Test func readsHowEarlierVersionsStoredTheExpiry() throws {
+        let decode = { (json: String) in try JSONDecoder().decode(LinkExpiry.self, from: Data(json.utf8)) }
+        #expect(try decode(#"{"days":{"_0":10}}"#) == .days(10))
+        #expect(try decode(#"{"months":{"_0":2}}"#) == .months(2))
+        #expect(try decode(#"{"never":{}}"#) == .never)
+        let custom = LinkExpiry.after(LinkExpiry.Period(months: 2, days: 3, hours: 1))
+        #expect(try decode(try #require(String(bytes: JSONEncoder().encode(custom), encoding: .utf8))) == custom)
+        #expect(throws: DecodingError.self) { try decode(#"{"weeks":{"_0":2}}"#) }
     }
 
     @Test(arguments: [(LinkExpiry.year, "2026-03-02"), (.never, "2026-03-02"), (.week, "2026-02-07")])
     func shortensToAnEnforcedMaximum(expiry: LinkExpiry, date: String) {
-        #expect(expiry.expireDate(today: Self.today, calendar: Self.calendar, limits: Self.limits(maximum: 30)) == date)
+        #expect(expiry.expireDate(from: Self.today, calendar: Self.calendar, limits: Self.limits(maximum: 30)) == date)
     }
 
     @Test func ignoresADefaultThatIsntEnforced() {
         let limits = SharingLimits(version: "35", passwordEnforced: false, defaultExpiryDays: 7, expiryEnforced: false)
-        #expect(LinkExpiry.never.expireDate(today: Self.today, calendar: Self.calendar, limits: limits) == "")
+        #expect(LinkExpiry.never.expireDate(from: Self.today, calendar: Self.calendar, limits: limits) == "")
     }
 }
 
