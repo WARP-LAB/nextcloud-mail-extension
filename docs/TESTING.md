@@ -36,9 +36,9 @@ Run against the test server and account only (D14), whose credentials are in the
 - shares with and without a password, and their view and download links
 - expiry dates, and a password the policy rejects
 - the password page, and the zip from a folder share
-- not yet: an enforced expiry maximum and enforced passwords, which need the server's settings changed (T3b, D18)
+- with `--server-settings` only: an enforced expiry maximum and enforced passwords. They change the whole server's sharing settings for the test, so that option runs nothing else, and puts the settings back at the end, even after a failure (D18)
 
-One run creates 7 shares, and Nextcloud allows 20 in 10 minutes, so a third run within 10 minutes fails with 429 ([NEXTCLOUD.md](NEXTCLOUD.md#rate-limit)). `scripts/nextcloud.sh` runs single requests by hand with the same `.env`. Record what the server really did in NEXTCLOUD.md (R19).
+One run creates 7 shares, and the `--server-settings` run tries 5, while Nextcloud allows 20 in 10 minutes, so a third run within 10 minutes fails with 429 ([NEXTCLOUD.md](NEXTCLOUD.md#rate-limit)). `scripts/nextcloud.sh` runs single requests by hand with the same `.env`. Record what the server really did in NEXTCLOUD.md (R19).
 
 `scripts/use-test-account.sh` logs the installed Debug build in to the test server with an app password, instead of the browser login, and sets the upload directory to `NCAM_TEST_DIRECTORY`, so the extension in Mail uploads there. `--log-out` revokes it. The app's `--check-connection` and `--check-from-mail` options then run the two checks from the command line.
 

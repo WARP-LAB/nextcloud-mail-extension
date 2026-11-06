@@ -17,7 +17,7 @@ Risk register: `docs/RISKS.md`.
 > - Write Acceptance Criteria or a explicit Definition of Done
 > - Take tasks in order unless told otherwise. Do not start the next task without being asked.
 
-None. T3b is next.
+None. T5 is next.
 
 ## ❓ Open Decisions (human to resolve)
 
@@ -46,8 +46,6 @@ Judgment calls and known risks are tracked separately in `docs/RISKS.md`.
   2. Click Test from Mail, and close the new message window once the app shows the extension's answer.
   3. Click Log out, then Log in in the browser, log in there with the test account and grant access. The app should show the account. Click Test from Mail again.
   - **Acceptance:** the window shows every setting, Test from Mail passes after Local Network is allowed, and the browser login stores the account. MAIL.md says whether the extension got the app's Local Network permission, and R18 is updated.
-- **T3b: Enforced server settings.** Server tests with an enforced expiry maximum and enforced passwords, switched on for the test run and off again (D18, R19).
-  - **Acceptance:** both behave as NEXTCLOUD.md says, or NEXTCLOUD.md is corrected, and the test server's settings are back as they were.
 - **T5: Send flow (FR1, FR10).** `encode()` with the upload ledger, the failure memo and the Mail Drop clean-up, with files decoded to temporary files (R5), and the shares D17 describes. Deleted files go to the trash bin, where they still count against the quota (NEXTCLOUD.md).
   - **Acceptance:** the send-flow Mail checks pass, and the delivered links work in Apple Mail, Gmail and Outlook.
 - **T6: Password popover (FR7).** The popover's password field, kept per message in memory and the Keychain (R8).
@@ -62,6 +60,7 @@ Judgment calls and known risks are tracked separately in `docs/RISKS.md`.
 ## ✅ Completed Tasks (Done)
 
 - **Probing Mail with MailProbe (2026-11-05).** Four rounds of tests found what Mail does with an extension. See `probe/docs/` and `docs/MAIL.md`.
+- **T3b: Enforced server settings (2026-11-06).** Verified: `scripts/test-nextcloud.sh --server-settings` passes 2 tests on the test server. With a 7-day maximum enforced, the capabilities report it, "no expiry" becomes the maximum, a later date gets 404 with the server's reason, and `LinkExpiry` shortens a year to the maximum, which the server accepts. With passwords enforced, the capabilities report it, a share without one gets 403 with the server's reason, and one with a password works. The settings were put back, checked by listing the server's keys, and `scripts/test-nextcloud.sh` still passes 8 tests. NEXTCLOUD.md has the keys and the HTTP statuses.
 - **T2: Settings and login (2026-11-06).** Verified: `swift test` passes 79 unit tests, covering the settings' defaults, stored settings that are old, partial or unreadable, the upload directory, the server address check, Test from Mail's request and answer, and the offline error. `scripts/test-nextcloud.sh` passes 8 server tests, now with the connection check. The build has no warnings and lint is clean. With the installed Debug build, `scripts/use-test-account.sh` stored the test account in the shared Keychain item, and `--check-connection` read it back and reached Nextcloud 35.0.2. `--check-from-mail` got the extension's answer from Mail, with the settings and app password the extension read itself, but Local Network privacy had blocked its request to the test server ([MAIL.md](MAIL.md#network), R18). The host app now declares `NSLocalNetworkUsageDescription`. The window, the browser login and Test from Mail with Local Network allowed moved to T2b.
 - **T1b: Check T1 in Mail (2026-11-06).** The user enabled the extension in Mail, chose it for message security, and checked that Sign is offered and that the popover shows the values the host app wrote. Verified: with this Mac registered with the Personal Team (D16) and `keychain-access-groups` added to both targets, `--check-storage` passes for the container, the settings and the Keychain item. The extension's read of the Keychain item is checked by T2's Test connection.
 - **T9: AGENTS.md in every agent tool (2026-11-06).** Verified from each tool's docs that all eleven read a root `AGENTS.md`, recorded in D15. `CLAUDE.md` imports it for older Claude Code versions. Claude Code 2.1.310 loaded AGENTS.md in this session. The check in the other tools moved to T9b.

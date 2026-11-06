@@ -40,7 +40,7 @@ This file covers how to work in the repository.
 scripts/build.sh            # host app and extension, into build/Debug/NextcloudAppleMail.app
 swift test                  # unit tests of Shared/, from tests/
 tests/make-fixtures.py      # remake the anonymised test messages from probe/test-results/ (local only)
-scripts/test-nextcloud.sh   # the server tests, against the test server in .env
+scripts/test-nextcloud.sh   # the server tests, against the test server in .env; --server-settings for the enforced ones
 scripts/nextcloud.sh        # run single Nextcloud requests by hand, with no arguments for the list
 scripts/lint.sh [--fix]     # all linters on every file git doesn't ignore, with --fix applying automatic fixes first
 scripts/install.sh          # copy the build to ~/Applications and register the extension (see Boundaries)

@@ -137,11 +137,11 @@ What could go wrong, how we'd notice, and what's being done about it. Each entry
 - **Mitigation:** the host app declares `NSLocalNetworkUsageDescription`, so macOS asks the user, and the extension shares the app's permission. The offline error and the setup help say where to allow it. Test from Mail checks it (T2b).
 - **Judgment call:** if it's blocked, stop and ask.
 
-### R19: Nextcloud behaviour is only read from the source
+### R19: Nextcloud behaves differently from what was tested
 
-- **Risk:** behaviour in [NEXTCLOUD.md](NEXTCLOUD.md) that hasn't been run against a server. Since T3, that is only an enforced expiry maximum and enforced passwords, which need the test server's settings changed (T3b, D18). Other servers may also run other versions or settings than the test server's Nextcloud 35.0.2.
+- **Risk:** everything in [NEXTCLOUD.md](NEXTCLOUD.md) has now been run against the test server's Nextcloud 35.0.2, the enforced settings included (T3, T3b). Other servers may run other versions, apps or settings, such as Nextcloud 34, a different password policy, or a proxy in front.
 - **Signal:** shares, links or expiry dates behave differently from what NEXTCLOUD.md says.
-- **Mitigation:** the server tests (`scripts/test-nextcloud.sh`), and the enforced settings in T3b (D18).
+- **Mitigation:** the server tests (`scripts/test-nextcloud.sh`, and `--server-settings` for the enforced settings, D18), which can be run against another test server.
 - **Judgment call:** an agent may adapt to what the server really does, and update NEXTCLOUD.md.
 
 ### R21: Nextcloud's limit on new shares
