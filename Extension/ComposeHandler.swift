@@ -146,8 +146,8 @@ private struct PopoverView: View {
             Text("This email link generation")
             Picker("This email link generation", selection: $choice) {
                 Text("Use settings").tag(LinkChoice.useSettings)
-                Text("Enforce all files (including pasted images) to become links").tag(LinkChoice.allFiles)
-                Text("Keep all files as attachments").tag(LinkChoice.keepAttached)
+                Text("All files via Nextcloud").tag(LinkChoice.allFiles)
+                Text("All files kept as attachments").tag(LinkChoice.keepAttached)
             }
             .pickerStyle(.radioGroup)
             .labelsHidden()
