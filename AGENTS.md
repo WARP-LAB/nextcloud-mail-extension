@@ -66,6 +66,7 @@ Only what isn't obvious from directory names:
 - `scripts/`: build, install, lint, and the Nextcloud tests and tool. `tools/ncam-nextcloud/`: that tool.
 - `Design/`: source artwork, such as Nextcloud's logo mark, which `Extension/Assets.xcassets` uses for the toolbar button.
 - `LICENSE.Nextcloud`: where Nextcloud's logo is used, its sources and its terms, which this repository's MIT licence doesn't cover. Keep it up to date when Nextcloud artwork changes (R22).
+- `LICENSE.Apple`: Apple's trademarks that the project names, and that it contains nothing of Apple's. Keep its list up to date (R23).
 - `probe/`: MailProbe. Frozen: change it only to probe Mail again.
 - `CLAUDE.md`: only imports this file, for Claude Code versions that don't read AGENTS.md (D15). Put instructions here, not there.
 - Ignored by git: `probe/test-results/`, which holds real emails, `probe/test-files/`, `build/`, `.build/`, `Config/Local.xcconfig` and `.env`.
