@@ -20,6 +20,9 @@ lsregister=/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchSe
 mkdir -p "${HOME}/Applications"
 rm -rf "${app}"
 ditto "${built}" "${app}"
+# ditto keeps the build's dates, and Xcode doesn't change the bundle's own, while macOS's icon cache takes an app with
+# the same date as unchanged. Dating the bundle now makes the Dock and Cmd-Tab show a changed icon.
+touch "${app}"
 
 # macOS registers the copy Xcode builds, and won't list a second copy with the same bundle ID. Unregister the
 # build's copy, so that only the installed one is used.

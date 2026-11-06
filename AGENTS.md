@@ -102,6 +102,7 @@ Only what isn't obvious from directory names:
 - Running the server tests again and again: Nextcloud allows 20 new shares in 10 minutes, so the third run in a row fails with 429. Wait 10 minutes.
 - Narrowing the server tests with `scripts/test-nextcloud.sh --filter X`: `swift test` joins its filters with or, so that runs every server test and uses up the share limit. Load `.env` and run `swift test --filter X` alone.
 - In zsh, `log` is a builtin, so `log show` fails with "too many arguments". Use `/usr/bin/log show`.
+- A changed app icon doesn't show in the Dock and Cmd-Tab while the installed bundle keeps its date: macOS's icon cache ignores the version and build number, and `ditto` keeps the build's date. `scripts/install.sh` touches the bundle for this. For a copy installed otherwise, `touch` it, run `lsregister -f` on it (the path is in `scripts/install.sh`) and `killall Dock`.
 - SwiftUI's `TextField(value:format: .number)` reads decimals by the region, ignoring custom number settings, so with Latvia's region "0.2" became 0. Number fields use `DecimalText`, which takes "." or ",".
 
 ## Definition of done
