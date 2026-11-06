@@ -17,7 +17,7 @@ Risk register: `docs/RISKS.md`.
 > - Write Acceptance Criteria or a explicit Definition of Done
 > - Take tasks in order unless told otherwise. Do not start the next task without being asked.
 
-None. T1b and T9b wait for the user, T2 for OD7, T3b for OD8 and T5 to T8 for OD9.
+None. T2 is next.
 
 ## ❓ Open Decisions (human to resolve)
 
@@ -28,7 +28,6 @@ Judgment calls and known risks are tracked separately in `docs/RISKS.md`.
 - **OD4: Defaults chosen by an agent.** Confirm or change: FR5's warning on, FR6's phrase list empty, FR8's view and download links, FR9's all-files links off, the email saying that links need a password (FR7), and folder names `<yyyy-MM-dd> <subject>` ([ARCHITECTURE.md](ARCHITECTURE.md#using-nextcloud)).
 - **OD5: Proposed requirements.** Confirm or change the non-functional requirements and the out-of-scope list in the PRD.
 - **OD6: Testing "Don't ask again".** Whether to test it in Mail's Mail Drop prompt, knowing it changes the account's behaviour and may be hard to undo (R2).
-- **OD7: Registering this Mac with the Personal Team.** The shared Keychain item for the app password needs a provisioning profile, which Xcode can only create once this Mac is registered as a device with the team: by building once in Xcode's window, or with `xcodebuild -allowProvisioningDeviceRegistration` (R17). The alternative is the fallback in R17. Needed for T1b and T2.
 - **OD8: Changing the test server's sharing settings.** The test account is an admin. Testing an enforced expiry maximum and enforced passwords means switching those on for the whole test server for a few minutes, through Nextcloud's admin API, and back off afterwards. Allowed or not? Without it, those two tests stay untested (R19).
 - **OD9: Staying within Nextcloud's share limit.** Nextcloud allows each user 20 new shares in 10 minutes (R21). With a share per file and one for the folder, an email with 20 files, or a few emails in a row, can't be sent. Options:
   - **(a) A share per file, as now.** FR8's View links show each file. Emails with many files fail, so the setup help tells admins to raise the limit.
@@ -48,8 +47,6 @@ Judgment calls and known risks are tracked separately in `docs/RISKS.md`.
 
 ## 📋 Backlog (To Be Done)
 
-- **T1b: Check T1 in Mail (needs the user).** Enable NextcloudAppleMail in Mail's Settings > Extensions, choose it for message security, and restart Mail. Once OD7 is settled, add the `keychain-access-groups` entitlement back and rerun the storage check.
-  - **Acceptance:** Mail lists the extension, Sign is offered while the extension reports `canSign: true` and `canEncrypt: false` (R9), the toolbar popover shows the container and settings values the host app wrote, and the storage check passes, or the Keychain fallback is recorded in DECISIONS.md.
 - **T2: Settings and login (FR2).** The host app's settings UI, Nextcloud's browser login, the app password in the Keychain, and settings shared through the App Group. A "Test connection" button that makes the extension itself reach the server (R17, R18).
   - **Acceptance:** the extension reads the settings and the app password, and reaches the server.
 - **T9b: Check AGENTS.md in each agent tool (needs the user).** Open the repository once in each tool you use, ask what the repository's instructions say about commits, and note any tool that doesn't know. Claude Code 2.1.310 is checked, because this session loaded AGENTS.md. For Copilot in VS Code, `chat.useAgentsMdFile` must be on.
@@ -68,6 +65,7 @@ Judgment calls and known risks are tracked separately in `docs/RISKS.md`.
 ## ✅ Completed Tasks (Done)
 
 - **Probing Mail with MailProbe (2026-11-05).** Four rounds of tests found what Mail does with an extension. See `probe/docs/` and `docs/MAIL.md`.
+- **T1b: Check T1 in Mail (2026-11-06).** The user enabled the extension in Mail, chose it for message security, and checked that Sign is offered and that the popover shows the values the host app wrote. Verified: with this Mac registered with the Personal Team (D16) and `keychain-access-groups` added to both targets, `--check-storage` passes for the container, the settings and the Keychain item. The extension's read of the Keychain item is checked by T2's Test connection.
 - **T9: AGENTS.md in every agent tool (2026-11-06).** Verified from each tool's docs that all eleven read a root `AGENTS.md`, recorded in D15. `CLAUDE.md` imports it for older Claude Code versions. Claude Code 2.1.310 loaded AGENTS.md in this session. The check in the other tools moved to T9b.
 - **T3: Nextcloud client (2026-11-06).** Verified: `scripts/test-nextcloud.sh` passes 7 server tests on the test server, Nextcloud 35.0.2. They cover the browser login's start, app passwords and revoking them, folders, uploads that refuse to overwrite, shares with working view and download links, expiry dates, share passwords and the policy's refusal, password pages, the folder zip, one file from a folder share, and deletes. `swift test` passes 63 unit tests, lint is clean, the build has no warnings, and `scripts/nextcloud.sh` runs requests by hand. NEXTCLOUD.md records what the server did, including the limit of 20 new shares in 10 minutes (OD9, R21). The enforced settings moved to T3b.
 - **T4: Rewriter and link policy (2026-11-06).** Verified: `swift test` passes 46 tests over 12 anonymised fixtures. They cover every structure in MAIL.md: links in place in plain, rich, forwarded and first-call messages, the fallback list, folder links and the password notice above quotes, the size rule keeping other files byte for byte, signature and pasted images, accented names, and a message that is only a file. Unchanged messages come out byte for byte the same. Rewritten fixtures parse without defects in Python's `email` package. Lint is clean, the build has no warnings, and the storage check is unchanged.
