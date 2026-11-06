@@ -9,6 +9,7 @@ import Foundation
 ///   use-test-account.sh` loads it from `.env`, and sets the upload directory to `NCAM_TEST_DIRECTORY` (D14).
 /// - `--log-out`, debug builds only: revokes the stored app password and deletes it.
 /// - `--settings [<json>]`, debug builds only: prints the settings as JSON, after changing those in `<json>`.
+/// - `--render-window`, debug builds only: the settings window drawn off screen, as a PNG in base64.
 /// - `--debug-dumps on|off|take`, debug builds only: the copies of test messages that Mail passes the extension
 ///   (`DebugDumps`). `take` prints each as its name, a tab and the message in base64, and deletes them.
 ///
@@ -21,6 +22,7 @@ enum AppCommand {
     case logOut
     case settings(String?)
     case debugDumps(String)
+    case renderWindow
 
     init?(arguments: [String]) {
         if arguments.contains("--check-storage") {
@@ -33,6 +35,8 @@ enum AppCommand {
             self = .useTestAccount
         } else if Self.debug && arguments.contains("--log-out") {
             self = .logOut
+        } else if Self.debug && arguments.contains("--render-window") {
+            self = .renderWindow
         } else if Self.debug, let index = arguments.firstIndex(of: "--settings") {
             self = .settings(arguments.indices.contains(index + 1) ? arguments[index + 1] : nil)
         } else if Self.debug, let index = arguments.firstIndex(of: "--debug-dumps"),
@@ -53,6 +57,10 @@ enum AppCommand {
     }
 
     func runAndExit() -> Never {
+        if case .renderWindow = self {
+            // AppKit needs the main thread, which dispatchMain below gives up to the main queue's workers.
+            exit(MainActor.assumeIsolated { DebugCommands.renderWindow() } ? 0 : 1)
+        }
         Task {
             let passed: Bool
             switch self {
@@ -72,6 +80,8 @@ enum AppCommand {
                 passed = DebugCommands.settings(json)
             case .debugDumps(let action):
                 passed = DebugCommands.debugDumps(action)
+            case .renderWindow:
+                passed = false
             }
             exit(passed ? 0 : 1)
         }

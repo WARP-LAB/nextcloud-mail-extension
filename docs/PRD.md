@@ -80,7 +80,7 @@ Acceptance criteria:
 
 ## FR6: Warn if text mentions an attachment but none is added
 
-The settings have a field, "Warn if text found but no attachment", where the user enters words or phrases, such as "attachment" or "see attached". It is empty by default (OD4), and while it is empty there is no check.
+The settings have a field, "Warn if text found but no attachment", where the user enters words or phrases, such as "attachment" or "see attached". Each one entered with Return becomes a tag, shown as a bubble with an x that removes it, and a tag can hold several words. It is empty by default (OD4), and while it is empty there is no check.
 
 When the message text contains one of those words or phrases and the message has no attachment, clicking Send shows an alert. The alert names the word or phrase it found. It has two buttons:
 
