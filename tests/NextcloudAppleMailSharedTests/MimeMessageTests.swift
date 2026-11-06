@@ -15,7 +15,7 @@ struct MimeMessageTests {
         #expect(files.map(\.filename) == ["dummy-1MB.pdf", "dummy-10MB.png"])
         #expect(files.map(\.index) == [0, 1])
         #expect(files.map(\.contentType) == ["application/pdf", "image/png"])
-        #expect(files.map(\.decodedSize) == [1000, 10001])
+        #expect(files.map(\.decodedSize) == [1000, 10000])
     }
 
     @Test func readsContentIDsWithoutAngleBrackets() throws {

@@ -10,7 +10,7 @@ listed in FIXTURES and anonymises them:
   From, To, Cc and Bcc headers, so none are written into this script.
 - Message IDs, dates and other identifying headers get fixed values.
 - Each attachment is replaced by deterministic bytes of 1/1000 of its size, at least 100 bytes, so sizes keep their
-  proportions. Structure, boundaries, Content-IDs and the text stay exactly as Mail wrote them.
+  proportions. The bytes come from a hash of the original, so a file that's the same in two messages stays the same. Structure, boundaries, Content-IDs and the text stay exactly as Mail wrote them.
 
 It fails if any name, name part or address is still there afterwards.
 """
@@ -101,16 +101,23 @@ def spanning_soft_breaks(text):
     return re.compile(''.join(re.escape(character) + r'(?:=\r?\n)?' for character in text))
 
 
-def shrunk(encoded_lines, encoding, label, eol):
-    """New body lines for an attachment: deterministic bytes of 1/1000 of its size, in the same encoding."""
+def shrunk(encoded_lines, encoding, eol):
+    """New body lines for an attachment: deterministic bytes of 1/1000 of its size, in the same encoding.
+
+    The bytes come from a hash of the original file, so a file that's the same in two messages, as in Mail's two
+    send calls, is the same in their fixtures too.
+    """
     if encoding == 'base64':
-        size = max(100, len(base64.b64decode(''.join(encoded_lines))) // 1000)
-        return base64.encodebytes(payload(label, size)).decode('ascii').rstrip('\n').split('\n')
-    size = max(100, len(quopri.decodestring(eol.join(encoded_lines).encode('latin-1'))) // 1000)
-    return quopri.encodestring(payload(label, size)).decode('latin-1').rstrip('\n').split('\n')
+        original = base64.b64decode(''.join(encoded_lines))
+    else:
+        original = quopri.decodestring(eol.join(encoded_lines).encode('latin-1'))
+    data = payload(hashlib.sha256(original).hexdigest(), max(100, len(original) // 1000))
+    if encoding == 'base64':
+        return base64.encodebytes(data).decode('ascii').rstrip('\n').split('\n')
+    return quopri.encodestring(data).decode('latin-1').rstrip('\n').split('\n')
 
 
-def anonymise(raw, label, found):
+def anonymise(raw, found):
     pairs = replacements(found)
     eol = '\r\n' if b'\r\n' in raw[:2000] else '\n'
     text = raw.decode('latin-1')
@@ -142,7 +149,7 @@ def anonymise(raw, label, found):
                         index += 1
                     while encoded and encoded[-1] == '':
                         encoded.pop()
-                    out += shrunk(encoded, encoding, f'{label}-{len(out)}', eol)
+                    out += shrunk(encoded, encoding, eol)
                     out.append('')
                 part_headers = []
                 continue
@@ -205,7 +212,7 @@ def main():
         found += [person for person in people(raw) if person not in found]
     failed = False
     for label, raw in sources.items():
-        data = anonymise(raw, label, found)
+        data = anonymise(raw, found)
         left = leftovers(data, found)
         same = structure(data) == structure(raw)
         (OUTPUT / f'{label}.eml').write_bytes(data)
