@@ -117,3 +117,11 @@ Settled decisions, and why they were made. The current design is in [ARCHITECTUR
 
 - **Decision:** each email's folder is named `<yyyy-MM-dd-HH-mm-ss> <subject>`, such as `2026-11-05-14-03-09 Report`, in the Mac's time zone, at the time of the first send call. This replaces the date alone of D5's naming in ARCHITECTURE.md.
 - **Why:** the user's choice, so that emails with the same subject on one day don't share a name. They offered this or a date with a short UUID, and the time was chosen because it stays readable and sorts by time. There's no `T` and no colons, which paths don't take well. If two folders still get the same name, a number is added.
+
+## D20: View links in a shared folder open the folder (2026-11-06)
+
+- **Decision:** with one link for the email's folder (D17), each file's View link opens the folder's page, where the recipient clicks the file. This resolves OD10, and may be revisited.
+- **Why:** the user's choice. Nextcloud 35 can't open one file of a folder share in its viewer from a link: the public page opens the viewer only for a share of a single file, and takes no file from the URL (`apps/files_sharing/src/init-public.ts`). The rejected options, recorded for a later look:
+  - A share of its own for each file that Nextcloud can show, used only for View. It opens the viewer, but costs a share each, which brings back the limit of 20 new shares in 10 minutes (R21).
+  - View showing the file itself from the folder share's WebDAV address, which Nextcloud serves without forcing a download. That's the browser's display, not Nextcloud's viewer, and with a password the browser asks for the user name "anonymous" and the password.
+- **Revisit when:** a Nextcloud version lets a link open one file of a folder share, or recipients find the folder page confusing.

@@ -76,7 +76,7 @@ By default the extension uses one share per email, of its folder (D17, R21).
 - **Password pages:** without the password, the view link goes to `/s/<token>/authenticate/showshare` and the download link to `/s/<token>/authenticate/downloadshare`. Both are password pages with status 200, so a script downloading the link gets HTML, not the file.
 - **Public WebDAV:** `/public.php/dav/files/<token>` accepts Basic auth with the user `anonymous` and the share's password. A wrong password gives 401.
 - **Hidden downloads:** a share with "hide download" set fails to download. Shares created without that setting are unaffected.
-- **No view page for one file in a folder share.** Whether a link can open one file in the folder's page is untested.
+- **No view page for one file in a folder share.** A link can't open one file of a folder share in Nextcloud's viewer: the public page opens the viewer only for a share of a single file, and reads no file from the URL (`apps/files_sharing/src/init-public.ts`, stable35). A file in a folder share is served inline from `/public.php/dav/files/<token>/<name>`, without `Content-Disposition: attachment`, so a browser can show text and images from there (D20).
 - **One file of a folder share, by name:** the redirect puts the name into the WebDAV path without encoding it, so a name with `#`, `%` or `?` is cut or broken and gets 404 or an error. Spaces, accents, `&`, `+`, `;`, `=`, `@`, `,`, quotes, brackets and full-width characters worked. A file's own share downloads any name. Tested 2026-11-06.
 - **One file of a password-protected folder share:** `?files=` survives the password page. After the password, the page redirects to that file alone (`downloadsOneFileOfAFolderShareAfterItsPassword`).
 
