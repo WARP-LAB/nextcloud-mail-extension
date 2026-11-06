@@ -5,17 +5,32 @@ struct SettingsView: View {
     @ObservedObject var model: AppModel
 
     var body: some View {
-        Form {
-            AccountSection(model: model)
-            uploads
-            files
-            links
-            warnings
-            check
-            SetupHelp()
+        VStack(spacing: 0) {
+            Form {
+                AccountSection(model: model)
+                uploads
+                files
+                links
+                warnings
+                check
+                SetupHelp()
+            }
+            .formStyle(.grouped)
+            Text(Self.version)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .textSelection(.enabled)
+                .padding(.vertical, 6)
         }
-        .formStyle(.grouped)
         .frame(minWidth: 560, idealWidth: 640, minHeight: 600, idealHeight: 860)
+    }
+
+    /// Such as "Version 0.1.0 (1)": the version and the build number (D22).
+    private static var version: String {
+        let info = Bundle.main.infoDictionary ?? [:]
+        let version = info["CFBundleShortVersionString"] as? String ?? "unknown"
+        let build = info["CFBundleVersion"] as? String ?? "unknown"
+        return "Version \(version) (\(build))"
     }
 
     /// FR2.

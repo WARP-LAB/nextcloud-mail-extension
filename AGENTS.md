@@ -78,6 +78,7 @@ Only what isn't obvious from directory names:
 - **Logging:** never log message contents, addresses or passwords.
 - **Bash:** start with `#!/usr/bin/env bash` and `set -euo pipefail`, and run unchanged on macOS (BSD tools, bash 3.2) and GNU/Linux.
 - **Markdown:** follow `.markdownlint.json`.
+- **Versioning:** Semantic Versioning 2.0.0, and ZeroVer (`0.y.z`) during early development, as the versioning skill in `~/.agents/skills/versioning/` sets out. Only the user decides a major release, including the first `1.0.0`. The version is `MARKETING_VERSION` in the project file, always `MAJOR.MINOR.PATCH`, and `CURRENT_PROJECT_VERSION` is the build number (D22).
 - **Docs:** record settled choices in DECISIONS.md, risks in RISKS.md, and new facts about Mail or Nextcloud in MAIL.md or NEXTCLOUD.md.
 
 ## Boundaries / Guardrails
