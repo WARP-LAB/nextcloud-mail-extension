@@ -118,13 +118,20 @@ What could go wrong, how we'd notice, and what's being done about it. Each entry
 - **Mitigation:** merge text parts so the message has one text part, and check delivered messages in those three clients ([TESTING.md](TESTING.md#mail-checks)). The Mail checks found that files next to each other ran their links together in the plain text, now fixed (T5b).
 - **Judgment call:** an agent may change the link layout within what FR8 says.
 
+### R22: Nextcloud's trademarks
+
+- **Risk:** Nextcloud GmbH objects to its logo as the project's icons, or to Nextcloud in the project's name, and asks for them to go. Its trademark guidelines allow the logos only as links to nextcloud.com, and say that third-party apps shouldn't have its mark in their name.
+- **Signal:** a request from Nextcloud GmbH, or an app store refusing the app.
+- **Mitigation:** `LICENSE.Nextcloud` names the files that use the logo, their sources and the trademark, and says the project isn't official. The artwork is in three places, `Design/`, the toolbar's image set and `App/AppIcon.icon`, so it can be replaced in one change. The user asks Nextcloud GmbH for permission while the project is published (D25, T13b).
+- **Judgment call:** none on using, replacing or renaming, which is the user's call. An agent keeps `LICENSE.Nextcloud` up to date when Nextcloud artwork is added or changed.
+
 ## Platform and server
 
 ### R17: Sharing the app password needs a provisioning profile
 
 - **Risk:** the host app and the extension share settings through the App Group, and the app password through a Keychain item in the same group.
 - **Tested** (T1, 2026-11-06, with the free Personal Team): the App Group's container and settings work without a provisioning profile. The shared Keychain item fails with `-34018`, because it needs the `keychain-access-groups` entitlement. That entitlement needs a provisioning profile, which Xcode can only create once this Mac is registered as a device with the team.
-- **Tested** (T1b, 2026-11-06, with this Mac registered, D16): the host app's storage check passes for the container, the settings and the Keychain item. The extension's read of the Keychain item is checked by T2's Test connection, which reads the app password from it.
+- **Tested** (T1b, 2026-11-06, with this Mac registered, D16): the host app's storage check passes for the container, the settings and the Keychain item. The extension's read of the Keychain item is checked by Test from Mail, which runs the connection check in the extension and reads the app password from it.
 - **Signal:** the Keychain line of the host app's storage check fails, or the extension can't read the app password.
 - **Mitigation:** this Mac is registered with the Personal Team (D16). On another Mac, register it the same way. The fallback is doing the login in the extension and keeping the app password in the extension's own Keychain.
 - **Judgment call:** registering a Mac, or switching to the fallback, is the user's call.

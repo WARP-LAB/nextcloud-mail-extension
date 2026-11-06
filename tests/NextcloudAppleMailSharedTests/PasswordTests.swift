@@ -4,12 +4,12 @@ import Testing
 @testable import NextcloudAppleMailShared
 
 /// The email's password from the toolbar popover (FR7, R8).
-struct MessagePasswordsTests {
+struct MessageValuesTests {
     let message = "00000000-0000-4000-8000-000000000001"
 
     @Test func findsThePasswordOfAReopenedDraft() {
         let vault = MemoryVault()
-        let passwords = MessagePasswords(vault: vault)
+        let passwords = MessageValues(vault: vault)
         let first = UUID()
         passwords.set("correct horse battery", context: first)
         #expect(vault.kept.isEmpty)
@@ -19,47 +19,47 @@ struct MessagePasswordsTests {
         let reopened = UUID()
         #expect(passwords.shown(context: reopened) == "")
         passwords.link(context: reopened, message: message)
-        #expect(passwords.password(context: reopened, message: message) == "correct horse battery")
+        #expect(passwords.value(context: reopened, message: message) == "correct horse battery")
         #expect(passwords.shown(context: reopened) == "correct horse battery")
     }
 
     @Test func keepsThePasswordWhenMailRestarts() {
         let vault = MemoryVault()
-        let before = MessagePasswords(vault: vault)
+        let before = MessageValues(vault: vault)
         let context = UUID()
         before.link(context: context, message: message)
         before.set("correct horse battery", context: context)
-        let after = MessagePasswords(vault: vault)
-        #expect(after.password(context: UUID(), message: message) == "correct horse battery")
+        let after = MessageValues(vault: vault)
+        #expect(after.value(context: UUID(), message: message) == "correct horse battery")
     }
 
     @Test func clearingThePasswordRemovesItsCopy() {
         let vault = MemoryVault()
-        let passwords = MessagePasswords(vault: vault)
+        let passwords = MessageValues(vault: vault)
         let context = UUID()
         passwords.link(context: context, message: message)
         passwords.set("correct horse battery", context: context)
         passwords.set("", context: context)
         #expect(vault.kept.isEmpty)
-        #expect(passwords.password(context: context, message: message) == nil)
+        #expect(passwords.value(context: context, message: message) == nil)
         vault.kept[message] = "older"
-        #expect(passwords.password(context: context, message: message) == nil, "the cleared field wins")
+        #expect(passwords.value(context: context, message: message) == nil, "the cleared field wins")
     }
 
     @Test func forgetsAMessage() {
         let vault = MemoryVault()
-        let passwords = MessagePasswords(vault: vault)
+        let passwords = MessageValues(vault: vault)
         let context = UUID()
         passwords.link(context: context, message: message)
         passwords.set("correct horse battery", context: context)
         passwords.forget(message: message)
         #expect(vault.kept.isEmpty)
-        #expect(passwords.password(context: context, message: message) == nil)
+        #expect(passwords.value(context: context, message: message) == nil)
     }
 
     @Test func dropsCopiesAsOldAsTheLedgersEntries() {
         let vault = MemoryVault()
-        let passwords = MessagePasswords(vault: vault)
+        let passwords = MessageValues(vault: vault)
         vault.now = SendFixtures.today.addingTimeInterval(-UploadLedger.lifetime - 60)
         passwords.link(context: UUID(), message: "old")
         passwords.set("old password", context: UUID())
@@ -90,7 +90,7 @@ struct SendPasswordTests {
     final class World {
         let nextcloud = FakeNextcloud()
         let vault = MemoryVault()
-        lazy var passwords = MessagePasswords(vault: vault)
+        lazy var passwords = MessageValues(vault: vault)
         let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
 
         func sender() -> Sender {
@@ -177,5 +177,67 @@ struct SendPasswordTests {
         world.nextcloud.limits.passwordEnforced = true
         let result = await world.sender().encode(try Fixture.data("t29-second"), isAutoSave: false, contextID: UUID())
         #expect(result == .failed(SendError.passwordRequired.localizedDescription))
+    }
+}
+
+/// An email's own link expiry, set in the popover (FR4).
+struct SendExpiryTests {
+    func encoded(_ expiry: LinkExpiry) throws -> String {
+        try #require(String(bytes: JSONEncoder().encode(expiry), encoding: .utf8))
+    }
+
+    @Test func givesTheSharesTheEmailsOwnExpiryAndFollowsItsChanges() async throws {
+        let nextcloud = FakeNextcloud()
+        let expiries = MessageValues(vault: MemoryVault())
+        let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer {
+            try? FileManager.default.removeItem(at: folder)
+        }
+        let sender = Sender(
+            Sender.Dependencies(
+                settings: { SendFixtures.settings() },
+                connect: { nextcloud },
+                store: UploadLedgerStore(url: folder.appendingPathComponent("upload-ledger.json")),
+                expiries: expiries,
+                now: { SendFixtures.today }
+            ))
+        let context = UUID()
+        expiries.set(try encoded(.year), context: context)
+        guard
+            case .rewritten(let first) = await sender.encode(
+                try Fixture.data("t29-first"), isAutoSave: false, contextID: context)
+        else {
+            Issue.record("Not rewritten.")
+            return
+        }
+        #expect(nextcloud.shares.map(\.expireDate) == ["2027-11-06"])
+        #expect(MimeMessage(first).text("html").joined().contains("link expires 6 Nov 2027"))
+        // After Undo Send, the email gets another expiry.
+        expiries.set(try encoded(.days(3)), context: context)
+        guard
+            case .rewritten(let second) = await sender.encode(
+                try Fixture.data("t29-second"), isAutoSave: false, contextID: context)
+        else {
+            Issue.record("Not rewritten.")
+            return
+        }
+        #expect(nextcloud.shares.count == 1)
+        #expect(nextcloud.expiryChanges == [["1", "2026-11-09"]])
+        #expect(MimeMessage(second).root.text?.contains("link expires 9 Nov 2026") == true)
+        _ = await sender.encode(try Fixture.data("t29-second"), isAutoSave: false, contextID: context)
+        #expect(nextcloud.expiryChanges.count == 1, "a call with the same expiry changes nothing")
+    }
+
+    @Test(arguments: [
+        (LinkExpiry.week, "in a week"), (.month, "in a month"), (.year, "in a year"), (.never, "never"),
+        (.days(14), "after 14 days"),
+        (
+            .after(LinkExpiry.Period(months: 2, days: 3, hours: 1)),
+            "after 2 months, 3 days and 1 hour"
+        ),
+        (.after(LinkExpiry.Period()), "at the end of the day of sending"),
+    ])
+    func describesTheExpiry(expiry: LinkExpiry, text: String) {
+        #expect(expiry.description == text)
     }
 }

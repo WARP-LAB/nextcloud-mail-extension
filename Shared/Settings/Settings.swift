@@ -19,7 +19,17 @@ struct Settings: Equatable {
         case folderLinksOnly
     }
 
-    static let defaultDirectory = "Mail attachments"
+    /// What FR3's size limit is compared with.
+    enum SizeLimitScope: String, Codable, CaseIterable {
+        /// Each file larger than the limit becomes links. The default.
+        case eachFile
+        /// When the files together are larger than the limit, all of them become links.
+        case allFiles
+    }
+
+    static let defaultDirectory = "MailAttachments"
+    /// The largest size limit, a terabyte, so that any number typed or stored turns into bytes.
+    static let maximumSizeLimitMegabytes = 1_000_000.0
 
     /// The server address the user typed to log in. Requests use the server that the login returned.
     var server = ""
@@ -28,6 +38,7 @@ struct Settings: Equatable {
     /// FR3: true when only files over `sizeLimitMegabytes` become links, false when all files do.
     var onlyLargeFiles = false
     var sizeLimitMegabytes = 10.0
+    var sizeLimitScope = SizeLimitScope.eachFile
     var pastedImagesBecomeLinks = true
     var expiry = LinkExpiry.month
     /// FR5.
@@ -51,9 +62,30 @@ struct Settings: Equatable {
 
     /// FR3's rule. Sizes are decimal, as Finder and the link text show them: 1 MB is 1,000,000 bytes.
     var linkPolicy: LinkPolicy {
-        let rule: LinkPolicy.Rule =
-            onlyLargeFiles ? .largerThan(bytes: Int(max(0, sizeLimitMegabytes) * 1_000_000)) : .allAttachments
+        let megabytes = sizeLimitMegabytes.isNaN ? 0 : min(max(0, sizeLimitMegabytes), Self.maximumSizeLimitMegabytes)
+        let bytes = Int((megabytes * 1_000_000).rounded())
+        let rule: LinkPolicy.Rule
+        switch (onlyLargeFiles, sizeLimitScope) {
+        case (false, _):
+            rule = .allAttachments
+        case (true, .eachFile):
+            rule = .largerThan(bytes: bytes)
+        case (true, .allFiles):
+            rule = .togetherLargerThan(bytes: bytes)
+        }
         return LinkPolicy(rule: rule, pastedImagesBecomeLinks: pastedImagesBecomeLinks)
+    }
+
+    /// FR3's rule for one email, after the choice in its toolbar popover.
+    func linkPolicy(for choice: LinkChoice) -> LinkPolicy {
+        switch choice {
+        case .useSettings:
+            return linkPolicy
+        case .allFiles:
+            return LinkPolicy(rule: .allAttachments, pastedImagesBecomeLinks: true)
+        case .keepAttached:
+            return LinkPolicy(rule: .noFiles)
+        }
     }
 
     /// Whether the email has only the folder's links (FR8, D17).
@@ -64,8 +96,8 @@ struct Settings: Equatable {
 
 extension Settings: Codable {
     private enum CodingKeys: String, CodingKey {
-        case server, directory, onlyLargeFiles, sizeLimitMegabytes, pastedImagesBecomeLinks, expiry, warnIfSignOff
-        case warningPhrases, sharing, placement, linkStyle, folderLinks
+        case server, directory, onlyLargeFiles, sizeLimitMegabytes, sizeLimitScope, pastedImagesBecomeLinks, expiry
+        case warnIfSignOff, warningPhrases, sharing, placement, linkStyle, folderLinks
     }
 
     /// Reads stored settings. A setting that's missing, such as one added in a later version, or that can't be read
@@ -80,6 +112,7 @@ extension Settings: Codable {
         directory = value(.directory, defaults.directory)
         onlyLargeFiles = value(.onlyLargeFiles, defaults.onlyLargeFiles)
         sizeLimitMegabytes = value(.sizeLimitMegabytes, defaults.sizeLimitMegabytes)
+        sizeLimitScope = value(.sizeLimitScope, defaults.sizeLimitScope)
         pastedImagesBecomeLinks = value(.pastedImagesBecomeLinks, defaults.pastedImagesBecomeLinks)
         expiry = value(.expiry, defaults.expiry)
         warnIfSignOff = value(.warnIfSignOff, defaults.warnIfSignOff)
@@ -88,6 +121,48 @@ extension Settings: Codable {
         placement = value(.placement, defaults.placement)
         linkStyle = value(.linkStyle, defaults.linkStyle)
         folderLinks = value(.folderLinks, defaults.folderLinks)
+    }
+}
+
+/// Which of an email's files become links, as chosen in its toolbar popover (FR3).
+enum LinkChoice: String, CaseIterable {
+    /// The settings decide. The default.
+    case useSettings
+    /// Every file becomes links, pasted images too, whatever the size limit. Images in the signature stay.
+    case allFiles
+    /// Every file stays attached.
+    case keepAttached
+
+    /// The popover's stored choice, where anything else, such as none, means the settings decide.
+    init(stored: String?) {
+        self = stored.flatMap(Self.init(rawValue:)) ?? .useSettings
+    }
+}
+
+/// Decimal numbers that the user types, such as the size limit in MB. "." and "," both separate the decimals,
+/// whatever the region, so that "0.2" isn't read as 0 where the region writes "0,2".
+enum DecimalText {
+    /// The number, or nil for text that isn't a number that's zero or more, such as "", "1.2.3" or "-1".
+    static func value(of text: String) -> Double? {
+        let text = text.trimmingCharacters(in: .whitespaces).replacingOccurrences(of: ",", with: ".")
+        guard text.contains(where: \.isNumber), text.filter({ $0 == "." }).count <= 1,
+            text.allSatisfy({ ("0"..."9").contains($0) || $0 == "." })
+        else {
+            return nil
+        }
+        return Double(text.hasSuffix(".") ? text + "0" : text)
+    }
+
+    /// The number with up to three decimals, without trailing zeros or grouping, such as "0.2" or "10".
+    static func text(of value: Double, separator: String = Locale.current.decimalSeparator ?? ".") -> String {
+        var text = String(format: "%.3f", value)
+        while text.hasSuffix("0") {
+            text.removeLast()
+        }
+        if text.hasSuffix(".") {
+            text.removeLast()
+        }
+        return text.replacingOccurrences(of: ".", with: separator)
     }
 }
 

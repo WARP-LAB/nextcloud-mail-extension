@@ -10,10 +10,14 @@ enum SendWarnings {
     ///     output, whose files may already be links (docs/MAIL.md).
     ///   - signOn: Mail's Sign toggle, read at send.
     ///   - linkedEarlier: how many files the first send call turned into links for this message.
-    static func warning(for message: MimeMessage, signOn: Bool, settings: Settings, linkedEarlier: Int) -> String? {
+    ///   - choice: the email's choice in the toolbar popover of which files become links.
+    static func warning(
+        for message: MimeMessage, signOn: Bool, settings: Settings, linkedEarlier: Int,
+        choice: LinkChoice = .useSettings
+    ) -> String? {
         let signature = LinkPolicy.signatureContentIDs(in: message)
         if settings.warnIfSignOff && !signOn {
-            let files = settings.linkPolicy.linkedFiles(in: message, signatureContentIDs: signature)
+            let files = settings.linkPolicy(for: choice).linkedFiles(in: message, signatureContentIDs: signature)
             if !files.isEmpty {
                 return signOffWarning(files.map(\.filename))
             }

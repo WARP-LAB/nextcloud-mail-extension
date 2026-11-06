@@ -17,15 +17,12 @@ Risk register: `docs/RISKS.md`.
 > - Write Acceptance Criteria or a explicit Definition of Done
 > - Take tasks in order unless told otherwise. Do not start the next task without being asked.
 
-None. The backlog has only T9b, which the user left for the end of the project.
-
 ## ❓ Open Decisions (human to resolve)
 
 Agents: do not guess these. Record questions here and stop.
 Judgment calls and known risks are tracked separately in `docs/RISKS.md`.
 
 - **OD3: Distribution.** How the app is distributed: Developer ID, the Mac App Store, or local builds only. Both of the first two need the renewed paid membership (D11). The supported versions are decided (D12).
-- **OD4: Defaults chosen by an agent.** Confirm or change: the upload directory "Mail attachments" (FR2), all attachments becoming links (FR3), links expiring in a month (FR4), FR5's warning on, FR6's phrase list empty, FR8's view and download links, FR9's all-files links off, the list of file names above the folder's links when FR8 gives only those (D17), the email saying that links need a password (FR7), upload notifications only after 2 seconds (T8).
 - **OD5: Proposed requirements.** Confirm or change the non-functional requirements and the out-of-scope list in the PRD.
 - **OD6: Testing "Don't ask again".** Whether to test it in Mail's Mail Drop prompt, knowing it changes the account's behaviour and may be hard to undo (R2).
 
@@ -41,12 +38,15 @@ Judgment calls and known risks are tracked separately in `docs/RISKS.md`.
 
 ## 📋 Backlog (To Be Done)
 
+- **T13b: Ask Nextcloud GmbH about the logo and the name (needs the user).** The project is published with Nextcloud's mark as its icons and Nextcloud in its name, while the user asks for permission through Nextcloud's [contact form](https://nextcloud.com/contact) (D25).
+  - **Acceptance:** Nextcloud GmbH's answer is recorded in D25 and `LICENSE.Nextcloud`. If it refuses, the icons are replaced and the project renamed, as a task of its own.
 - **T9b: Check AGENTS.md in each agent tool (needs the user, optional).** At the end of the project, if at all (the user's choice). Open the repository once in each tool you use, ask what the repository's instructions say about commits, and note any tool that doesn't know. Claude Code 2.1.310 is checked, because this session loaded AGENTS.md. For Copilot in VS Code, `chat.useAgentsMdFile` must be on.
   - **Acceptance:** each tool you use answers from AGENTS.md, or D15 records what it needs.
 
 ## ✅ Completed Tasks (Done)
 
 - **Probing Mail with MailProbe (2026-11-05).** Four rounds of tests found what Mail does with an extension. See `probe/docs/` and `docs/MAIL.md`.
+- **T13: Popover, icons, version and settings wording (2026-11-06).** The popover chooses which of an email's files become links, gives it its own expiry and opens the app. The toolbar button shows Nextcloud's mark and the app has Nextcloud's icon. The version is 0.1.0 (2), shown in the app's footer. The size limit keeps decimals and can apply to all files together, and the settings use the user's wording (D21 to D24). Verified: 144 unit tests pass, in Mail `keep-attached`, `all-files`, `own-expiry`, `open-settings`, `t36`, `size-rule`, `size-together` and `size-together-under` pass, and the user approved both icons.
 - **Regression on the final build (2026-11-06).** After T6 to T8, `python3 tests/mail-checks.py` passed all 11 send checks, and `tests/mail-window-checks.py` passed t7, t21, t30, t34, t36, t37, password-refused, t33, t23, t34-phrase, t35-phrase and t39. Send Later was left out, so as not to schedule more emails.
 - **T8: Progress display (2026-11-06).** Notifications from the extension, which R3 let the agent choose: "Uploading…" once an upload has run for 2 seconds, replaced by "Uploaded … in N s", and removed after a failure. Verified: `swift test` passes 132 unit tests, with the send flow reporting the start and end of new uploads, nothing for a call that finds them uploaded, and a failure. The user allowed the app's notifications. In Mail, with `tests/mail-window-checks.py t8`, a 30 MB email showed both notifications and arrived with working links.
 - **T7: Send warnings (2026-11-06).** Verified: `swift test` passes 131 unit tests, with FR5 naming the files with Sign off and not warning with Sign on, with the setting off or with only files the size rule keeps, and FR6 finding a phrase inside longer words, ignoring case, in the user's own text only, not in the subject, quotes or signature, counting every file and those the first call linked, but not signature images. In Mail, with `tests/mail-window-checks.py`: with Sign off, the alert named the file and said how to turn on Sign, Cancel kept the window, and with Sign back on the email went out with links (t33), while Send Anyway sent the file attached with nothing uploaded (t23). A phrase with no attachment gave the alert naming it, with Sign on and off, Cancel kept the window, and Send Anyway sent the email as written (t34, t35). A phrase only in the subject or a reply's quote gave none. Sign was turned back on after each check.

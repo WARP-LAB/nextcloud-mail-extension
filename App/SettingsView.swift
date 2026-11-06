@@ -5,17 +5,32 @@ struct SettingsView: View {
     @ObservedObject var model: AppModel
 
     var body: some View {
-        Form {
-            AccountSection(model: model)
-            uploads
-            files
-            links
-            warnings
-            check
-            SetupHelp()
+        VStack(spacing: 0) {
+            Form {
+                AccountSection(model: model)
+                uploads
+                files
+                links
+                warnings
+                check
+                SetupHelp()
+            }
+            .formStyle(.grouped)
+            Text(Self.version)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .textSelection(.enabled)
+                .padding(.vertical, 6)
         }
-        .formStyle(.grouped)
         .frame(minWidth: 560, idealWidth: 640, minHeight: 600, idealHeight: 860)
+    }
+
+    /// Such as "Version 0.1.0 (1)": the version and the build number (D22).
+    private static var version: String {
+        let info = Bundle.main.infoDictionary ?? [:]
+        let version = info["CFBundleShortVersionString"] as? String ?? "unknown"
+        let build = info["CFBundleVersion"] as? String ?? "unknown"
+        return "Version \(version) (\(build))"
     }
 
     /// FR2.
@@ -41,27 +56,40 @@ struct SettingsView: View {
                 Text("Only attachments over a size").tag(true)
             }
             if model.settings.onlyLargeFiles {
-                TextField("Larger than, in MB", value: $model.settings.sizeLimitMegabytes, format: .number)
+                DecimalField(label: "Larger than, in MB", value: $model.settings.sizeLimitMegabytes)
+                Picker("Size limit applies to", selection: $model.settings.sizeLimitScope) {
+                    Text("Each file").tag(Settings.SizeLimitScope.eachFile)
+                    Text("All files together").tag(Settings.SizeLimitScope.allFiles)
+                }
             }
             Toggle("Pasted images become links", isOn: $model.settings.pastedImagesBecomeLinks)
         } header: {
             Text("Which files become links")
         } footer: {
-            Text("Images in your signature always stay in the email.").foregroundStyle(.secondary)
+            Text(filesFooter).foregroundStyle(.secondary)
         }
+    }
+
+    private var filesFooter: String {
+        let signature = "Images in your signature always stay in the email."
+        guard model.settings.onlyLargeFiles && model.settings.sizeLimitScope == .allFiles else {
+            return signature
+        }
+        return "When the files together are larger than the limit, all of them become links, and otherwise they "
+            + "all stay attached. " + signature
     }
 
     /// FR4, FR8, FR9 and D17.
     private var links: some View {
         Section {
             Picker("Share files as", selection: $model.settings.sharing) {
-                Text("One link for the email's folder").tag(Settings.Sharing.folder)
+                Text("One link for all files in the email").tag(Settings.Sharing.folder)
                 Text("A link for each file").tag(Settings.Sharing.eachFile)
             }
             if model.settings.sharing == .folder {
-                Picker("Links in the email", selection: $model.settings.placement) {
-                    Text("Where each file was").tag(Settings.Placement.whereEachFileWas)
-                    Text("Only the folder's links").tag(Settings.Placement.folderLinksOnly)
+                Picker("Place links", selection: $model.settings.placement) {
+                    Text("Inline, where each file was").tag(Settings.Placement.whereEachFileWas)
+                    Text("Below your text").tag(Settings.Placement.folderLinksOnly)
                 }
             }
             Picker("Show download link for file", selection: $model.settings.linkStyle) {
@@ -98,7 +126,7 @@ struct SettingsView: View {
     private var warnings: some View {
         Section {
             Toggle("Warn if signing (upload via link) is disabled", isOn: $model.settings.warnIfSignOff)
-            LabeledContent("Warn if text found but no attachment") {
+            LabeledContent("Warn if the email's text includes a phrase but there's no attachment") {
                 TagField(tags: $model.settings.warningPhrases, prompt: "Type a word or phrase, then Return")
             }
         } header: {
@@ -135,6 +163,37 @@ struct SettingsView: View {
             )
             .foregroundStyle(.secondary)
         }
+    }
+}
+
+/// A field for a decimal number that keeps the decimals typed, with "." or "," (`DecimalText`). Text that isn't a
+/// number leaves the value as it was, and the field shows the value again when it loses focus.
+private struct DecimalField: View {
+    let label: String
+    @Binding var value: Double
+    @State private var text = ""
+    @FocusState private var focused: Bool
+
+    var body: some View {
+        TextField(label, text: $text)
+            .focused($focused)
+            .onAppear { text = DecimalText.text(of: value) }
+            .onChange(of: text) { _, text in
+                if let typed = DecimalText.value(of: text) {
+                    value = typed
+                }
+            }
+            .onChange(of: focused) { _, focused in
+                if !focused {
+                    text = DecimalText.text(of: value)
+                }
+            }
+            .onChange(of: value) { _, value in
+                if !focused {
+                    text = DecimalText.text(of: value)
+                }
+            }
+            .onSubmit { text = DecimalText.text(of: value) }
     }
 }
 
@@ -192,113 +251,6 @@ private struct CheckResultView: View {
                 Text(result.title)
             }
         }
-    }
-}
-
-/// FR4: in a week, a month or a year, after a custom period of years, months, days and hours, or never.
-private struct ExpiryPicker: View {
-    enum Choice: Hashable {
-        case week, month, year, custom, never
-    }
-
-    @Binding var expiry: LinkExpiry
-    /// Whether the custom choice is shown, which a custom period equal to a preset, such as 7 days, needs.
-    @State private var custom = false
-
-    var body: some View {
-        Picker("Links expire", selection: choice) {
-            Text("In a week").tag(Choice.week)
-            Text("In a month").tag(Choice.month)
-            Text("In a year").tag(Choice.year)
-            Text("After a custom period").tag(Choice.custom)
-            Text("Never").tag(Choice.never)
-        }
-        .onAppear {
-            custom = Self.preset(expiry) == nil
-        }
-        if choice.wrappedValue == .custom {
-            LabeledContent("After") {
-                HStack(spacing: 12) {
-                    amount("year", "years", \.years)
-                    amount("month", "months", \.months)
-                    amount("day", "days", \.days)
-                    amount("hour", "hours", \.hours)
-                }
-            }
-            Text(
-                "Counted from sending. Nextcloud ends a link at the end of a day, so the link expires at the end of "
-                    + "the day the period reaches, and hours only matter when they cross midnight."
-            )
-            .font(.footnote)
-            .foregroundStyle(.secondary)
-        }
-    }
-
-    private func amount(_ unit: String, _ units: String, _ part: WritableKeyPath<LinkExpiry.Period, Int>)
-        -> some View
-    {
-        HStack(spacing: 4) {
-            TextField(units, value: binding(part), format: .number)
-                .labelsHidden()
-                .multilineTextAlignment(.trailing)
-                .frame(width: 44)
-            Stepper(units, value: binding(part), in: 0...9999)
-                .labelsHidden()
-            Text(period[keyPath: part] == 1 ? unit : units)
-        }
-    }
-
-    private var choice: Binding<Choice> {
-        Binding {
-            custom ? .custom : Self.preset(expiry) ?? .custom
-        } set: { choice in
-            custom = choice == .custom
-            switch choice {
-            case .week:
-                expiry = .week
-            case .month:
-                expiry = .month
-            case .year:
-                expiry = .year
-            case .never:
-                expiry = .never
-            case .custom:
-                if expiry == .never {
-                    expiry = .days(14)
-                }
-            }
-        }
-    }
-
-    /// The custom period, or two weeks to start from when links don't expire.
-    private var period: LinkExpiry.Period {
-        if case .after(let period) = expiry {
-            return period
-        }
-        return LinkExpiry.Period(days: 14)
-    }
-
-    private func binding(_ part: WritableKeyPath<LinkExpiry.Period, Int>) -> Binding<Int> {
-        Binding {
-            period[keyPath: part]
-        } set: { value in
-            var changed = period
-            changed[keyPath: part] = min(max(value, 0), 9999)
-            expiry = .after(changed)
-        }
-    }
-
-    private static func preset(_ expiry: LinkExpiry) -> Choice? {
-        if expiry == .week {
-            return .week
-        }
-        if expiry == .month {
-            return .month
-        }
-        if expiry == .year {
-            return .year
-        }
-        return expiry == .never ? .never : nil
     }
 }
 

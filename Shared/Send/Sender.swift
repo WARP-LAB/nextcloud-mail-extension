@@ -18,7 +18,11 @@ actor Sender {
         var connect: () async throws -> NextcloudService?
         var store: UploadLedgerStore?
         /// The passwords typed in the toolbar popover (FR7), or nil for none.
-        var passwords: MessagePasswords?
+        var passwords: MessageValues?
+        /// Each email's own link expiry from the popover, as `LinkExpiry` JSON, or nil for none.
+        var expiries: MessageValues?
+        /// Each email's `LinkChoice` from the popover, or nil for none.
+        var linkChoices: MessageValues?
         /// Told, with the message ID, when uploads start and end (R3).
         var progress: (String, SendProgress) -> Void = { _, _ in }
         var now: () -> Date = Date.init
@@ -48,6 +52,8 @@ actor Sender {
         self.dependencies = dependencies
         ledger = dependencies.store?.load() ?? UploadLedger()
         dependencies.passwords?.prune(now: dependencies.now())
+        dependencies.expiries?.prune(now: dependencies.now())
+        dependencies.linkChoices?.prune(now: dependencies.now())
     }
 
     /// One `encode()` call. `messageID` is Mail's `X-Universally-Unique-Identifier`, found in the message, with
@@ -61,6 +67,8 @@ actor Sender {
         let headerID = MimePart.headerField("x-universally-unique-identifier", in: raw)
         if let headerID {
             dependencies.passwords?.link(context: contextID, message: headerID)
+            dependencies.expiries?.link(context: contextID, message: headerID)
+            dependencies.linkChoices?.link(context: contextID, message: headerID)
         }
         // Auto-saves keep their files (D3, docs/MAIL.md).
         guard !isAutoSave else {
@@ -103,13 +111,16 @@ actor Sender {
         .sorted()
         let settings = dependencies.settings()
         let known = Set(entry.signatureFiles)
-        let files = settings.linkPolicy.linkedFiles(in: message, signatureContentIDs: signatureIDs).filter { file in
-            !(file.contentType.hasPrefix("image/") && known.contains(UploadLedger.key(for: file.data)))
+        let choice = LinkChoice(stored: dependencies.linkChoices?.value(context: contextID, message: messageID))
+        let policy = settings.linkPolicy(for: choice)
+        let files = policy.linkedFiles(in: message, signatureContentIDs: signatureIDs) { file in
+            file.contentType.hasPrefix("image/") && known.contains(UploadLedger.key(for: file.data))
         }
 
         // Mail Drop: its message has the header, and the call before it has none of the files (FR10, docs/MAIL.md).
+        // Files kept attached after Undo Send also leave nothing to link, but the email's popover values stay.
         if message.root.field("remote-attachment-url") != nil || (files.isEmpty && entry.hasUploads) {
-            await removeUploads(entry, settings, messageID)
+            await removeUploads(entry, settings, messageID, forgetValues: choice != .keepAttached)
             return nil
         }
         guard !files.isEmpty else {
@@ -130,20 +141,30 @@ actor Sender {
         flow.temporaryDirectory = dependencies.temporaryDirectory
         let report = dependencies.progress
         flow.progress = { report(messageID, $0) }
-        let password = dependencies.passwords?.password(context: contextID, message: messageID)
+        let password = dependencies.passwords?.value(context: contextID, message: messageID)
+        let expiry = dependencies.expiries?.value(context: contextID, message: messageID).flatMap {
+            try? JSONDecoder().decode(LinkExpiry.self, from: Data($0.utf8))
+        }
         let data = try await flow.run(
-            message, files: files, password: password, applied: applied[messageID], record: record)
+            message, files: files, password: password, applied: applied[messageID], expiry: expiry, record: record)
         applied[messageID] = password ?? ""
         return data
     }
 
-    /// Deletes what was uploaded for the message, its password and its entry, after Mail Drop took over (D8).
-    private func removeUploads(_ entry: UploadLedger.Entry, _ settings: Settings, _ messageID: String) async {
+    /// Deletes what was uploaded for the message and its entry, and with `forgetValues` the popover's values for
+    /// it, after Mail Drop took over (D8).
+    private func removeUploads(
+        _ entry: UploadLedger.Entry, _ settings: Settings, _ messageID: String, forgetValues: Bool
+    ) async {
         if entry.hasUploads {
             if let service = try? await dependencies.connect() {
                 try? await SendFlow(settings: settings, service: service).removeUploads(entry)
             }
-            dependencies.passwords?.forget(message: messageID)
+            if forgetValues {
+                dependencies.passwords?.forget(message: messageID)
+                dependencies.expiries?.forget(message: messageID)
+                dependencies.linkChoices?.forget(message: messageID)
+            }
             applied[messageID] = nil
         }
         store(nil, for: messageID)

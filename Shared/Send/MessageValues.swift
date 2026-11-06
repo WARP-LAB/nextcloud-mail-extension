@@ -1,7 +1,7 @@
 import Foundation
 
-/// Where `MessagePasswords` keeps a copy of each email's password, so that tests can keep it in memory.
-protocol PasswordVault {
+/// Where `MessageValues` keeps a copy of each email's value, so that tests can keep it in memory.
+protocol MessageVault {
     func read(_ messageID: String) throws -> String?
     func write(_ password: String, for messageID: String) throws
     func delete(_ messageID: String) throws
@@ -9,51 +9,59 @@ protocol PasswordVault {
     func unchanged(since date: Date) throws -> [String]
 }
 
-/// The Keychain items of the shared group, one per message ID (R8).
-struct KeychainPasswordVault: PasswordVault {
-    static let service = "lv.warp.nextcloudapplemail.message-password"
-
+/// The Keychain items of the shared group, one per message ID for each service (R8).
+struct KeychainVault: MessageVault {
     let group: String
+    let service: String
 
     func read(_ messageID: String) throws -> String? {
-        try Keychain.read(service: Self.service, account: messageID, group: group).flatMap {
+        try Keychain.read(service: service, account: messageID, group: group).flatMap {
             String(bytes: $0, encoding: .utf8)
         }
     }
 
     func write(_ password: String, for messageID: String) throws {
-        try Keychain.write(Data(password.utf8), service: Self.service, account: messageID, group: group)
+        try Keychain.write(Data(password.utf8), service: service, account: messageID, group: group)
     }
 
     func delete(_ messageID: String) throws {
-        try Keychain.delete(service: Self.service, account: messageID, group: group)
+        try Keychain.delete(service: service, account: messageID, group: group)
     }
 
     func unchanged(since date: Date) throws -> [String] {
-        try Keychain.items(service: Self.service, group: group).filter { $0.modified < date }.map(\.account)
+        try Keychain.items(service: service, group: group).filter { $0.modified < date }.map(\.account)
     }
 }
 
-/// The password typed for each email in the toolbar popover (FR7, docs/ARCHITECTURE.md).
+/// What the user sets for each email in the toolbar popover: its password (FR7), its own link expiry, if any, and
+/// which files become links, if not as the settings say (docs/ARCHITECTURE.md).
 ///
 /// The popover knows only the compose context, and `encode()` knows the context and the message ID. A reopened draft
 /// gets a new context but keeps its message ID, so every `encode()` call, auto-saves included, links its context to
-/// the message ID, and the password is also kept in the Keychain under the message ID, which survives Mail
-/// restarting (R8, docs/MAIL.md). A password is never logged, and never written anywhere else.
-final class MessagePasswords: @unchecked Sendable {
-    static let shared = MessagePasswords(vault: SharedStorage.appGroupIdentifier.map(KeychainPasswordVault.init))
+/// the message ID, and the value is also kept in the Keychain under the message ID, which survives Mail restarting
+/// (R8, docs/MAIL.md). A password is never logged, and never written anywhere else.
+final class MessageValues: @unchecked Sendable {
+    static let passwords = MessageValues(service: "lv.warp.nextcloudapplemail.message-password")
+    /// Each email's own link expiry, as `LinkExpiry` JSON. Not secret, but kept the same way.
+    static let expiries = MessageValues(service: "lv.warp.nextcloudapplemail.message-expiry")
+    /// Each email's `LinkChoice`, as its raw value, when it isn't `useSettings`. Not secret either.
+    static let linkChoices = MessageValues(service: "lv.warp.nextcloudapplemail.message-links")
 
     private let lock = NSLock()
-    private let vault: PasswordVault?
+    private let vault: MessageVault?
     /// What was typed in each context. An empty string means the password was cleared there.
     private var typed: [UUID: String] = [:]
     private var messageOfContext: [UUID: String] = [:]
 
-    init(vault: PasswordVault?) {
+    init(vault: MessageVault?) {
         self.vault = vault
     }
 
-    /// The popover's field, at each change.
+    private convenience init(service: String) {
+        self.init(vault: SharedStorage.appGroupIdentifier.map { KeychainVault(group: $0, service: service) })
+    }
+
+    /// The popover's field, at each change. Empty means none.
     func set(_ password: String, context: UUID) {
         lock.lock()
         defer { lock.unlock() }
@@ -73,9 +81,9 @@ final class MessagePasswords: @unchecked Sendable {
         }
     }
 
-    /// The email's password, or nil for none: typed in this context, else in another context of the same message,
-    /// else kept in the Keychain.
-    func password(context: UUID, message: String?) -> String? {
+    /// The email's value, or nil for none: set in this context, else in another context of the same message, else
+    /// kept in the Keychain.
+    func value(context: UUID, message: String?) -> String? {
         lock.lock()
         defer { lock.unlock() }
         return find(context: context, message: message ?? messageOfContext[context]).flatMap { $0.isEmpty ? nil : $0 }
@@ -83,10 +91,10 @@ final class MessagePasswords: @unchecked Sendable {
 
     /// What the popover shows when it opens.
     func shown(context: UUID) -> String {
-        password(context: context, message: nil) ?? ""
+        value(context: context, message: nil) ?? ""
     }
 
-    /// Deletes the copies of passwords that weren't changed for as long as the ledger keeps a message, so that they
+    /// Deletes the copies of values that weren't changed for as long as the ledger keeps a message, so that they
     /// go with the message's entry (docs/ARCHITECTURE.md).
     func prune(now: Date = Date()) {
         let oldest = now.addingTimeInterval(-UploadLedger.lifetime)
@@ -95,7 +103,7 @@ final class MessagePasswords: @unchecked Sendable {
         }
     }
 
-    /// Forgets the message's password, as when Mail Drop sent it without links.
+    /// Forgets the message's value, as when Mail Drop sent it without links.
     func forget(message: String) {
         lock.lock()
         defer { lock.unlock() }

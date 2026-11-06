@@ -70,6 +70,15 @@ final class FakeNextcloud: NextcloudService {
         passwordChanges.append([id, password])
     }
 
+    /// Each expiry change, as share ID and date.
+    var expiryChanges: [[String]] = []
+
+    func setExpireDate(_ date: String, forShare id: String) async throws -> Share {
+        expiryChanges.append([id, date])
+        let url = try #require(URL(string: "https://cloud.example.test/s/share\(id)"))
+        return Share(id: id, url: url, expiration: ExpiryDate(server: date))
+    }
+
     func delete(_ path: String) async throws {
         deleted.append(path)
         folders = folders.filter { $0 != path && !$0.hasPrefix(path + "/") }
@@ -98,7 +107,7 @@ enum SendFixtures {
 }
 
 /// Passwords in memory, standing in for the Keychain.
-final class MemoryVault: PasswordVault {
+final class MemoryVault: MessageVault {
     var kept: [String: String] = [:]
     var modified: [String: Date] = [:]
     var now = Date()

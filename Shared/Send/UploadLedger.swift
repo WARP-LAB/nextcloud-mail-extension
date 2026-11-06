@@ -27,6 +27,8 @@ struct UploadLedger: Codable, Equatable {
         var signatureFiles: [String] = []
         /// Whether the shares were given a password (FR7). The password itself is never kept here.
         var passwordProtected = false
+        /// The expiry date the shares were given, `YYYY-MM-DD` or empty for none, or nil before any were made.
+        var expireDate: String?
         var updated: Date
 
         init(updated: Date) {
@@ -57,7 +59,7 @@ struct UploadLedger: Codable, Equatable {
 
 extension UploadLedger.Entry {
     private enum CodingKeys: String, CodingKey {
-        case folder, folderShare, files, signatureContentIDs, signatureFiles, passwordProtected, updated
+        case folder, folderShare, files, signatureContentIDs, signatureFiles, passwordProtected, expireDate, updated
     }
 
     /// Reads an entry, with defaults for what an earlier version didn't store.
@@ -69,6 +71,7 @@ extension UploadLedger.Entry {
         signatureContentIDs = try values.decodeIfPresent([String].self, forKey: .signatureContentIDs) ?? []
         signatureFiles = try values.decodeIfPresent([String].self, forKey: .signatureFiles) ?? []
         passwordProtected = try values.decodeIfPresent(Bool.self, forKey: .passwordProtected) ?? false
+        expireDate = try values.decodeIfPresent(String.self, forKey: .expireDate)
         updated = try values.decode(Date.self, forKey: .updated)
     }
 }

@@ -1,0 +1,47 @@
+Nextcloud's logo in NextcloudAppleMail
+
+NextcloudAppleMail uses Nextcloud's logo mark. The logo is not covered by this
+repository's MIT licence (LICENSE), and Nextcloud does not publish it under an
+open licence.
+
+"Nextcloud and the Nextcloud logo is a registered trademark of Nextcloud GmbH
+in Germany and/or other countries." (Nextcloud's trademark guidelines)
+
+NextcloudAppleMail is not made, endorsed or supported by Nextcloud GmbH, and is
+not an official Nextcloud client.
+
+
+Files that use the logo
+
+- Design/Nextcloud_02-blue-logo_mark-only.svg
+  The blue "mark only" logo from Nextcloud's logo resources, unchanged.
+- Extension/Assets.xcassets/ToolbarIcon.imageset/nextcloud-mark.svg
+  The same mark for the Mail toolbar button, without the editor's metadata and
+  with padding around it.
+- App/AppIcon.icon
+  The app's icon, made with Icon Composer: the mark in white on a gradient of
+  Nextcloud's brand colours, #0082C9 and #1CAFFF, as the icon of Nextcloud's
+  macOS desktop client has them.
+
+
+Sources
+
+- Logo resources: https://nextcloud.com/press/#logo-resources
+- Brand page, with the logo usage requirements: https://nextcloud.com/brand/
+- Trademark guidelines, last updated 26 June 2024:
+  https://nextcloud.com/trademarks/
+
+
+Terms
+
+Nextcloud's brand page says that its name, logo and trademarks are protected,
+that it supports "fair use" of its marks where the use is descriptive and
+implies no endorsement, and that it can revoke permission at any time. Fair use
+is a legal doctrine, not a licence.
+
+The trademark guidelines allow the logos "only on the Internet and only as a
+link to nextcloud.com", and say that third-party apps "should not include a
+Nextcloud mark in the name". This project uses the mark for its icons and has
+Nextcloud in its name, which goes beyond that. The project asks Nextcloud GmbH
+for permission through https://nextcloud.com/contact, and replaces the icons
+and changes its name if Nextcloud GmbH objects.

@@ -38,6 +38,13 @@ CHECKS = {
     'download-only': dict(settings={'linkStyle': 'downloadOnly'}, files=[('report.bin', 25_000)]),
     'size-rule': dict(settings={'onlyLargeFiles': True, 'sizeLimitMegabytes': 0.2},
                       files=[('small.txt', 50_000), ('large.bin', 400_000)], kept=['small.txt']),
+    # The size limit for all files together (FR3): each file is under 0.2 MB, and together they're over it, or not.
+    'size-together': dict(settings={'onlyLargeFiles': True, 'sizeLimitMegabytes': 0.2, 'sizeLimitScope': 'allFiles'},
+                          files=[('part-1.bin', 150_000), ('part-2.bin', 120_000)]),
+    'size-together-under': dict(settings={'onlyLargeFiles': True, 'sizeLimitMegabytes': 0.2,
+                                          'sizeLimitScope': 'allFiles'},
+                                files=[('part-1.txt', 50_000), ('part-2.txt', 60_000)],
+                                kept=['part-1.txt', 'part-2.txt']),
     'odd-names': dict(files=[('Pārskats #1 100%.txt', 5_000), ('a&b+c [1].txt', 5_000)]),
     'same-file-twice': dict(files=[('twice.bin', 10_000), None]),
     'signature': dict(files=[('with-signature.bin', 10_000)], signature=True),
@@ -51,7 +58,8 @@ CHECKS = {
 }
 
 DEFAULTS = {'sharing': 'folder', 'placement': 'whereEachFileWas', 'linkStyle': 'viewAndDownload',
-            'folderLinks': False, 'onlyLargeFiles': False, 'pastedImagesBecomeLinks': True, 'warningPhrases': []}
+            'folderLinks': False, 'onlyLargeFiles': False, 'sizeLimitScope': 'eachFile', 'pastedImagesBecomeLinks': True,
+            'warningPhrases': []}
 
 
 def mail(*arguments, capture=False):

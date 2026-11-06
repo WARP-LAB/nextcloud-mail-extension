@@ -56,6 +56,31 @@ enum LinkExpiry: Equatable {
     }
 }
 
+extension LinkExpiry {
+    /// Such as "in a month", "never" or "after 2 months, 3 days and 1 hour".
+    var description: String {
+        guard case .after(let period) = self else {
+            return "never"
+        }
+        if self == .week {
+            return "in a week"
+        }
+        if self == .month {
+            return "in a month"
+        }
+        if self == .year {
+            return "in a year"
+        }
+        let parts = [(period.years, "year"), (period.months, "month"), (period.days, "day"), (period.hours, "hour")]
+            .filter { $0.0 > 0 }
+            .map { "\($0.0) \($0.1)\($0.0 == 1 ? "" : "s")" }
+        guard let last = parts.last else {
+            return "at the end of the day of sending"
+        }
+        return "after " + (parts.count == 1 ? last : parts.dropLast().joined(separator: ", ") + " and " + last)
+    }
+}
+
 extension LinkExpiry: Codable {
     private enum CodingKeys: String, CodingKey {
         case never, after

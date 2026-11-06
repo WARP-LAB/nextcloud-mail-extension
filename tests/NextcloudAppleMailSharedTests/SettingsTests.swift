@@ -11,8 +11,10 @@ struct SettingsTests {
 
     @Test func hasThePRDsDefaults() {
         let settings = Settings()
-        #expect(settings.directory == "Mail attachments")
+        #expect(settings.directory == "MailAttachments")
         #expect(settings.linkPolicy.rule == .allAttachments)
+        #expect(settings.sizeLimitScope == .eachFile)
+        #expect(settings.expiry == .month)
         #expect(settings.pastedImagesBecomeLinks)
         #expect(settings.warnIfSignOff)
         #expect(settings.warningPhrases.isEmpty)
@@ -29,6 +31,7 @@ struct SettingsTests {
         settings.directory = "Mail/Out"
         settings.onlyLargeFiles = true
         settings.sizeLimitMegabytes = 2.5
+        settings.sizeLimitScope = .allFiles
         settings.pastedImagesBecomeLinks = false
         settings.expiry = .years(2)
         settings.warnIfSignOff = false
@@ -76,8 +79,8 @@ struct SettingsTests {
         ("  Mail attachments/ ", "Mail attachments"),
         ("/Mail//Out/", "Mail/Out"),
         ("a/../b/./c", "a/b/c"),
-        ("", "Mail attachments"),
-        (" / ", "Mail attachments"),
+        ("", "MailAttachments"),
+        (" / ", "MailAttachments"),
     ])
     func cleansTheDirectory(directory: String, expected: String) {
         var settings = Settings()
@@ -90,8 +93,35 @@ struct SettingsTests {
         settings.onlyLargeFiles = true
         settings.sizeLimitMegabytes = 2.5
         #expect(settings.linkPolicy.rule == .largerThan(bytes: 2_500_000))
+        settings.sizeLimitMegabytes = 10.2
+        #expect(settings.linkPolicy.rule == .largerThan(bytes: 10_200_000), "rounded, not cut off")
+        settings.sizeLimitMegabytes = 0.2
+        settings.sizeLimitScope = .allFiles
+        #expect(settings.linkPolicy.rule == .togetherLargerThan(bytes: 200_000))
         settings.sizeLimitMegabytes = -1
-        #expect(settings.linkPolicy.rule == .largerThan(bytes: 0))
+        #expect(settings.linkPolicy.rule == .togetherLargerThan(bytes: 0))
+        settings.sizeLimitMegabytes = 1e300
+        #expect(settings.linkPolicy.rule == .togetherLargerThan(bytes: 1_000_000_000_000), "a terabyte at most")
+        settings.sizeLimitMegabytes = .nan
+        #expect(settings.linkPolicy.rule == .togetherLargerThan(bytes: 0))
+    }
+
+    @Test(
+        arguments: [
+            ("0.2", 0.2), ("0,2", 0.2), ("10.2", 10.2), (" 10,25 ", 10.25), ("5", 5), ("5.", 5), (".5", 0.5),
+            ("", nil), ("1.2.3", nil), ("1,2.3", nil), ("-1", nil), ("1e3", nil), ("abc", nil), (".", nil),
+        ] as [(String, Double?)])
+    func readsDecimalsWithEitherSeparator(text: String, value: Double?) {
+        #expect(DecimalText.value(of: text) == value)
+    }
+
+    @Test func showsDecimalsWithTheUsersSeparator() {
+        #expect(DecimalText.text(of: 0.2, separator: ".") == "0.2")
+        #expect(DecimalText.text(of: 0.2, separator: ",") == "0,2")
+        #expect(DecimalText.text(of: 10, separator: ".") == "10")
+        #expect(DecimalText.text(of: 0.1 + 0.2, separator: ".") == "0.3")
+        #expect(DecimalText.text(of: 2.0005, separator: ".") == "2.001")
+        #expect(DecimalText.text(of: 1_000_000, separator: ",") == "1000000")
     }
 
     @Test func hasOnlyFolderLinksOnlyWhenTheFolderIsShared() {

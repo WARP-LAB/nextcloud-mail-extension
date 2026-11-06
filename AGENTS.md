@@ -29,7 +29,7 @@ This file covers how to work in the repository.
 
 - macOS 27 and Xcode 27, on Apple silicon. The probing baseline is macOS 27.0.1 with Mail 16.0.
 - Linters: `brew install swiftlint shellcheck markdownlint-cli2`. swift-format comes with Xcode.
-- Signing: create `Config/Local.xcconfig`, which git ignores, with `CODE_SIGN_STYLE = Automatic`, `CODE_SIGN_IDENTITY = Apple Development` and `DEVELOPMENT_TEAM = <team ID>`. The free Personal Team works for local builds (D11). Without the file, builds are ad-hoc signed and the App Group fails.
+- Signing: copy `Config/Local.example.xcconfig` to `Config/Local.xcconfig`, which git ignores, and fill in `DEVELOPMENT_TEAM`. The free Personal Team works for local builds (D11). Without the file, builds are ad-hoc signed and the App Group fails.
 - Provisioning: the shared Keychain item needs provisioning profiles, which need the Mac registered with the team (D16). Once per Mac, run `xcodebuild -project NextcloudAppleMail.xcodeproj -scheme NextcloudAppleMail -destination 'platform=macOS' -allowProvisioningUpdates -allowProvisioningDeviceRegistration build`, since `scripts/build.sh` builds without a destination, which can't register one. The Personal Team's profiles last 7 days, and `scripts/build.sh` renews them.
 - The Nextcloud test server and account (D14): copy `.env.example` to `.env`, which git ignores, and fill it in.
 - To use the extension in Mail: run `scripts/install.sh`, then in Mail open Settings > Extensions, enable NextcloudAppleMail, choose it for message security, and restart Mail.
@@ -64,6 +64,8 @@ Only what isn't obvious from directory names:
 - `Shared/`: code both use. `Package.swift` also builds it as a Swift package, and `tests/` holds that package's unit tests (D13).
 - `Config/`: signing, entitlements and `Info.plist` files. The App Group is `<team ID>.lv.warp.nextcloudapplemail`, built from `$(TeamIdentifierPrefix)`, so the team ID appears only in `Local.xcconfig`.
 - `scripts/`: build, install, lint, and the Nextcloud tests and tool. `tools/ncam-nextcloud/`: that tool.
+- `Design/`: source artwork, such as Nextcloud's logo mark, which `Extension/Assets.xcassets` uses for the toolbar button.
+- `LICENSE.Nextcloud`: where Nextcloud's logo is used, its sources and its terms, which this repository's MIT licence doesn't cover. Keep it up to date when Nextcloud artwork changes (R22).
 - `probe/`: MailProbe. Frozen: change it only to probe Mail again.
 - `CLAUDE.md`: only imports this file, for Claude Code versions that don't read AGENTS.md (D15). Put instructions here, not there.
 - Ignored by git: `probe/test-results/`, which holds real emails, `probe/test-files/`, `build/`, `.build/`, `Config/Local.xcconfig` and `.env`.
@@ -77,6 +79,7 @@ Only what isn't obvious from directory names:
 - **Logging:** never log message contents, addresses or passwords.
 - **Bash:** start with `#!/usr/bin/env bash` and `set -euo pipefail`, and run unchanged on macOS (BSD tools, bash 3.2) and GNU/Linux.
 - **Markdown:** follow `.markdownlint.json`.
+- **Versioning:** Semantic Versioning 2.0.0, and ZeroVer (`0.y.z`) during early development, as the versioning skill in `~/.agents/skills/versioning/` sets out. Only the user decides a major release, including the first `1.0.0`. The version is `MARKETING_VERSION` in the project file, always `MAJOR.MINOR.PATCH`, and `CURRENT_PROJECT_VERSION` is the build number (D22).
 - **Docs:** record settled choices in DECISIONS.md, risks in RISKS.md, and new facts about Mail or Nextcloud in MAIL.md or NEXTCLOUD.md.
 
 ## Boundaries / Guardrails
@@ -100,6 +103,8 @@ Only what isn't obvious from directory names:
 - Running the server tests again and again: Nextcloud allows 20 new shares in 10 minutes, so the third run in a row fails with 429. Wait 10 minutes.
 - Narrowing the server tests with `scripts/test-nextcloud.sh --filter X`: `swift test` joins its filters with or, so that runs every server test and uses up the share limit. Load `.env` and run `swift test --filter X` alone.
 - In zsh, `log` is a builtin, so `log show` fails with "too many arguments". Use `/usr/bin/log show`.
+- A changed app icon doesn't show in the Dock and Cmd-Tab while the installed bundle keeps its date: macOS's icon cache ignores the version and build number, and `ditto` keeps the build's date. `scripts/install.sh` touches the bundle for this. For a copy installed otherwise, `touch` it, run `lsregister -f` on it (the path is in `scripts/install.sh`) and `killall Dock`.
+- SwiftUI's `TextField(value:format: .number)` reads decimals by the region, ignoring custom number settings, so with Latvia's region "0.2" became 0. Number fields use `DecimalText`, which takes "." or ",".
 
 ## Definition of done
 

@@ -2,15 +2,18 @@ import AppKit
 import MailKit
 import SwiftUI
 
-/// The send check's warnings (FR5, FR6), the toolbar popover, where the user sets the email's password (FR7), and
-/// the host app's Test from Mail, which runs when a message window opens.
+/// The send check's warnings (FR5, FR6), the toolbar popover, where the user sets which of the email's files become
+/// links (FR3), its password (FR7) and its expiry (FR4), and the host app's Test from Mail, which runs when a message
+/// window opens.
 final class ComposeHandler: NSObject, MEComposeSessionHandler {
     func mailComposeSessionDidBegin(_ session: MEComposeSession) {
         // A reopened draft may already have its message ID, which finds a password kept for it.
         let headers = session.mailMessage.headers ?? [:]
         let messageID = headers.first { $0.key.lowercased() == "x-universally-unique-identifier" }?.value.first
         if let messageID {
-            MessagePasswords.shared.link(context: session.composeContext.contextID, message: messageID)
+            MessageValues.passwords.link(context: session.composeContext.contextID, message: messageID)
+            MessageValues.expiries.link(context: session.composeContext.contextID, message: messageID)
+            MessageValues.linkChoices.link(context: session.composeContext.contextID, message: messageID)
         }
         Task {
             await Self.answerMailCheck()
@@ -24,8 +27,9 @@ final class ComposeHandler: NSObject, MEComposeSessionHandler {
     func allowMessageSendForSession(_ session: MEComposeSession, completion: @escaping (Error?) -> Void) {
         let raw = session.mailMessage.rawData
         let signOn = session.composeContext.shouldSign
+        let contextID = session.composeContext.contextID
         Task {
-            let warning = await SecurityHandler.shared.sendWarning(raw: raw, signOn: signOn)
+            let warning = await SecurityHandler.shared.sendWarning(raw: raw, signOn: signOn, contextID: contextID)
             completion(
                 warning.map { MEComposeSessionError(.invalidBody, userInfo: [NSLocalizedDescriptionKey: $0]) })
         }
@@ -60,64 +64,149 @@ private final class PasswordPopover: MEExtensionViewController {
         nil
     }
 
+    /// The popover is as high as its content, and follows it when the custom expiry's fields show or hide.
     override func loadView() {
-        let hosting = NSHostingView(rootView: PasswordView(context: context))
-        hosting.frame = NSRect(x: 0, y: 0, width: 380, height: 250)
+        let hosting = NSHostingView(
+            rootView: PopoverView(context: context) { [weak self] size in
+                self?.preferredContentSize = size
+            })
+        hosting.frame = NSRect(origin: .zero, size: hosting.fittingSize)
         view = hosting
-        preferredContentSize = hosting.frame.size
+        preferredContentSize = hosting.fittingSize
     }
 }
 
-private struct PasswordView: View {
+/// Which of the email's files become links (FR3), its password (FR7), its own link expiry if it should differ from
+/// the settings' (FR4), and a way to the app's settings.
+private struct PopoverView: View {
     let context: UUID
+    /// Told the view's size whenever it changes.
+    let resized: (CGSize) -> Void
+    private let settings: Settings
+    @State private var choice: LinkChoice
     @State private var password: String
-    @State private var report: ConnectionCheck.Report?
-    @State private var checking = false
+    @State private var passwordShown = false
+    @State private var ownExpiry: Bool
+    @State private var expiry: LinkExpiry
 
-    init(context: UUID) {
+    init(context: UUID, resized: @escaping (CGSize) -> Void) {
         self.context = context
-        _password = State(initialValue: MessagePasswords.shared.shown(context: context))
+        self.resized = resized
+        let settings =
+            SharedStorage.appGroupIdentifier.flatMap(SettingsStore.init(groupIdentifier:))?.load() ?? Settings()
+        self.settings = settings
+        _choice = State(
+            initialValue: LinkChoice(stored: MessageValues.linkChoices.value(context: context, message: nil)))
+        _password = State(initialValue: MessageValues.passwords.shown(context: context))
+        let own = MessageValues.expiries.value(context: context, message: nil).flatMap {
+            try? JSONDecoder().decode(LinkExpiry.self, from: Data($0.utf8))
+        }
+        _ownExpiry = State(initialValue: own != nil)
+        _expiry = State(initialValue: own ?? settings.expiry)
     }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text("NextcloudAppleMail").font(.headline)
-            SecureField("Password for this email's links", text: $password)
-                .textFieldStyle(.roundedBorder)
-                // Saved at every change, because the popover can close without the field ending its editing.
-                .onChange(of: password) { _, value in
-                    MessagePasswords.shared.set(value, context: context)
-                }
-            Text(
-                "Empty means the links need no password. The email says that they need one, but not which: give it "
-                    + "to the recipients some other way."
-            )
-            .font(.footnote)
-            .foregroundStyle(.secondary)
-            .fixedSize(horizontal: false, vertical: true)
+            Divider()
+            linksSection
+            Divider()
+            Group {
+                passwordSection
+                Divider()
+                expirySection
+            }
+            .disabled(choice == .keepAttached)
             Divider()
             HStack {
                 Text(Self.account).font(.footnote)
                 Spacer()
-                Button(checking ? "Checking…" : "Test connection") {
-                    checking = true
-                    Task {
-                        report = await ConnectionCheck.runWithSharedStorage()
-                        checking = false
-                    }
-                }
-                .disabled(checking)
+                Button("Settings…", action: Self.openApp)
+                    .help(Self.settingsHelp)
             }
-            if let report {
-                Text(report.text)
-                    .font(.footnote)
-                    .foregroundStyle(report.passed ? Color.primary : Color.red)
-                    .textSelection(.enabled)
-            }
-            Spacer(minLength: 0)
         }
         .padding(16)
-        .frame(width: 380, height: 250, alignment: .topLeading)
+        .frame(width: 400, alignment: .topLeading)
+        .fixedSize(horizontal: false, vertical: true)
+        .onGeometryChange(for: CGSize.self, of: \.size) { resized($0) }
+    }
+
+    /// FR3, for this email.
+    private var linksSection: some View {
+        Picker("For this email", selection: $choice) {
+            Text("Use settings").tag(LinkChoice.useSettings)
+            Text("All files via Nextcloud").tag(LinkChoice.allFiles)
+            Text("All files kept as attachments").tag(LinkChoice.keepAttached)
+        }
+        .pickerStyle(.menu)
+        .onChange(of: choice) { _, value in
+            MessageValues.linkChoices.set(value == .useSettings ? "" : value.rawValue, context: context)
+        }
+    }
+
+    private var passwordSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 6) {
+                Group {
+                    if passwordShown {
+                        TextField("Password for this email's links", text: $password)
+                    } else {
+                        SecureField("Password for this email's links", text: $password)
+                    }
+                }
+                .textFieldStyle(.roundedBorder)
+                // Saved at every change, because the popover can close without the field ending its editing.
+                .onChange(of: password) { _, value in
+                    MessageValues.passwords.set(value, context: context)
+                }
+                Button {
+                    passwordShown.toggle()
+                } label: {
+                    Image(systemName: passwordShown ? "eye.slash" : "eye")
+                }
+                .buttonStyle(.borderless)
+                .help(passwordShown ? "Hide the password" : "Show the password")
+                .accessibilityLabel(passwordShown ? "Hide the password" : "Show the password")
+            }
+            Text("Empty means no password. If you set one, consider a safe way to pass it to the recipients.")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    private var expirySection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Toggle("Own link expiry for this email", isOn: $ownExpiry)
+                .onChange(of: ownExpiry) { _, _ in saveExpiry() }
+            if ownExpiry {
+                Form {
+                    ExpiryPicker(expiry: $expiry)
+                }
+                .formStyle(.columns)
+                .onChange(of: expiry) { _, _ in saveExpiry() }
+            } else {
+                Text("Links expire \(settings.expiry.description), as in the settings.")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            }
+        }
+    }
+
+    /// Keeps the email's own expiry, or clears it so that the settings' applies.
+    private func saveExpiry() {
+        let json = ownExpiry ? (try? JSONEncoder().encode(expiry)).flatMap { String(bytes: $0, encoding: .utf8) } : nil
+        MessageValues.expiries.set(json ?? "", context: context)
+    }
+
+    /// The Settings… button's tooltip, which the Mail checks also find it by.
+    static let settingsHelp = "Open NextcloudAppleMail's settings"
+
+    /// Opens the app the extension is in, `NextcloudAppleMail.app`, three folders up from the extension.
+    private static func openApp() {
+        let app = Bundle.main.bundleURL.deletingLastPathComponent().deletingLastPathComponent()
+            .deletingLastPathComponent()
+        NSWorkspace.shared.openApplication(at: app, configuration: NSWorkspace.OpenConfiguration())
     }
 
     private static var account: String {
