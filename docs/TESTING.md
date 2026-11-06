@@ -67,7 +67,7 @@ macOS asks for these permissions, for the app that runs the terminal, such as Vi
 | --- | --- | --- | --- |
 | Automation of Mail | Automation, under the terminal's app | The first AppleScript sent to Mail | Sending, and reading mailboxes and messages |
 | Automation of System Events | Automation, under the terminal's app | The first AppleScript sent to System Events | Reading Mail's alerts and clicking their buttons |
-| Accessibility | Accessibility | The first time System Events reads or clicks in Mail's windows | Alerts, Undo Send, Send Later and the Mail Drop prompt |
+| Accessibility | Accessibility | Not asked for: System Events fails at once with "osascript is not allowed assistive access", and the user turns the terminal's app on in the list by hand | Alerts, Undo Send, Send Later and the Mail Drop prompt |
 | Screen Recording | Screen & System Audio Recording | The first `screencapture` | Screenshots of Mail's windows, to see an alert or a layout |
 | Local Network, for NextcloudAppleMail | Local Network | The app's first request to a server on the local network, opened normally rather than from a terminal | The extension's uploads to such a server ([MAIL.md](MAIL.md#network)) |
 
