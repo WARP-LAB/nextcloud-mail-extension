@@ -90,7 +90,7 @@ Acceptance criteria:
 
 ## FR6: Warn if text mentions an attachment but none is added
 
-The settings have a field, "Warn if text found but no attachment", where the user enters words or phrases, such as "attachment" or "see attached". Each one entered with Return becomes a tag, shown as a bubble with an x that removes it, and a tag can hold several words. It is empty by default, and while it is empty there is no check.
+The settings have a field, "Warn if the email's text includes a phrase but there's no attachment", where the user enters words or phrases, such as "attachment" or "see attached". Each one entered with Return becomes a tag, shown as a bubble with an x that removes it, and a tag can hold several words. It is empty by default, and while it is empty there is no check.
 
 When the message text contains one of those words or phrases and the message has no attachment, clicking Send shows an alert. The alert names the word or phrase it found. It has two buttons:
 
@@ -130,13 +130,13 @@ Acceptance criteria:
 
 A setting, "Share files as", chooses what Nextcloud shares (D17):
 
-- **One link for the email's folder:** one share per email, of its folder (FR2). This is the default. Each file's view link opens the folder's page, which lists the email's files, and its download link downloads only that file.
+- **One link for all files in the email:** one share per email, of its folder (FR2). This is the default. Each file's view link opens the folder's page, which lists the email's files, and its download link downloads only that file.
 - **A link for each file:** one share per file, and each file's view link opens that file's own page. Nextcloud allows each user only 20 new shares in 10 minutes, so an email with many files, or several emails in a row, can fail to send until the server's admin raises that limit. The setup help says how.
 
-With one link for the email's folder, a second setting, "Links in the email", chooses:
+With one link for all files in the email, a second setting, "Place links", chooses:
 
-- **Where each file was:** each file gets its links as described below. This is the default.
-- **Only the folder's links:** the files are removed from where they were. After the user's own text, the email lists each file's name and size, followed by FR9's two links, whatever FR9's setting and however many files became links.
+- **Inline, where each file was:** each file gets its links as described below. This is the default.
+- **Below your text:** the files are removed from where they were. After the user's own text, the email lists each file's name and size, followed by FR9's two links, whatever FR9's setting and however many files became links.
 
 Each file that becomes a link is replaced by its links where the file was dropped in the message, which may be between paragraphs of text. If the extension can't tell where a file was, its links go in a list after the user's own text, above any quoted messages in a reply or forward. They never go at the top.
 

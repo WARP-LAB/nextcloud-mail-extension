@@ -83,13 +83,13 @@ struct SettingsView: View {
     private var links: some View {
         Section {
             Picker("Share files as", selection: $model.settings.sharing) {
-                Text("One link for the email's folder").tag(Settings.Sharing.folder)
+                Text("One link for all files in the email").tag(Settings.Sharing.folder)
                 Text("A link for each file").tag(Settings.Sharing.eachFile)
             }
             if model.settings.sharing == .folder {
-                Picker("Links in the email", selection: $model.settings.placement) {
-                    Text("Where each file was").tag(Settings.Placement.whereEachFileWas)
-                    Text("Only the folder's links").tag(Settings.Placement.folderLinksOnly)
+                Picker("Place links", selection: $model.settings.placement) {
+                    Text("Inline, where each file was").tag(Settings.Placement.whereEachFileWas)
+                    Text("Below your text").tag(Settings.Placement.folderLinksOnly)
                 }
             }
             Picker("Show download link for file", selection: $model.settings.linkStyle) {
@@ -126,7 +126,7 @@ struct SettingsView: View {
     private var warnings: some View {
         Section {
             Toggle("Warn if signing (upload via link) is disabled", isOn: $model.settings.warnIfSignOff)
-            LabeledContent("Warn if text found but no attachment") {
+            LabeledContent("Warn if the email's text includes a phrase but there's no attachment") {
                 TagField(tags: $model.settings.warningPhrases, prompt: "Type a word or phrase, then Return")
             }
         } header: {
