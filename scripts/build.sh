@@ -21,6 +21,7 @@ if ! command -v xcodebuild > /dev/null 2>&1; then
 fi
 if [[ ! -f Config/Local.xcconfig ]]; then
     echo "warning: no Config/Local.xcconfig, so the build is ad-hoc signed and the App Group won't work" >&2
+    echo "         Copy Config/Local.example.xcconfig to Config/Local.xcconfig and fill in DEVELOPMENT_TEAM" >&2
 fi
 
 xcodebuild -project NextcloudAppleMail.xcodeproj -target NextcloudAppleMail -configuration "${configuration}" \
