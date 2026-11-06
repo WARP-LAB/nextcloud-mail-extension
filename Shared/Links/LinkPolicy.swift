@@ -8,6 +8,8 @@ struct LinkPolicy {
         case largerThan(bytes: Int)
         /// All the files when their decoded sizes together are larger than this many bytes, else none.
         case togetherLargerThan(bytes: Int)
+        /// No file: they all stay attached.
+        case noFiles
     }
 
     var rule: Rule
@@ -37,6 +39,8 @@ struct LinkPolicy {
             return files.filter { $0.decodedSize > bytes }
         case .togetherLargerThan(let bytes):
             return files.reduce(0) { $0 + $1.decodedSize } > bytes ? files : []
+        case .noFiles:
+            return []
         }
     }
 

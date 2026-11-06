@@ -33,8 +33,8 @@ struct KeychainVault: MessageVault {
     }
 }
 
-/// What the user sets for each email in the toolbar popover: its password (FR7) and its own link expiry, if any
-/// (docs/ARCHITECTURE.md).
+/// What the user sets for each email in the toolbar popover: its password (FR7), its own link expiry, if any, and
+/// which files become links, if not as the settings say (docs/ARCHITECTURE.md).
 ///
 /// The popover knows only the compose context, and `encode()` knows the context and the message ID. A reopened draft
 /// gets a new context but keeps its message ID, so every `encode()` call, auto-saves included, links its context to
@@ -44,6 +44,8 @@ final class MessageValues: @unchecked Sendable {
     static let passwords = MessageValues(service: "lv.warp.nextcloudapplemail.message-password")
     /// Each email's own link expiry, as `LinkExpiry` JSON. Not secret, but kept the same way.
     static let expiries = MessageValues(service: "lv.warp.nextcloudapplemail.message-expiry")
+    /// Each email's `LinkChoice`, as its raw value, when it isn't `useSettings`. Not secret either.
+    static let linkChoices = MessageValues(service: "lv.warp.nextcloudapplemail.message-links")
 
     private let lock = NSLock()
     private let vault: MessageVault?

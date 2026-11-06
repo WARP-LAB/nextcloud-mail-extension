@@ -44,7 +44,13 @@ The size is in decimal megabytes, as Finder shows them, and keeps the decimals t
 - **Each file:** each file larger than the limit becomes links. This is the default.
 - **All files together:** when the files together are larger than the limit, all of them become links, and otherwise all of them stay attached. Only files that could become links count towards the total, so pasted images that stay in the email and signature images don't.
 
-A second setting, "Pasted images become links", decides whether images pasted into the body follow that rule. It is on by default. When it is off, pasted images stay in the email whatever the rule says. Images in the signature never become links.
+Another setting, "Pasted images become links", decides whether images pasted into the body follow that rule. It is on by default. When it is off, pasted images stay in the email whatever the rule says. Images in the signature never become links.
+
+In the message window, the toolbar button's popover chooses for that email, under "This email link generation" (D24):
+
+- **Use settings:** the settings above decide. This is the default.
+- **Enforce all files (including pasted images) to become links:** every file becomes links, pasted images too, whatever the size limit and the pasted-images setting say.
+- **Keep all files as attachments:** every file stays attached, and nothing is uploaded for the email. The popover's password and expiry don't apply then, so they're greyed out. Keeping the files after Undo Send deletes what the earlier send uploaded.
 
 Acceptance criteria:
 
@@ -54,6 +60,8 @@ Acceptance criteria:
 - A size typed as "0.2" or "0,2" stays 0.2 MB.
 - Pasted images follow the rule while the pasted-images setting is on, and stay in the email while it's off.
 - Signature images always stay in the email.
+- With "Enforce all files…" in an email's popover, every file but the signature's images becomes links, whatever the settings say.
+- With "Keep all files as attachments", every file arrives attached and byte-identical, and nothing is left uploaded for that email.
 
 ## FR4: Link expiry
 

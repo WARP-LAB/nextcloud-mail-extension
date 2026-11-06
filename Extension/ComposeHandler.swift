@@ -2,8 +2,9 @@ import AppKit
 import MailKit
 import SwiftUI
 
-/// The send check's warnings (FR5, FR6), the toolbar popover, where the user sets the email's password (FR7), and
-/// the host app's Test from Mail, which runs when a message window opens.
+/// The send check's warnings (FR5, FR6), the toolbar popover, where the user sets which of the email's files become
+/// links (FR3), its password (FR7) and its expiry (FR4), and the host app's Test from Mail, which runs when a message
+/// window opens.
 final class ComposeHandler: NSObject, MEComposeSessionHandler {
     func mailComposeSessionDidBegin(_ session: MEComposeSession) {
         // A reopened draft may already have its message ID, which finds a password kept for it.
@@ -12,6 +13,7 @@ final class ComposeHandler: NSObject, MEComposeSessionHandler {
         if let messageID {
             MessageValues.passwords.link(context: session.composeContext.contextID, message: messageID)
             MessageValues.expiries.link(context: session.composeContext.contextID, message: messageID)
+            MessageValues.linkChoices.link(context: session.composeContext.contextID, message: messageID)
         }
         Task {
             await Self.answerMailCheck()
@@ -25,8 +27,9 @@ final class ComposeHandler: NSObject, MEComposeSessionHandler {
     func allowMessageSendForSession(_ session: MEComposeSession, completion: @escaping (Error?) -> Void) {
         let raw = session.mailMessage.rawData
         let signOn = session.composeContext.shouldSign
+        let contextID = session.composeContext.contextID
         Task {
-            let warning = await SecurityHandler.shared.sendWarning(raw: raw, signOn: signOn)
+            let warning = await SecurityHandler.shared.sendWarning(raw: raw, signOn: signOn, contextID: contextID)
             completion(
                 warning.map { MEComposeSessionError(.invalidBody, userInfo: [NSLocalizedDescriptionKey: $0]) })
         }
@@ -63,17 +66,20 @@ private final class PasswordPopover: MEExtensionViewController {
 
     override func loadView() {
         let hosting = NSHostingView(rootView: PopoverView(context: context))
-        hosting.frame = NSRect(x: 0, y: 0, width: 400, height: 380)
+        hosting.frame = NSRect(x: 0, y: 0, width: 400, height: PopoverView.height)
         view = hosting
         preferredContentSize = hosting.frame.size
     }
 }
 
-/// The email's password (FR7), its own link expiry if it should differ from the settings' (FR4), and a way to the
-/// app's settings.
+/// Which of the email's files become links (FR3), its password (FR7), its own link expiry if it should differ from
+/// the settings' (FR4), and a way to the app's settings.
 private struct PopoverView: View {
+    static let height: CGFloat = 500
+
     let context: UUID
     private let settings: Settings
+    @State private var choice: LinkChoice
     @State private var password: String
     @State private var passwordShown = false
     @State private var ownExpiry: Bool
@@ -86,6 +92,8 @@ private struct PopoverView: View {
         let settings =
             SharedStorage.appGroupIdentifier.flatMap(SettingsStore.init(groupIdentifier:))?.load() ?? Settings()
         self.settings = settings
+        _choice = State(
+            initialValue: LinkChoice(stored: MessageValues.linkChoices.value(context: context, message: nil)))
         _password = State(initialValue: MessageValues.passwords.shown(context: context))
         let own = MessageValues.expiries.value(context: context, message: nil).flatMap {
             try? JSONDecoder().decode(LinkExpiry.self, from: Data($0.utf8))
@@ -97,6 +105,60 @@ private struct PopoverView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text("NextcloudAppleMail").font(.headline)
+            linksSection
+            Divider()
+            Group {
+                passwordSection
+                Divider()
+                expirySection
+            }
+            .disabled(choice == .keepAttached)
+            Divider()
+            HStack {
+                Text(Self.account).font(.footnote)
+                Spacer()
+                Button("Settings…", action: Self.openApp)
+                    .help(Self.settingsHelp)
+                Button(checking ? "Checking…" : "Test connection") {
+                    checking = true
+                    Task {
+                        report = await ConnectionCheck.runWithSharedStorage()
+                        checking = false
+                    }
+                }
+                .disabled(checking)
+            }
+            if let report {
+                Text(report.text)
+                    .font(.footnote)
+                    .foregroundStyle(report.passed ? Color.primary : Color.red)
+                    .textSelection(.enabled)
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(16)
+        .frame(width: 400, height: Self.height, alignment: .topLeading)
+    }
+
+    /// FR3, for this email.
+    private var linksSection: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text("This email link generation")
+            Picker("This email link generation", selection: $choice) {
+                Text("Use settings").tag(LinkChoice.useSettings)
+                Text("Enforce all files (including pasted images) to become links").tag(LinkChoice.allFiles)
+                Text("Keep all files as attachments").tag(LinkChoice.keepAttached)
+            }
+            .pickerStyle(.radioGroup)
+            .labelsHidden()
+            .onChange(of: choice) { _, value in
+                MessageValues.linkChoices.set(value == .useSettings ? "" : value.rawValue, context: context)
+            }
+        }
+    }
+
+    private var passwordSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 6) {
                 Group {
                     if passwordShown {
@@ -126,7 +188,11 @@ private struct PopoverView: View {
             .font(.footnote)
             .foregroundStyle(.secondary)
             .fixedSize(horizontal: false, vertical: true)
-            Divider()
+        }
+    }
+
+    private var expirySection: some View {
+        VStack(alignment: .leading, spacing: 10) {
             Toggle("Own link expiry for this email", isOn: $ownExpiry)
                 .onChange(of: ownExpiry) { _, _ in saveExpiry() }
             if ownExpiry {
@@ -140,30 +206,7 @@ private struct PopoverView: View {
                     .font(.footnote)
                     .foregroundStyle(.secondary)
             }
-            Divider()
-            HStack {
-                Text(Self.account).font(.footnote)
-                Spacer()
-                Button("Settings…", action: Self.openApp)
-                Button(checking ? "Checking…" : "Test connection") {
-                    checking = true
-                    Task {
-                        report = await ConnectionCheck.runWithSharedStorage()
-                        checking = false
-                    }
-                }
-                .disabled(checking)
-            }
-            if let report {
-                Text(report.text)
-                    .font(.footnote)
-                    .foregroundStyle(report.passed ? Color.primary : Color.red)
-                    .textSelection(.enabled)
-            }
-            Spacer(minLength: 0)
         }
-        .padding(16)
-        .frame(width: 400, height: 380, alignment: .topLeading)
     }
 
     /// Keeps the email's own expiry, or clears it so that the settings' applies.
@@ -171,6 +214,9 @@ private struct PopoverView: View {
         let json = ownExpiry ? (try? JSONEncoder().encode(expiry)).flatMap { String(bytes: $0, encoding: .utf8) } : nil
         MessageValues.expiries.set(json ?? "", context: context)
     }
+
+    /// The Settings… button's tooltip, which the Mail checks also find it by.
+    static let settingsHelp = "Open NextcloudAppleMail's settings"
 
     /// Opens the app the extension is in, `NextcloudAppleMail.app`, three folders up from the extension.
     private static func openApp() {

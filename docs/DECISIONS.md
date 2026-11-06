@@ -140,3 +140,8 @@ Settled decisions, and why they were made. The current design is in [ARCHITECTUR
 
 - **Decision:** the user chose these labels: "Share files as" offers "One link for all files in the email" and "A link for each file". With one link, "Place links" offers "Inline, where each file was" and "Below your text". FR6's field is "Warn if the email's text includes a phrase but there's no attachment". The UI and docs keep the word "folder" for a folder on Nextcloud, and "directory" for the upload directory that holds each email's folder.
 - **Why:** the user's choice. "Folder" is the word macOS, Apple's Human Interface Guidelines and Nextcloud's own interface use. "Below your text" fits replies and forwards too, where the links go above the quoted message rather than at the bottom.
+
+## D24: Each email chooses which files become links (2026-11-06)
+
+- **Decision:** the popover's first block, "This email link generation", chooses for the email: "Use settings", the default, "Enforce all files (including pasted images) to become links", which ignores the size limit and the pasted-images setting, or "Keep all files as attachments", which uploads nothing. Images in the signature stay in the email even with all files, as FR3 says they always do. With the files kept, the password and expiry are greyed out, and after Undo Send what the earlier send uploaded is deleted, while the email's popover values are kept.
+- **Why:** the user's request, so that one email can differ from the settings without changing them. The signature's images are part of the signature, not files the user attached, so an agent kept them out. Keeping the values lets the user undo again and change their mind without typing the password again.

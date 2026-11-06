@@ -76,6 +76,18 @@ struct Settings: Equatable {
         return LinkPolicy(rule: rule, pastedImagesBecomeLinks: pastedImagesBecomeLinks)
     }
 
+    /// FR3's rule for one email, after the choice in its toolbar popover.
+    func linkPolicy(for choice: LinkChoice) -> LinkPolicy {
+        switch choice {
+        case .useSettings:
+            return linkPolicy
+        case .allFiles:
+            return LinkPolicy(rule: .allAttachments, pastedImagesBecomeLinks: true)
+        case .keepAttached:
+            return LinkPolicy(rule: .noFiles)
+        }
+    }
+
     /// Whether the email has only the folder's links (FR8, D17).
     var onlyFolderLinks: Bool {
         sharing == .folder && placement == .folderLinksOnly
@@ -109,6 +121,21 @@ extension Settings: Codable {
         placement = value(.placement, defaults.placement)
         linkStyle = value(.linkStyle, defaults.linkStyle)
         folderLinks = value(.folderLinks, defaults.folderLinks)
+    }
+}
+
+/// Which of an email's files become links, as chosen in its toolbar popover (FR3).
+enum LinkChoice: String, CaseIterable {
+    /// The settings decide. The default.
+    case useSettings
+    /// Every file becomes links, pasted images too, whatever the size limit. Images in the signature stay.
+    case allFiles
+    /// Every file stays attached.
+    case keepAttached
+
+    /// The popover's stored choice, where anything else, such as none, means the settings decide.
+    init(stored: String?) {
+        self = stored.flatMap(Self.init(rawValue:)) ?? .useSettings
     }
 }
 

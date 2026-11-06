@@ -875,7 +875,7 @@ def check_t8(run):
                and not attached)
 
 
-# MARK: The popover's expiry and settings button
+# MARK: The popover's link choice, expiry and settings button
 
 POPOVER = ('group 1 of pop over 1 of (first button of toolbar 1 of window (item 1 of argv) '
            'whose description is "NextcloudAppleMail")')
@@ -914,6 +914,47 @@ def check_own_expiry(run):
     run.expect('the link works', downloads_match(found, 'own-expiry.bin', data_path.read_bytes()) and not attached)
 
 
+def choose_links(subject, choice):
+    """Picks this email's link choice in the popover: 1 uses the settings, 2 links all files, 3 keeps them attached."""
+    open_popover(subject)
+    radio = f'radio button {choice} of radio group 1 of {POPOVER}'
+    wait(lambda: in_mail(f'return exists {radio}', subject) == 'true', 10, 'no link choice in the popover')
+    in_mail(f'click {radio}', subject)
+    time.sleep(0.5)
+    mail_in_front()
+    osa('tell application "System Events" to key code 53')
+
+
+def check_keep_attached(run):
+    """The popover keeps this email's file attached, where the settings would make it a link (FR3)."""
+    subject = run.subject('keep-attached')
+    data_path = run.file('kept.bin', 40_000)
+    checks.app_settings(dict(checks.DEFAULTS))
+    checks.mail('compose', 'A', 'B', subject, 'Check: this email keeps its files attached.', 'none', str(data_path))
+    choose_links(subject, 3)
+    click_send(subject)
+    _, attached, found = file_links(run.fetch(subject, 'keep-attached-received.eml'))
+    run.expect('the file arrived attached, byte for byte', attached.get('kept.bin') == data_path.read_bytes(),
+               f'attached: {sorted(attached)}')
+    run.expect('no links', not found, f'links for: {sorted(found)}')
+
+
+def check_all_files(run):
+    """The popover makes this email's small file a link, where the settings' size limit would keep it (FR3)."""
+    subject = run.subject('all-files')
+    data_path = run.file('small.bin', 4000)
+    checks.app_settings(dict(checks.DEFAULTS, onlyLargeFiles=True, sizeLimitMegabytes=0.2))
+    checks.mail('compose', 'A', 'B', subject, 'Check: all of this email\'s files become links.', 'none',
+                str(data_path))
+    choose_links(subject, 2)
+    click_send(subject)
+    _, attached, found = file_links(run.fetch(subject, 'all-files-received.eml'))
+    run.expect('the small file became a link that downloads it', downloads_match(found, 'small.bin',
+                                                                                 data_path.read_bytes()),
+               f'links for: {sorted(found)}')
+    run.expect('nothing attached', not attached, f'attached: {sorted(attached)}')
+
+
 def check_open_settings(run):
     """The popover's Settings… button opens the NextcloudAppleMail app."""
     osa('tell application id "lv.warp.nextcloudapplemail" to if it is running then quit')
@@ -922,7 +963,8 @@ def check_open_settings(run):
     subject = run.subject('open-settings')
     checks.mail('compose', 'A', 'B', subject, 'Check: the Settings button.', 'none')
     open_popover(subject)
-    in_mail(f'click button 1 of {POPOVER}', subject)
+    # The button has no name here, only its tooltip.
+    in_mail(f'click (first button of {POPOVER} whose help is "Open NextcloudAppleMail\'s settings")', subject)
     wait(lambda: osa('tell application "System Events" to return exists (first process whose bundle identifier '
                      'is "lv.warp.nextcloudapplemail")') == 'true', 30, 'the app didn\'t open')
     run.expect('the app opened', True)
@@ -934,7 +976,8 @@ CHECKS = {'t7': check_t7, 't21': check_t21, 't22': check_t22, 't30': check_t30, 
           't37-restart': check_t37_restart, 'password-refused': check_password_refused,
           'password-required': check_password_required, 't33': check_t33, 't23': check_t23,
           't34-phrase': check_t34_phrase, 't35-phrase': check_t35_phrase, 'phrase-elsewhere': check_phrase_elsewhere,
-          't8': check_t8, 'own-expiry': check_own_expiry, 'open-settings': check_open_settings}
+          't8': check_t8, 'own-expiry': check_own_expiry, 'open-settings': check_open_settings,
+          'keep-attached': check_keep_attached, 'all-files': check_all_files}
 
 
 def main():

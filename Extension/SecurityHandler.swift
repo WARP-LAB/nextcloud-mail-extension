@@ -21,6 +21,7 @@ final class SecurityHandler: NSObject, MEMessageSecurityHandler {
             store: UploadLedgerStore.inContainer,
             passwords: MessageValues.passwords,
             expiries: MessageValues.expiries,
+            linkChoices: MessageValues.linkChoices,
             progress: { ProgressNotices.shared.report($0, $1) }
         ))
 
@@ -62,7 +63,7 @@ final class SecurityHandler: NSObject, MEMessageSecurityHandler {
     }
 
     /// The send check's warning for the message, if any (FR5, FR6).
-    func sendWarning(raw: Data?, signOn: Bool) async -> String? {
+    func sendWarning(raw: Data?, signOn: Bool, contextID: UUID) async -> String? {
         guard let raw else {
             // After an error in the first send call the check gets no message, and the send has stopped anyway.
             return nil
@@ -74,7 +75,9 @@ final class SecurityHandler: NSObject, MEMessageSecurityHandler {
         if let messageID {
             linked = await sender.linkedFiles(messageID: messageID)
         }
-        return SendWarnings.warning(for: MimeMessage(raw), signOn: signOn, settings: settings, linkedEarlier: linked)
+        let choice = LinkChoice(stored: MessageValues.linkChoices.value(context: contextID, message: messageID))
+        return SendWarnings.warning(
+            for: MimeMessage(raw), signOn: signOn, settings: settings, linkedEarlier: linked, choice: choice)
     }
 
     private static func encodingResult(_ result: SendResult) -> MEMessageEncodingResult {
