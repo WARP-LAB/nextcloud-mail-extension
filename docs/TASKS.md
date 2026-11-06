@@ -25,6 +25,7 @@ Judgment calls and known risks are tracked separately in `docs/RISKS.md`.
 - **OD3: Distribution.** How the app is distributed: Developer ID, the Mac App Store, or local builds only. Both of the first two need the renewed paid membership (D11). The supported versions are decided (D12).
 - **OD5: Proposed requirements.** Confirm or change the non-functional requirements and the out-of-scope list in the PRD.
 - **OD6: Testing "Don't ask again".** Whether to test it in Mail's Mail Drop prompt, knowing it changes the account's behaviour and may be hard to undo (R2).
+- **OD12: Apple in the project's name.** Apple's trademark guidelines say a third party may not use Apple or any other Apple trademark in a product's name, while describing what it works with, such as "for use with Apple Mail", is fine. The project is called NextcloudAppleMail. Keep the name, or rename the project before it's distributed, which the Mac App Store's review would probably need too (OD3). See `LICENSE.Apple` and R23.
 
 ## ✔️ Shared Definition of Done (every task)
 

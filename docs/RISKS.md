@@ -125,6 +125,13 @@ What could go wrong, how we'd notice, and what's being done about it. Each entry
 - **Mitigation:** `LICENSE.Nextcloud` names the files that use the logo, their sources and the trademark, and says the project isn't official. The artwork is in three places, `Design/`, the toolbar's image set and `App/AppIcon.icon`, so it can be replaced in one change. The user asks Nextcloud GmbH for permission while the project is published (D25, T13b).
 - **Judgment call:** none on using, replacing or renaming, which is the user's call. An agent keeps `LICENSE.Nextcloud` up to date when Nextcloud artwork is added or changed.
 
+### R23: Apple's trademarks
+
+- **Risk:** Apple objects to Apple in the project's name, or refuses the app in review. Its trademark guidelines don't allow Apple's trademarks in a third party's product name, only in phrases that say what a product works with.
+- **Signal:** a request from Apple, or a rejection in the Mac App Store's review.
+- **Mitigation:** `LICENSE.Apple` gives Apple's trademark notice, says the project isn't Apple's, and that it contains nothing of Apple's. Keeping the name or renaming is open (OD12).
+- **Judgment call:** none on the name, which is the user's call. An agent describes compatibility in Apple's terms, such as "for Mail on macOS", and keeps `LICENSE.Apple`'s list of trademarks up to date when docs or the app start naming another one.
+
 ## Platform and server
 
 ### R17: Sharing the app password needs a provisioning profile
