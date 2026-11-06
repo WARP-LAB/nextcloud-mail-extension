@@ -9,6 +9,7 @@ What Apple Mail does with a MailKit extension, as far as the design in [ARCHITEC
 - **Upload switch:** `encode()` runs at send only while Sign or Encrypt is on (t1–t5). Draft auto-saves call it whatever the toggles.
 - **Returned bytes are delivered:** Mail sends the message `encode()` returns, even when it's flagged as neither signed nor encrypted (t5). Apple's header comment suggests otherwise, so this may change (R1).
 - **No contents in the status call:** `getEncodingStatus` doesn't get the message's contents, so whether Sign is offered can't depend on attachments. Reporting that the extension can't sign makes the button unavailable, and `encode()` then doesn't run at send (t6).
+- **Choosing the extension:** Mail's Settings > Extensions shows a "Message security extension" popup at the bottom only when there's a choice to make. With this the only message security extension installed, there's no popup (the user, 2026-11-07).
 - **The extension can't turn Sign on.** Sign keeps its state across messages and Mail restarts.
 - **Reading the state:** `composeContext.shouldSign` matched the toggle in all 30 logged sends when read at send (t5, t23). At compose start it can be wrong at first and then correct itself.
 - **Returning nil:** with Sign on, Mail sends the message normally, unsigned, with its files intact (t18).

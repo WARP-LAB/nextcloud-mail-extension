@@ -37,5 +37,6 @@ touch "${app}"
 pluginkit -a "${app}/Contents/PlugIns/NextcloudMailExtensionPlugIn.appex"
 
 echo "Installed ${app}"
-echo "In Mail: Settings > Extensions, enable NextcloudMailExtension, choose it for message security, then restart Mail."
+echo "In Mail: Settings > Extensions, enable NextcloudMailExtension, and choose it in the \"Message security extension\""
+echo "popup if the tab shows one, then restart Mail."
 pluginkit -m -p com.apple.email.extension

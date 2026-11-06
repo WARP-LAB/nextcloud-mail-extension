@@ -32,7 +32,7 @@ This file covers how to work in the repository.
 - Signing: copy `Config/Local.example.xcconfig` to `Config/Local.xcconfig`, which git ignores, and fill in `DEVELOPMENT_TEAM`. The free Personal Team works for local builds (D11). Without the file, builds are ad-hoc signed and the App Group fails.
 - Provisioning: the shared Keychain item needs provisioning profiles, which need the Mac registered with the team (D16). Once per Mac, run `xcodebuild -project NextcloudMailExtension.xcodeproj -scheme NextcloudMailExtension -destination 'platform=macOS' -allowProvisioningUpdates -allowProvisioningDeviceRegistration build`, since `scripts/build.sh` builds without a destination, which can't register one. The Personal Team's profiles last 7 days, and `scripts/build.sh` renews them.
 - The Nextcloud test server and account (D14): copy `.env.example` to `.env`, which git ignores, and fill it in.
-- To use the extension in Mail: run `scripts/install.sh`, then in Mail open Settings > Extensions, enable NextcloudMailExtension, choose it for message security, and restart Mail.
+- To use the extension in Mail: run `scripts/install.sh`, then in Mail open Settings > Extensions and enable NextcloudMailExtension. If the tab shows a "Message security extension" popup at the bottom, choose NextcloudMailExtension there. Then restart Mail.
 
 ## Commands
 
