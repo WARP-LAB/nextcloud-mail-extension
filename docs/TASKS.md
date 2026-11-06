@@ -17,7 +17,7 @@ Risk register: `docs/RISKS.md`.
 > - Write Acceptance Criteria or a explicit Definition of Done
 > - Take tasks in order unless told otherwise. Do not start the next task without being asked.
 
-None. T6 is next. T2b and T5b wait for the user.
+🔄 T5b, which the user asked the agent to run, by driving Mail with AppleScript.
 
 ## ❓ Open Decisions (human to resolve)
 
@@ -41,11 +41,6 @@ Judgment calls and known risks are tracked separately in `docs/RISKS.md`.
 
 ## 📋 Backlog (To Be Done)
 
-- **T2b: Check T2 in Mail (needs the user).** The installed Debug build is logged in to the test server with an app password from `scripts/use-test-account.sh`.
-  1. Open NextcloudAppleMail from `~/Applications` in Finder, look through the window, and click Test connection. When macOS asks whether it may find devices on your local network, allow it.
-  2. Click Test from Mail, and close the new message window once the app shows the extension's answer.
-  3. Click Log out, then Log in in the browser, log in there with the test account and grant access. The app should show the account. Click Test from Mail again.
-  - **Acceptance:** the window shows every setting, Test from Mail passes after Local Network is allowed, and the browser login stores the account. MAIL.md says whether the extension got the app's Local Network permission, and R18 is updated.
 - **T5b: Check T5 in Mail (needs the user).** After T2b, since the extension can't reach the test server until Local Network is allowed. Installing the T5 build means every email sent with Sign on has its files uploaded to the configured server and replaced by links, so it isn't installed yet. Keep Sign off for other mail while it is.
   1. Install it with `scripts/build.sh` and `scripts/install.sh`, or tell me to.
   2. Send to your own address with Sign on, after TESTING.md's send-flow row: a plain email with two files between paragraphs (t15, t29), a rich one with a signature image and a pasted image (t30), a forward with a file (t20) and a reply (t34), the size rule with one small and one large file (t27, t28), a file large enough to take a while (t9), Undo Send and then sending again (t21), Send Later (t22), and an email over the account's size limit with Try Sending in Email (t38) and another with Use Mail Drop (t39). For a failure (t7), log out in the app first, so the send stops with "isn't set up".
@@ -64,6 +59,7 @@ Judgment calls and known risks are tracked separately in `docs/RISKS.md`.
 ## ✅ Completed Tasks (Done)
 
 - **Probing Mail with MailProbe (2026-11-05).** Four rounds of tests found what Mail does with an extension. See `probe/docs/` and `docs/MAIL.md`.
+- **T2b: Check T2 in Mail (2026-11-06).** Done by the user: allowed NextcloudAppleMail's local network access when macOS asked, Test from Mail passed, and the browser login stored the account. The app's check afterwards showed the browser login's account on the test server.
 - **T5: Send flow (2026-11-06).** Verified: `swift test` passes 106 unit tests. Against a fake Nextcloud, they cover both send calls uploading once, auto-saves, messages without files, not being logged in, a failure repeated for the next call only and forgotten after a minute, a retry uploading only what failed, Mail Drop's two signals, signature images carried from the first call, two calls for one message at once, each sharing setting, the server's password and expiry rules, taken names, and a file attached twice. `scripts/test-nextcloud.sh` passes 9 server tests, now with one file of a password-protected folder share. That test found that Nextcloud's redirect breaks names with `#`, `%` or `?`, which folder shares now replace (NEXTCLOUD.md). The fixtures now keep a file the same in both calls, as Mail does. The build has no warnings and lint is clean. The Mail checks moved to T5b, and the build isn't installed.
 - **T3b: Enforced server settings (2026-11-06).** Verified: `scripts/test-nextcloud.sh --server-settings` passes 2 tests on the test server. With a 7-day maximum enforced, the capabilities report it, "no expiry" becomes the maximum, a later date gets 404 with the server's reason, and `LinkExpiry` shortens a year to the maximum, which the server accepts. With passwords enforced, the capabilities report it, a share without one gets 403 with the server's reason, and one with a password works. The settings were put back, checked by listing the server's keys, and `scripts/test-nextcloud.sh` still passes 8 tests. NEXTCLOUD.md has the keys and the HTTP statuses.
 - **T2: Settings and login (2026-11-06).** Verified: `swift test` passes 79 unit tests, covering the settings' defaults, stored settings that are old, partial or unreadable, the upload directory, the server address check, Test from Mail's request and answer, and the offline error. `scripts/test-nextcloud.sh` passes 8 server tests, now with the connection check. The build has no warnings and lint is clean. With the installed Debug build, `scripts/use-test-account.sh` stored the test account in the shared Keychain item, and `--check-connection` read it back and reached Nextcloud 35.0.2. `--check-from-mail` got the extension's answer from Mail, with the settings and app password the extension read itself, but Local Network privacy had blocked its request to the test server ([MAIL.md](MAIL.md#network), R18). The host app now declares `NSLocalNetworkUsageDescription`. The window, the browser login and Test from Mail with Local Network allowed moved to T2b.
