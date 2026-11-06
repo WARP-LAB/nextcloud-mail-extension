@@ -46,7 +46,7 @@ The size is in decimal megabytes, as Finder shows them, and keeps the decimals t
 
 Another setting, "Pasted images become links", decides whether images pasted into the body follow that rule. It is on by default. When it is off, pasted images stay in the email whatever the rule says. Images in the signature never become links.
 
-In the message window, the toolbar button's popover chooses for that email, under "For this email" (D24):
+In the message window, a menu in the toolbar button's popover, "For this email", chooses for that email (D24):
 
 - **Use settings:** the settings above decide. This is the default.
 - **All files via Nextcloud:** every file becomes links, pasted images too, whatever the size limit and the pasted-images setting say.

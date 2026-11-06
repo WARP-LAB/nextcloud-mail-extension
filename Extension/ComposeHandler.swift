@@ -75,7 +75,7 @@ private final class PasswordPopover: MEExtensionViewController {
 /// Which of the email's files become links (FR3), its password (FR7), its own link expiry if it should differ from
 /// the settings' (FR4), and a way to the app's settings.
 private struct PopoverView: View {
-    static let height: CGFloat = 500
+    static let height: CGFloat = 450
 
     let context: UUID
     private let settings: Settings
@@ -143,18 +143,14 @@ private struct PopoverView: View {
 
     /// FR3, for this email.
     private var linksSection: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text("For this email")
-            Picker("For this email", selection: $choice) {
-                Text("Use settings").tag(LinkChoice.useSettings)
-                Text("All files via Nextcloud").tag(LinkChoice.allFiles)
-                Text("All files kept as attachments").tag(LinkChoice.keepAttached)
-            }
-            .pickerStyle(.radioGroup)
-            .labelsHidden()
-            .onChange(of: choice) { _, value in
-                MessageValues.linkChoices.set(value == .useSettings ? "" : value.rawValue, context: context)
-            }
+        Picker("For this email", selection: $choice) {
+            Text("Use settings").tag(LinkChoice.useSettings)
+            Text("All files via Nextcloud").tag(LinkChoice.allFiles)
+            Text("All files kept as attachments").tag(LinkChoice.keepAttached)
+        }
+        .pickerStyle(.menu)
+        .onChange(of: choice) { _, value in
+            MessageValues.linkChoices.set(value == .useSettings ? "" : value.rawValue, context: context)
         }
     }
 

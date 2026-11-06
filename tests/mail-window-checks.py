@@ -895,9 +895,10 @@ def check_own_expiry(run):
     checks.app_settings(dict(checks.DEFAULTS, expiry={'after': {'years': 0, 'months': 0, 'days': 7, 'hours': 0}}))
     checks.mail('compose', 'A', 'B', subject, 'Check: this email\'s own link expiry.', 'none', str(data_path))
     open_popover(subject)
-    # SwiftUI's controls have no names here, so they're found by kind: the checkbox, then the picker it shows.
+    # SwiftUI's controls have no names here, so they're found by kind: the checkbox, then the picker it shows, after
+    # the link choice's.
     in_mail(f'click checkbox 1 of {POPOVER}', subject)
-    picker = f'pop up button 1 of {POPOVER}'
+    picker = f'pop up button 2 of {POPOVER}'
     wait(lambda: in_mail(f'return exists {picker}', subject) == 'true', 10, 'no expiry picker')
     in_mail(f'click {picker}', subject)
     time.sleep(0.5)
@@ -915,11 +916,13 @@ def check_own_expiry(run):
 
 
 def choose_links(subject, choice):
-    """Picks this email's link choice in the popover: 1 uses the settings, 2 links all files, 3 keeps them attached."""
+    """Picks this email's link choice, such as "All files via Nextcloud", in the popover's first pop-up menu."""
     open_popover(subject)
-    radio = f'radio button {choice} of radio group 1 of {POPOVER}'
-    wait(lambda: in_mail(f'return exists {radio}', subject) == 'true', 10, 'no link choice in the popover')
-    in_mail(f'click {radio}', subject)
+    menu = f'pop up button 1 of {POPOVER}'
+    wait(lambda: in_mail(f'return exists {menu}', subject) == 'true', 10, 'no link choice in the popover')
+    in_mail(f'click {menu}', subject)
+    time.sleep(0.5)
+    in_mail(f'click menu item (item 2 of argv) of menu 1 of {menu}', subject, choice)
     time.sleep(0.5)
     mail_in_front()
     osa('tell application "System Events" to key code 53')
@@ -931,7 +934,7 @@ def check_keep_attached(run):
     data_path = run.file('kept.bin', 40_000)
     checks.app_settings(dict(checks.DEFAULTS))
     checks.mail('compose', 'A', 'B', subject, 'Check: this email keeps its files attached.', 'none', str(data_path))
-    choose_links(subject, 3)
+    choose_links(subject, 'All files kept as attachments')
     click_send(subject)
     _, attached, found = file_links(run.fetch(subject, 'keep-attached-received.eml'))
     run.expect('the file arrived attached, byte for byte', attached.get('kept.bin') == data_path.read_bytes(),
@@ -946,7 +949,7 @@ def check_all_files(run):
     checks.app_settings(dict(checks.DEFAULTS, onlyLargeFiles=True, sizeLimitMegabytes=0.2))
     checks.mail('compose', 'A', 'B', subject, 'Check: all of this email\'s files become links.', 'none',
                 str(data_path))
-    choose_links(subject, 2)
+    choose_links(subject, 'All files via Nextcloud')
     click_send(subject)
     _, attached, found = file_links(run.fetch(subject, 'all-files-received.eml'))
     run.expect('the small file became a link that downloads it', downloads_match(found, 'small.bin',
