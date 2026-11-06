@@ -29,7 +29,7 @@ xcodebuild -version
 
 ## What the real extension relies on
 
-If one of these changes, the design in [ARCHITECTURE.md](../../docs/ARCHITECTURE.md) has to change too. "Message ID" means Mail's `X-Universally-Unique-Identifier` header.
+If one of these changes, [MAIL.md](../../docs/MAIL.md) and the design in [ARCHITECTURE.md](../../docs/ARCHITECTURE.md) have to change too. "Message ID" means Mail's `X-Universally-Unique-Identifier` header.
 
 | # | Behaviour | Tests | Baseline |
 | --- | --- | --- | --- |
@@ -132,7 +132,7 @@ The extension writes to `~/Library/Containers/lv.warp.mailprobe.extension/Data/L
 6. **Send:** run each pending test as written. Check the Sign button before every send. Note whether the window closed straight away, any alert text, and whether the message arrived or stayed in Drafts or Outbox.
 7. **Save messages:** drag them from Mail to `probe/test-results/round<N>/` as `t<N>-received.eml` and `t<N>-sent.eml`. For tests that didn't send, save `t<N>-draft.eml` and `t<N>-screenshot.png`.
 8. **Collect:** run `probe/scripts/collect-results.sh`. It copies the container and recent system log into `probe/test-results/<timestamp>/`.
-9. **Record:** replace each "Pending" in [TESTS.md](TESTS.md) with the result, and update the "Tested" claims in ARCHITECTURE.md and the PRD's test status.
+9. **Record:** replace each "Pending" in [TESTS.md](TESTS.md) with the result, and update [MAIL.md](../../docs/MAIL.md) and any affected entries in [RISKS.md](../../docs/RISKS.md).
 
 When re-probing after an update, keep the old baseline in TESTS.md and note the new result next to it, with the Mail version.
 

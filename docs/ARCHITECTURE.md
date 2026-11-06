@@ -1,0 +1,149 @@
+# Architecture
+
+How to build the requirements in [PRD.md](PRD.md). Nothing of the real extension has been built yet, so this is a plan. It rests on facts recorded elsewhere:
+
+- **Mail's behaviour:** [MAIL.md](MAIL.md), found by probing. `tN` refers to a probe test.
+- **Nextcloud's API:** [NEXTCLOUD.md](NEXTCLOUD.md), read from the server's source.
+- **Settled choices and why:** [DECISIONS.md](DECISIONS.md).
+- **What could go wrong:** [RISKS.md](RISKS.md). `Rn` refers to a risk.
+
+Anything here that doesn't cite a test is proposed and untried.
+
+## Approach
+
+The extension is a Mail message security extension (D1). At send, Mail passes the whole message to `encode()`. The extension uploads the files and returns a new message with links in their place, which Mail delivers. Mail calls `encode()` at send only while Sign is on, so Mail's Sign button is the upload switch. The extension can't turn it on, and FR5 warns about messages sent with it off.
+
+The extension's toolbar button in the message window opens a popover, where the user types the email's password (FR7).
+
+## Components
+
+| Component | Runs in | Job | Starting point |
+| --- | --- | --- | --- |
+| Settings UI and login | Host app | Settings for FR2–FR6, FR8 and FR9, Nextcloud login | New |
+| `SecurityHandler` | Extension | Status, `encode()`, and stubs for decoding | [SecurityHandler.swift](../probe/MailProbeExtension/SecurityHandler.swift), without markers |
+| `ComposeHandler` | Extension | FR5 and FR6 warnings, the password popover (FR7) | [ComposeHandler.swift](../probe/MailProbeExtension/ComposeHandler.swift) |
+| `MimeMessage` | Extension | Parse and rewrite the message | [MimeRewriter.swift](../probe/MailProbeExtension/MimeRewriter.swift) |
+| `LinkPolicy` | Extension | Decide which files become links (FR3) and which count as attachments (FR6) | `removes(_:over:)` in the rewriter |
+| `TextCheck` | Extension | Find FR6 phrases in the text the user wrote | New |
+| `NextcloudClient` | Both | Login, folders, uploads, shares, server limits | New |
+| `UploadLedger` | Extension | Remember each message's folder and finished uploads | New |
+| `MessagePasswords` | Extension | Passwords typed in the popover | `PopoverPasswords` in the probe's compose handler |
+| `Settings`, `Credentials` | Both | Shared settings and the app password | New |
+
+The extension keeps both capabilities in its `Info.plist`: `MEMessageSecurityHandler` and `MEComposeSessionHandler`. Start a new Xcode project and copy code across from the probe, leaving `ProbeDirective`, `ProbeLog` and the rest of MailProbe behind.
+
+## Send flow
+
+`getEncodingStatus` reports `canSign: true` and `canEncrypt: false`. MailProbe only ever reported the two together (R9).
+
+`encode()` runs these steps for each call:
+
+1. If the message is an auto-save (`state` 1), link its `contextID` to its message ID (see [Passwords](#passwords-in-the-message-window-fr7)) and return nil. The draft keeps its files (t17).
+2. Parse the message and let `LinkPolicy` pick the files. If there are none, return nil, and Mail sends the message normally (t18).
+3. Look up each file in the ledger. For any file not found, create the message's folder if needed, decode the file to a temporary file, upload it, create its share with the message's password, and add it to the ledger (R5).
+4. If FR9 applies, share the folder once for the message.
+5. Replace each file with its links (FR8), add the folder links after the user's own text (FR9), and return `MEEncodedOutgoingMessage(rawData:, isSigned: false, isEncrypted: false)`. Keep all other headers, including `Bcc:`, which Mail removes itself (t19).
+6. If anything failed, return a `signingError` naming the file and the server's message.
+
+The first send call does the uploads and the second finds them all in the ledger, so the code doesn't need to tell the calls apart. Decoded files are byte-identical in both calls (t15). Returning rewritten bytes from both calls is the combination tested so far.
+
+### Upload ledger
+
+Each message ID maps to its folder, the folder's share if there is one, and its files. Files are keyed by the SHA-256 of the decoded file, and each records its remote path, share ID, URL and returned expiry date. The ledger is a JSON file in the extension's container, pruned after 30 days. It never holds passwords.
+
+The key is the message ID, `X-Universally-Unique-Identifier`, because the `contextID` changes on a reopened draft and on Undo Send (t21, t26). Access is serialized per message, which costs little even though calls haven't overlapped.
+
+The same key means Undo Send followed by a second send reuses the folder and links, and a retry after a partial failure uploads only the remaining files. If the password changed in between, update each of the message's shares.
+
+### Failed uploads
+
+After a failed upload, Mail still makes the second send call (t7, t8, t12). It shouldn't retry, because the send is already stopped and the user would wait through a second upload. Remember the failure per message, have the second call return the same error and clear it, so the next click on Send retries. Let the memo expire after a minute as a safeguard.
+
+### Mail Drop (FR10)
+
+If the user chooses Use Mail Drop, the first call has already uploaded the files, but the email goes out with Mail Drop's link (t39). When a later send call for the message has a `Remote-Attachment-Url` header, or has none of the files the first call linked, return nil and delete that message's files and shares on Nextcloud (D8).
+
+## Rewriter
+
+- **Selecting files:** `isAttachment` is true for any part with an attachment disposition or a filename, which includes signature images and pasted images. Signature images are inside `AppleMailSignature` in the first call's HTML, so the first call records their Content-IDs for the second call. Pasted images can only be told apart by Mail's `PastedGraphic-N.png` names (R7). Signature images never become links and don't count as attachments for FR6. Pasted images follow the FR3 rule when its pasted-images setting is on, which is the default, and stay in the email when it's off. They always count for FR6.
+- **Measuring files:** the size rule uses decoded bytes, so a file exactly at the limit stays (t27, t28). The probe's `decodedSize` decodes the whole file to measure it, so compute the size from the encoded length instead.
+- **Links in place (FR8):** in a plain message, each file part becomes the link text, merged with the text parts on either side, so the delivered message has one text part instead of several and doesn't depend on how each mail client shows a run of text parts (R16). In the structure with a signature or pasted image, replace each `<img src="cid:…">` with the links and remove its part. Also replace the matching U+FFFC in the plain text, since they come in the same order as the images in the HTML (t30). In the forward structure, replace U+FFFC in the plain text and the file part in the HTML. In the first call's structure, replace each `cid:` placeholder, which matters for FR6.
+- **Fallback list (FR8):** if a file's position can't be found, for example in a structure the tests haven't shown yet, its links go in a list at the end of the user's own text, never at the top.
+- **End of the user's own text:** in HTML, this is before `<div class="AppleOriginalContents">` or the first `<blockquote type="cite">`. In plain text, it's before the first line starting with `>` (t20, t34). If no quote is found, it's the end of the message.
+- **Folder links (FR9):** add them at the end of the user's own text, after any fallback list.
+- **Non-ASCII names:** the probe replaces non-ASCII characters in names with `?`. The real rewriter must keep them, so it has to change a `us-ascii` part to UTF-8 when it adds a link.
+- **Message that is only a file:** the probe leaves this unchanged. Either replace the root part with text, or find out that Mail never produces it.
+
+### Link text
+
+Each file shows its name, size and the expiry date the server returned. With the default FR8 setting:
+
+```text
+report.pdf (12 MB, link expires 12 Dec 2026)
+View: https://cloud.example.com/s/abc
+Download: https://cloud.example.com/s/abc/download
+```
+
+With download only:
+
+```text
+report.pdf (12 MB, link expires 12 Dec 2026): https://cloud.example.com/s/abc/download
+```
+
+FR9's links after the user's own text, plus the password notice from FR7 when there is a password:
+
+```text
+View all files in email: https://cloud.example.com/s/xyz
+Download all files in email: https://cloud.example.com/s/xyz/download
+The links need a password, which the sender will give you separately.
+```
+
+The HTML version uses the same text, with the file names and labels as links.
+
+## Using Nextcloud
+
+The requests are in [NEXTCLOUD.md](NEXTCLOUD.md).
+
+- **Folders (FR2):** name each message's folder `<yyyy-MM-dd> <subject>`, inside the settings' directory. Shorten the subject to 60 characters, replace `/` and `\`, and trim spaces and dots from the ends. Use `Email` if there's no subject. If the folder exists, add a number, as in `2026-11-05 Report (2)`. Recipients see this name on the folder's page, and probably as the zip's name. Two different files with the same name in one message get an index.
+- **Uploads:** always upload with `If-None-Match: *`, so a file that older links point to is never overwritten.
+- **Shares (FR8, FR9):** create one share per file, plus one for the folder when FR9 applies. A folder share alone has no view page for a single file.
+- **Expiry (FR4):** send every share an explicit `expireDate`. For a week, month, year, or a custom number of days, months or years, use today plus that period by calendar. For never, send an empty string. Read the server's limits first, and shorten the date to the maximum when one is enforced. Show the `expiration` the server returns next to each link, never the requested date. The folder share gets the same date as the file shares.
+- **Passwords (FR7):** send the email's password with every share. If the server enforces passwords and there's none, stop the send with an alert asking for one. If the password policy rejects the password, stop the send with the server's reason.
+
+## Send warnings (FR5, FR6)
+
+Both warnings come from `allowMessageSendForSession`, which returns at most one error, so Mail shows at most one alert. FR5 needs a file and FR6 needs none, so only one can apply. The alert's buttons are fixed, as Cancel and Send Anyway (t23, t33).
+
+### FR5: Sign is off
+
+1. If `composeContext.shouldSign` is true, there's no FR5 warning. Read it here, not at compose start.
+2. Parse `rawData` with `LinkPolicy`. With Sign off it holds the whole message (t33). If no file would become a link, there's no FR5 warning.
+3. Otherwise return `MEComposeSessionError(.invalidBody, userInfo: [NSLocalizedDescriptionKey: …])`. The extension can't turn on Sign, so the text has to say how.
+
+### FR6: text mentions an attachment
+
+1. If the phrase list is empty, there's no check.
+2. Count the files in `rawData` under `LinkPolicy`'s FR6 rule. With Sign on, the first call has already turned files into links, so it records how many it linked for the message ID, and the check adds those. If there are any, there's no warning.
+3. Take the text from the HTML part, because the plain-text part is empty at this point (t34, t35). Remove tags, decode entities and collapse spaces. Skip `<div class="AppleOriginalContents">`, `<blockquote type="cite">` and `<div id="AppleMailSignature">`.
+4. Look for each phrase ignoring case, including inside longer words. Report the first one found: "Your message mentions "see attached" but has no attachment."
+
+## Passwords in the message window (FR7)
+
+- **Popover:** the compose session's view controller, with a secure password field (t36).
+- **Storage:** the password is stored by `contextID`. Every `encode()` call, including auto-saves, links its `contextID` to the message ID, so a reopened draft, which gets a new `contextID`, still finds it (t37).
+- **Restarts:** keep it in memory, and also in the Keychain under the message ID once that's known, so that restarting Mail doesn't send the links without a password (R8). Delete it with the message's ledger entry. Never write it to logs, settings or the ledger.
+
+## Settings and credentials
+
+- **Where they live:** the settings UI is in the host app: server, directory, the FR3 rule and pasted-images option, FR4 expiry, the FR5 checkbox, the FR6 phrases, and the FR8 and FR9 options. Settings are shared through an App Group, and the app password through a shared Keychain group (R17). The per-email password isn't a setting.
+- **Entitlements:** both targets need the sandbox, `com.apple.security.network.client`, the App Group and the Keychain group (R18). Leave out `files.user-selected.read-only`, which only dropping files on the popover needed.
+- **Server URLs:** accept `https://` only, because App Transport Security blocks plain HTTP by default.
+- **Not set up yet:** if the extension isn't set up when a file would become a link, stop the send with an error saying so. Reporting `canSign: false` instead would send the files as attachments with no warning.
+
+## Failures
+
+An encoder error stops the send, keeps the files in the message window and shows our text (t7, t8, t12). All folder, upload, share, password, login and server-limit errors use this route, naming the file and the server's reason.
+
+## Progress
+
+Mail shows nothing while `encode()` runs (t9). Post a notification when an upload starts and when it finishes, or open the host app's window if notifications from the extension don't work (R3).

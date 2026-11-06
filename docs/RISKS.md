@@ -1,0 +1,151 @@
+# Risks
+
+What could go wrong, how we'd notice, and what's being done about it. Each entry ends with a judgment call: what an agent may decide alone when the risk comes up. Anything beyond that goes to [TASKS.md](TASKS.md) as an open decision. When a task touches a risk, update its entry.
+
+## Mail
+
+### R1: Mail stops delivering the bytes `encode()` returns
+
+- **Risk:** the whole design relies on Mail sending what `encode()` returns even when it's flagged unsigned, which contradicts Apple's header comment ([MAIL.md](MAIL.md#the-sign-button)). A macOS or Mail update could change it.
+- **Signal:** after an update, files go out attached with Sign on, or Mail shows signing errors.
+- **Mitigation:** after every macOS update, run the quick regression set in [probe/docs/PROBE.md](../probe/docs/PROBE.md).
+- **Judgment call:** an agent may investigate and report, but must not switch to another route, such as the popover or AppleScript, without asking.
+
+### R2: "Don't ask again" in the Mail Drop prompt is untested
+
+- **Risk:** FR10's setup help assumes that ticking it with Try Sending in Email makes Mail stop asking. What it really remembers, and how to undo it, is unknown.
+- **Signal:** users still see the prompt every time, or large emails go out through Mail Drop.
+- **Mitigation:** test it once, on an account where changing the behaviour doesn't matter (open decision OD6).
+- **Judgment call:** never tick it on the user's account without asking.
+
+### R3: No progress display during uploads
+
+- **Risk:** Mail shows nothing while `encode()` runs, so a slow upload looks like Mail has hung.
+- **Signal:** users close the window or quit Mail during an upload.
+- **Mitigation:** a notification when an upload starts and finishes, or the host app's window (task T8).
+- **Judgment call:** an agent may choose whichever of the two works from the extension. If neither works, ask.
+
+### R4: Very long uploads
+
+- **Risk:** Mail waited 5 minutes 20 seconds without a timeout, but longer waits, and quitting Mail during an upload, are untested.
+- **Signal:** large uploads fail or the message is lost from the Outbox.
+- **Mitigation:** request timeouts, and a test with a large file on a slow connection.
+- **Judgment call:** an agent may set request timeouts. A maximum upload size would be a product change, so ask.
+
+### R5: Large messages in memory
+
+- **Risk:** Mail passes the whole message in memory, and decoding attachments can double that.
+- **Signal:** the extension is killed or slows down with big attachments. So far a 244 MB draft and a 40.5 MB send worked.
+- **Mitigation:** decode each attachment to a temporary file and upload from there.
+- **Judgment call:** implementation details are the agent's.
+
+### R6: Mail's HTML markers change
+
+- **Risk:** finding quoted text, the signature and each file's position relies on markers in Mail's HTML, such as `AppleMailSignature`, `blockquote type="cite"`, `cid:` and U+FFFC ([MAIL.md](MAIL.md#message-structures)).
+- **Signal:** links appear inside quotes or the signature, or FR6 warns about quoted text.
+- **Mitigation:** probe tests t29, t30 and t34 in the regression set, and the fallback list for files whose position can't be found.
+- **Judgment call:** an agent may adapt the detection to new markers after re-probing, and update MAIL.md.
+
+### R7: Telling pasted images from dropped ones
+
+- **Risk:** pasted images are recognised only by Mail's `PastedGraphic-N.png` names. Mail may use other names in other languages, and a dropped file with such a name counts as pasted.
+- **Signal:** the pasted-images setting (FR3) doesn't affect some pasted images.
+- **Mitigation:** probe once with macOS in another language (not run yet, see [probe/docs/TESTS.md](../probe/docs/TESTS.md#not-run-yet)).
+- **Judgment call:** an agent may add name patterns found by probing. Changing what FR3 does is the user's call.
+
+### R8: A password that can't be found at send
+
+- **Risk:** if a typed password isn't found at send, for example after Mail restarts before the draft's first auto-save, the links go out without one, and the extension can't tell.
+- **Signal:** recipients can open links that should need a password.
+- **Mitigation:** keep the password in the Keychain under the message ID as soon as that's known.
+- **Judgment call:** an agent must not drop the Keychain copy, or weaken FR7, without asking.
+
+### R9: Offering Sign without Encrypt
+
+- **Risk:** reporting `canSign: true` with `canEncrypt: false` is untested. MailProbe always reported both.
+- **Signal:** Sign is unavailable or behaves differently.
+- **Mitigation:** check it in task T1.
+- **Judgment call:** an agent may report both as available if needed, and note it here.
+
+### R10: The extension is enabled but not chosen for message security
+
+- **Risk:** the send check would still run, but Sign wouldn't reach the extension, so FR5's advice to turn on Sign wouldn't help.
+- **Signal:** users see the FR5 warning even with Sign on.
+- **Mitigation:** test it, and have the host app check the setup.
+- **Judgment call:** an agent may word the warnings and the setup check.
+
+### R11: Other mail providers
+
+- **Risk:** only Gmail was probed. Another provider might store the Sent copy differently, or Mail might handle it differently.
+- **Signal:** the Sent copy differs from what recipients get.
+- **Mitigation:** send test t27 from a non-Gmail account.
+- **Judgment call:** none needed. This is a test to run.
+
+### R12: Real signing and encryption
+
+- **Risk:** the extension takes over Mail's Sign button, so it can't be used alongside real email signing or encryption with S/MIME certificates. This is untested, but likely, since only one extension is chosen for message security.
+- **Signal:** users with certificates can't sign mail while the extension is chosen.
+- **Mitigation:** listed as out of scope in the PRD, and to be said in the setup help.
+- **Judgment call:** ask before designing anything around it.
+
+## Product
+
+### R13: Send Later uploads at scheduling
+
+- **Risk:** `encode()` runs when a message is scheduled, so files upload and link expiry starts then, not at delivery.
+- **Signal:** links expire earlier than expected for scheduled mail.
+- **Mitigation:** say so in the setup help.
+- **Judgment call:** none. It's a documented limit.
+
+### R14: Uploads left behind by Undo Send
+
+- **Risk:** after Undo Send the files are already on Nextcloud. If the email is never sent again, they stay there.
+- **Signal:** unused folders in the upload directory.
+- **Mitigation:** none yet. The ledger knows which messages these are.
+- **Judgment call:** never delete the user's files automatically without a product decision.
+
+### R15: Expired links leave no copy in the mailbox
+
+- **Risk:** the Sent copy holds links, not files, so once a link expires the mailbox has no copy of the file.
+- **Signal:** users can't find old attachments.
+- **Mitigation:** say so in the setup help. Files stay on Nextcloud after the share expires.
+- **Judgment call:** ask before adding anything that keeps copies.
+
+### R16: How recipients' mail clients show the links
+
+- **Risk:** links put where each file was might look wrong in some mail clients.
+- **Signal:** broken layout or missing links in Gmail, Outlook or Apple Mail.
+- **Mitigation:** merge text parts so the message has one text part, and check delivered messages in those three clients ([TESTING.md](TESTING.md#mail-checks)).
+- **Judgment call:** an agent may change the link layout within what FR8 says.
+
+## Platform and server
+
+### R17: App Groups and Keychain sharing need real signing
+
+- **Risk:** sharing settings and the app password between the host app and the extension may not work with ad-hoc signing.
+- **Signal:** the extension can't read the settings or the app password.
+- **Mitigation:** sign with an Apple team through `Local.xcconfig` (open decision OD1). The fallback is putting the settings in the popover.
+- **Judgment call:** the fallback changes the design, so ask.
+
+### R18: Network access from the extension
+
+- **Risk:** the extension using the network during `encode()` is untested.
+- **Signal:** uploads fail with sandbox or connection errors.
+- **Mitigation:** the "test connection" check in task T2.
+- **Judgment call:** if it's blocked, stop and ask.
+
+### R19: Nextcloud behaviour is only read from the source
+
+- **Risk:** the password pages, folder zips, expiry limits and password policy in [NEXTCLOUD.md](NEXTCLOUD.md) haven't been run against a server.
+- **Signal:** shares, links or expiry dates behave differently from what NEXTCLOUD.md says.
+- **Mitigation:** test against a server in task T3, including an enforced expiry maximum, enforced passwords and the password policy.
+- **Judgment call:** an agent may adapt to what the server really does, and update NEXTCLOUD.md.
+
+## Tooling
+
+### R20: swift-format changes with Xcode
+
+- **Risk:** the swift-format bundled with Xcode reports its version only as "main", so an Xcode update can change its findings.
+- **Signal:** new swift-format findings after an Xcode update, with no code change.
+- **Mitigation:** treat them as tooling changes, not code problems.
+- **Judgment call:** an agent may adjust `.swift-format` to restore the earlier behaviour, but should ask before switching rules off broadly.
