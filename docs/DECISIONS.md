@@ -111,3 +111,4 @@ Settled decisions, and why they were made. The current design is in [ARCHITECTUR
 
 - **Decision:** server tests may switch on an enforced expiry maximum and enforced passwords on the test server for the length of a run, through Nextcloud's admin API, and switch them back to what they were at the end. This resolves OD8.
 - **Why:** the user's choice. It's the only way to test those two (R19), and the test account is an admin.
+- **How:** the changes ask for the password to be confirmed, which an app password can't do, so these admin requests alone use the account password from `.env`. They run only with `scripts/test-nextcloud.sh --server-settings`, which runs nothing else, because other tests running at the same time would see the changed settings.

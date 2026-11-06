@@ -2,7 +2,7 @@
 
 The Nextcloud requests the design in [ARCHITECTURE.md](ARCHITECTURE.md) uses, and how the server behaves. The share, password and expiry behaviour was first read from the Nextcloud server's source code on 2026-11-05: `ShareAPIController.php`, `Manager.php`, `Capabilities.php`, `ShareController.php`, `AuthPublicShareController.php` and the password policy app's `PasswordPolicyConfig.php`.
 
-Everything here was then run against the test server (D14) on 2026-11-06, which runs Nextcloud 35.0.2, except an enforced expiry maximum and enforced passwords, which need the server's settings changed (T3b, R19). The server tests in `tests/NextcloudServerTests` repeat these checks.
+Everything here was then run against the test server (D14) on 2026-11-06, which runs Nextcloud 35.0.2. The enforced expiry maximum and enforced passwords were run with the server's settings changed for the test (T3b, D18). The server tests in `tests/NextcloudServerTests` repeat these checks.
 
 ## Requests
 
@@ -25,6 +25,19 @@ Everything here was then run against the test server (D14) on 2026-11-06, which 
 - **Cookies:** the server sets a session cookie tied to the app password that made the request. A client that keeps cookies and then uses another app password, or one that was revoked, gets 401. The client keeps no cookies.
 - **Large files:** single `PUT` requests may hit server or proxy limits on very large files. Nextcloud also has a chunked upload API for those. The test server's `files.chunked_upload.max_size` is 100 MB.
 - **Testing without a browser:** `GET /ocs/v2.php/core/getapppassword` with the account password returns an app password. Only the tests and the command-line tool use it (D14).
+
+## Server settings
+
+An admin sets the sharing rules in Administration settings > Sharing. They are keys of the `core` app's config, which the provisioning API reads and changes with `GET`, `POST` (with `value`) and `DELETE` on `/ocs/v2.php/apps/provisioning_api/api/v1/config/apps/core/<key>`. Without a key, its default applies. The test server had none of these set.
+
+| Key | Meaning |
+| --- | --- |
+| `shareapi_default_expire_date` | `yes`: link shares get an expiry date by default |
+| `shareapi_expire_after_n_days` | The default number of days, `7` when unset |
+| `shareapi_enforce_expire_date` | `yes`: the default is also the maximum |
+| `shareapi_enforce_links_password` | `yes`: link shares need a password |
+
+Changing or deleting a key asks for the password to be confirmed. An app password gets 403, "Password confirmation is required", while Basic auth with the account's own password works. Reading keys works with an app password.
 
 ## Capabilities
 
@@ -68,7 +81,7 @@ By default the extension uses one share per email, of its folder (D17, R21).
 ## Passwords
 
 - **No password:** an empty `password` means none.
-- **Enforced passwords:** when the server enforces passwords, creating a share without one fails with "Passwords are enforced for link and mail shares" (from the source, T3b).
+- **Enforced passwords:** when the server enforces passwords, creating a share without one fails with 403, "Passwords are enforced for link and mail shares", and the capabilities say `password.enforced` (T3b).
 - **Password policy:** a rejected password gets 400, with every broken rule in one message, such as "Password is among the 1,000,000 most common ones. Please make it unique. Password needs to be at least 10 characters long. Password is present in compromised password list. Please choose a different password." Changing a share's password to a weak one is rejected the same way.
 
 ## Expiry
@@ -78,5 +91,5 @@ By default the extension uses one share per email, of its folder (D17, R21).
 - **Omitting it** applies the server default. With none, as on the test server, the link doesn't expire.
 - **A date far ahead,** such as 2099-01-01, is accepted when there's no enforced maximum.
 - **A date in the past** gets 404, "Expiration date is in the past".
-- **Enforced maximum:** "no expiry" silently becomes the server default, and a later date is rejected with "Cannot set expiration date more than %n days in the future" (from the source, T3b).
+- **Enforced maximum:** "no expiry" silently becomes the maximum, today plus the default days, and a later date is rejected with 404, "Cannot set expiration date more than 7 days in the future" for a 7-day maximum. A date at the maximum is accepted (T3b).
 - **After expiry:** the share is deleted when someone next opens it, but the file stays in its folder.
