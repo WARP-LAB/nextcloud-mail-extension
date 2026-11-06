@@ -105,6 +105,7 @@ private struct PopoverView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text("NextcloudAppleMail").font(.headline)
+            Divider()
             linksSection
             Divider()
             Group {
@@ -143,8 +144,8 @@ private struct PopoverView: View {
     /// FR3, for this email.
     private var linksSection: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("This email link generation")
-            Picker("This email link generation", selection: $choice) {
+            Text("For this email")
+            Picker("For this email", selection: $choice) {
                 Text("Use settings").tag(LinkChoice.useSettings)
                 Text("All files via Nextcloud").tag(LinkChoice.allFiles)
                 Text("All files kept as attachments").tag(LinkChoice.keepAttached)
