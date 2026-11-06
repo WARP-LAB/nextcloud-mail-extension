@@ -78,6 +78,8 @@ In the first call's structure, the typed text is only in the HTML (t15, t24, t34
 
 Decoded files are byte-identical in both calls (t15). Mail didn't resize a 10 MB PNG (t28), and every kept or removed file matched the original byte for byte.
 
+Mail chooses each file's transfer encoding by its content. The 10 MB test PNG, mostly padding text, was quoted-printable in both of t28's calls, while the other files were base64. Lines end in LF, not CRLF, in all 165 saved send calls.
+
 ## The toolbar popover
 
 - **Opening it:** the compose session's view controller appears as a popover from the extension's button in the message window's toolbar.

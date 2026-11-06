@@ -38,6 +38,7 @@ This file covers how to work in the repository.
 ```sh
 scripts/build.sh            # host app and extension, into build/Debug/NextcloudAppleMail.app
 swift test                  # unit tests of Shared/, from tests/
+tests/make-fixtures.py      # remake the anonymised test messages from probe/test-results/ (local only)
 scripts/lint.sh [--fix]     # all linters on every file git doesn't ignore, with --fix applying automatic fixes first
 scripts/install.sh          # copy the build to ~/Applications and register the extension (see Boundaries)
 ~/Applications/NextcloudAppleMail.app/Contents/MacOS/NextcloudAppleMail --check-storage   # App Group check
@@ -83,6 +84,7 @@ Only what isn't obvious from directory names:
 - macOS registers the copy of the extension that Xcode builds in `build/`, and lists only one copy per bundle ID, so an installed copy can be ignored. `scripts/install.sh` unregisters the build's copy.
 - Reading Mail's Sign state at compose start instead of at send, or detecting auto-saves by headers instead of the message's `state` (`docs/MAIL.md`).
 - An unescaped `|` inside a Markdown table cell splits the cell, so avoid pipes in code within tables.
+- In Swift, `"\r\n"` is one `Character`, so `hasSuffix("\n")` is false for CRLF text. `MimePart.text` returns text with `\n` line endings for this reason. The package builds in Swift 5 mode, where a bare `/…/` regex literal doesn't compile: write `#/…/#`.
 
 ## Definition of done
 

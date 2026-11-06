@@ -17,7 +17,7 @@ Risk register: `docs/RISKS.md`.
 > - Write Acceptance Criteria or a explicit Definition of Done
 > - Take tasks in order unless told otherwise. Do not start the next task without being asked.
 
-None. T1b waits for the user, and T2 and T3 for the Nextcloud test server (OD2).
+None. T1b waits for the user.
 
 ## ❓ Open Decisions (human to resolve)
 
@@ -49,8 +49,6 @@ Judgment calls and known risks are tracked separately in `docs/RISKS.md`.
   - **Acceptance:** the extension reads the settings and the app password, and reaches the server.
 - **T3: Nextcloud client (FR1, FR2, FR4, FR7, FR9).** Every request in `docs/NEXTCLOUD.md`, with a small command-line tool to run them, tested against the test server (OD2, R19).
   - **Acceptance:** the Nextcloud tests in `docs/TESTING.md` pass, and NEXTCLOUD.md records what the server really did.
-- **T4: Rewriter and link policy (FR3, FR8, FR9).** Links in place, the fallback list, folder links, and `LinkPolicy` with the pasted-images setting and signature images (R6, R7, R16).
-  - **Acceptance:** unit tests with anonymised fixtures cover every structure in `docs/MAIL.md`.
 - **T5: Send flow (FR1, FR10).** `encode()` with the upload ledger, the failure memo and the Mail Drop clean-up, with files decoded to temporary files (R5).
   - **Acceptance:** the send-flow Mail checks pass, and the delivered links work in Apple Mail, Gmail and Outlook.
 - **T6: Password popover (FR7).** The popover's password field, kept per message in memory and the Keychain (R8).
@@ -65,4 +63,5 @@ Judgment calls and known risks are tracked separately in `docs/RISKS.md`.
 ## ✅ Completed Tasks (Done)
 
 - **Probing Mail with MailProbe (2026-11-05).** Four rounds of tests found what Mail does with an extension. See `probe/docs/` and `docs/MAIL.md`.
+- **T4: Rewriter and link policy (2026-11-06).** Verified: `swift test` passes 46 tests over 12 anonymised fixtures. They cover every structure in MAIL.md: links in place in plain, rich, forwarded and first-call messages, the fallback list, folder links and the password notice above quotes, the size rule keeping other files byte for byte, signature and pasted images, accented names, and a message that is only a file. Unchanged messages come out byte for byte the same. Rewritten fixtures parse without defects in Python's `email` package. Lint is clean, the build has no warnings, and the storage check is unchanged.
 - **T1: Project skeleton (2026-11-06).** Verified: `scripts/build.sh` builds both targets signed with the Personal Team, with no warnings. `swift test` passes 4 tests, `scripts/lint.sh` is clean, and `scripts/install.sh` installs and registers the extension. The storage check passes for the App Group's container and settings, but not for the shared Keychain item, which needs OD7. The checks in Mail moved to T1b.
