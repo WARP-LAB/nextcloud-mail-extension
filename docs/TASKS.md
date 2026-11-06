@@ -17,6 +17,9 @@ Risk register: `docs/RISKS.md`.
 > - Write Acceptance Criteria or a explicit Definition of Done
 > - Take tasks in order unless told otherwise. Do not start the next task without being asked.
 
+- 🔄 **T14: Rename to NextcloudMailExtension.** The user renamed the GitHub repository from `nextcloud-apple-mail` to `nextcloud-mail-extension`, and the product follows: the app is NextcloudMailExtension, the extension NextcloudMailExtensionAppex, the bundle IDs and App Group `lv.warp.nextcloudmailextension…`, the Swift package's modules `NextcloudMailExtension…`, and the abbreviation `ncme`/`NCME`. Without Apple in the name, OD12 goes.
+  - **Acceptance:** no tracked file names the old product, IDs or abbreviation, except where D26 and this task record the rename. The project builds, lint passes, and the unit and server tests pass. The old app is logged out, unregistered and gone from `~/Applications`, and the new one is installed, with `--check-storage` and `--check-connection` passing. Once the user has enabled the new extension in Mail, the toolbar button is called NextcloudMailExtension, and a send check and the popover checks pass. `LICENSE.Apple` no longer names a problem with the name.
+
 ## ❓ Open Decisions (human to resolve)
 
 Agents: do not guess these. Record questions here and stop.
