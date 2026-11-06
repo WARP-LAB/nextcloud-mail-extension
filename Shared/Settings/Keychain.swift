@@ -52,6 +52,32 @@ enum Keychain {
         }
     }
 
+    /// The accounts of a service's items in the group, with when each was last changed.
+    static func items(service: String, group: String) throws -> [(account: String, modified: Date)] {
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: service,
+            kSecAttrAccessGroup as String: group,
+            kSecUseDataProtectionKeychain as String: true,
+            kSecReturnAttributes as String: true,
+            kSecMatchLimit as String: kSecMatchLimitAll,
+        ]
+        var result: CFTypeRef?
+        let status = SecItemCopyMatching(query as CFDictionary, &result)
+        if status == errSecItemNotFound {
+            return []
+        }
+        guard status == errSecSuccess, let found = result as? [[String: Any]] else {
+            throw KeychainError(status: status)
+        }
+        return found.compactMap { item in
+            guard let account = item[kSecAttrAccount as String] as? String else {
+                return nil
+            }
+            return (account, item[kSecAttrModificationDate as String] as? Date ?? .distantPast)
+        }
+    }
+
     static func message(for status: OSStatus) -> String {
         let text = SecCopyErrorMessageString(status, nil) as String? ?? "unknown error"
         return "\(text) (\(status))"

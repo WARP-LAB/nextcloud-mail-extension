@@ -15,7 +15,7 @@ Everything here was then run against the test server (D14) on 2026-11-06, which 
 | Create a folder | `MKCOL /remote.php/dav/files/<user>/<path>` | 201. 405 when the folder exists, 409 when its parent doesn't |
 | Upload | `PUT /remote.php/dav/files/<user>/<path>/<name>`, with `If-None-Match: *` | 201. 412 when the file exists, because of the header, and 409 when its folder doesn't |
 | Share a file or folder | `POST /ocs/v2.php/apps/files_sharing/api/v1/shares` with `path`, `shareType=3` (public link), `expireDate`, and `password` if set | The response's `data` has `id` (a string), `token`, `url` and `expiration`. See [Rate limit](#rate-limit) |
-| Change a password | `PUT /ocs/v2.php/apps/files_sharing/api/v1/shares/<id>` with `password` | 200. The old password stops working at once |
+| Change a password | `PUT /ocs/v2.php/apps/files_sharing/api/v1/shares/<id>` with `password` | 200. The old password stops working at once. An empty `password` removes it, and the link then opens without one |
 | Delete a share | `DELETE /ocs/v2.php/apps/files_sharing/api/v1/shares/<id>` | 200, then the link gives 404. Again: 404, "Wrong share ID, share does not exist" |
 | Delete a file or folder | `DELETE /remote.php/dav/files/<user>/<path>` | 204, and 404 when it's gone. It goes to the user's trash bin, where it still counts against the quota until the trash expires. Deleting a folder deletes its shares too |
 

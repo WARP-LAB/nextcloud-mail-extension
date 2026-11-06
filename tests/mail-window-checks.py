@@ -4,7 +4,9 @@
 Usage: python3 tests/mail-window-checks.py [check ...]     with no names, every check runs. --list lists them.
 
 These are T5c's checks: an upload failure's alert (t7), Undo Send (t21), Send Later (t22), a pasted image (t30),
-a reply's quote (t34), and Mail Drop's prompt with Try Sending in Email (t38) and Use Mail Drop (t39). They click
+a reply's quote (t34), and Mail Drop's prompt with Try Sending in Email (t38) and Use Mail Drop (t39), and T6's: a
+password typed in the toolbar popover (t36), kept through a reopened draft (t37), refused by the server's policy, and
+required by the server, which password-required switches on for the check and off again (D18). They click
 Mail's Send button, menus and alert buttons, so the terminal's app needs Accessibility, and Mail must be the app in
 front whenever a key is pressed: each check makes sure of that first, and stops if it can't. "Don't ask again" in
 the Mail Drop prompt is never ticked (R2). Messages go between the two accounts in .env, as tests/mail-checks.py's do,
@@ -422,8 +424,241 @@ def check_t39(run):
                    f'folders: {folders_for(subject)}')
 
 
+# MARK: Passwords (FR7, T6)
+
+def type_password(subject, password):
+    """Types the email's password in the toolbar popover, replacing what's there, and closes the popover."""
+    mail_in_front()
+    in_mail('click (first button of toolbar 1 of window (item 1 of argv) whose description is "NextcloudAppleMail")',
+            subject)
+    field = ('text field 1 of group 1 of pop over 1 of (first button of toolbar 1 of window (item 1 of argv) '
+             'whose description is "NextcloudAppleMail")')
+    wait(lambda: in_mail(f'return exists {field}', subject) == 'true', 15, 'no password field in the popover')
+    in_mail(f'set value of attribute "AXFocused" of {field} to true', subject)
+    mail_in_front()
+    osa('tell application "System Events" to keystroke "a" using command down')
+    osa('tell application "System Events" to key code 51')
+    if password:
+        osa('on run argv\ntell application "System Events" to keystroke (item 1 of argv)\nend run', password)
+    time.sleep(0.5)
+    osa('tell application "System Events" to key code 53')
+    time.sleep(0.5)
+
+
+def password_protected(received, name, data, password):
+    """Whether the file's download link shows the password page, and the file comes with the password."""
+    _, attached, found = file_links(received)
+    link = found.get(name)
+    if not link or attached:
+        return False, f'links for: {sorted(found)}, attached: {sorted(attached)}'
+    page = checks.curl(link['download'])
+    token = re.search(r'/s/([^/?]+)', link['download'])[1]
+    server = env()['NCAM_TEST_SERVER_URL']
+    dav = f'{server}/public.php/dav/files/{token}/{urllib.parse.quote(name)}'
+    if '?files=' not in link['download']:
+        dav = f'{server}/public.php/dav/files/{token}'
+    with_password = checks.curl(dav, '-u', f'anonymous:{password}')
+    return page != data and b'<html' in page.lower() and with_password == data, (
+        f'without: {len(page)} bytes of {"HTML" if b"<html" in page.lower() else "data"}, with: {len(with_password)}')
+
+
+def check_t36(run):
+    """A password typed in the popover protects every link, and the email doesn't contain it (t36)."""
+    subject = run.subject('t36-password')
+    password = 'ncam-' + os.urandom(6).hex()
+    data_path = run.file('t36.bin', 5000)
+    checks.app_settings(dict(checks.DEFAULTS, folderLinks=True))
+    second = run.file('t36-second.bin', 3000)
+    checks.mail('compose', 'A', 'B', subject, 'Check t36: links with a password.', 'none', str(data_path),
+                str(second))
+    type_password(subject, password)
+    click_send(subject)
+    received = run.fetch(subject, 't36-received.eml')
+    ok, detail = password_protected(received, 't36.bin', data_path.read_bytes(), password)
+    run.expect('the file\'s link needs the password, and works with it', ok, detail)
+    texts, _, _ = file_links(received)
+    body = '\n'.join(texts['plain'] + texts['html'])
+    _, _, folder = checks.links('\n'.join(texts['plain']))
+    run.expect('the all-files link needs the password too',
+               'download' in folder and b'<html' in checks.curl(folder['download']).lower())
+    run.expect('the email says a password is needed', 'The links need a password' in body)
+    run.expect('the email doesn\'t contain the password', password not in body and password.encode() not in
+               received.read_bytes())
+
+
+OPEN_ROW = """
+on rowTexts(element)
+    tell application "System Events"
+        set found to ""
+        set kids to {}
+        try
+            set kids to UI elements of element
+        end try
+        repeat with kid in kids
+            try
+                if role of kid is "AXStaticText" then set found to found & (value of kid as text) & " "
+            end try
+            set found to found & my rowTexts(kid)
+        end repeat
+        return found
+    end tell
+end rowTexts
+
+on findRow(element, subject, depth)
+    tell application "System Events"
+        set kids to {}
+        try
+            set kids to UI elements of element
+        end try
+        repeat with kid in kids
+            set r to ""
+            try
+                set r to role of kid
+            end try
+            if r is "AXRow" then
+                if my rowTexts(kid) contains subject then return kid
+            else if depth < 8 then
+                set found to my findRow(kid, subject, depth + 1)
+                if found is not missing value then return found
+            end if
+        end repeat
+    end tell
+    return missing value
+end findRow
+
+on run argv
+    tell application "System Events" to tell process "Mail" to set w to (first window whose name starts with "Drafts")
+    set target to my findRow(w, item 1 of argv, 1)
+    if target is missing value then error "No row for the draft."
+    tell application "System Events"
+        set value of attribute "AXSelected" of target to true
+        delay 1
+        tell process "Mail" to click (first menu item of menu "File" of menu bar 1 whose name contains "Open")
+    end tell
+end run
+"""
+
+
+def reopen_draft(subject, account):
+    """Opens a saved draft again for editing, as a person would: its row in the Drafts list, then File > Open.
+    Selecting it through AppleScript alone doesn't reliably select the row Mail opens."""
+    osa('on run argv\ntell application "Mail"\nset selected mailboxes of message viewer 1 to '
+        '{mailbox "Drafts" of account (item 1 of argv)}\nend tell\nend run', account)
+    time.sleep(2)
+    mail_in_front()
+    osa(OPEN_ROW, subject, timeout=300)
+    wait(lambda: window_exists(subject), 30, 'the draft didn\'t open')
+
+
+def restart_mail():
+    """Quits Mail, which also ends the extension's process, and opens it again."""
+    osa('tell application "Mail" to quit')
+    wait(lambda: subprocess.run(['pgrep', '-x', 'Mail'], capture_output=True).returncode != 0, 60,
+         'Mail didn\'t quit')
+    time.sleep(3)
+    subprocess.run(['open', '-a', 'Mail'], check=True)
+    wait(lambda: osa('tell application "Mail" to return count of accounts') not in ('', '0'), 60,
+         'Mail didn\'t start')
+    time.sleep(5)
+
+
+def check_t37_restart(run):
+    """The password survives Mail restarting between typing it and sending: only the Keychain copy has it (R8)."""
+    check_t37(run, restart=True)
+
+
+def check_t37(run, restart=False):
+    """The password survives closing and reopening the draft (t37)."""
+    subject = run.subject('t37-restart' if restart else 't37-draft-password')
+    password = 'ncam-' + os.urandom(6).hex()
+    data_path = run.file('t37.bin', 5000)
+    checks.app_settings(checks.DEFAULTS)
+    checks.mail('compose', 'A', 'B', subject, 'Check t37: a password kept through the draft.', 'none',
+                str(data_path))
+    type_password(subject, password)
+    # Closing with Save stores the draft, which makes an auto-save call that links the password to the message.
+    mail_in_front()
+    in_mail('set w to window (item 1 of argv)\nperform action "AXRaise" of w\n'
+            'click (first button of w whose subrole is "AXCloseButton")\ndelay 1.5\n'
+            'if (count of sheets of w) > 0 then click button "Save" of sheet 1 of w', subject)
+    wait(lambda: not window_exists(subject), 30, 'the draft window didn\'t close')
+    time.sleep(5)
+    if restart:
+        restart_mail()
+    reopen_draft(subject, env()['NCAM_MAIL_A_ACCOUNT'])
+    run.expect('the draft opened again', True)
+    click_send(subject)
+    ok, detail = password_protected(run.fetch(subject, 't37-received.eml'), 't37.bin', data_path.read_bytes(),
+                                    password)
+    run.expect('the links still need the password', ok, detail)
+
+
+def check_password_refused(run):
+    """A password the server's policy refuses stops the send with the server's reason (FR7)."""
+    subject = run.subject('t6-policy')
+    data_path = run.file('t6-policy.bin', 4000)
+    checks.app_settings(checks.DEFAULTS)
+    checks.mail('compose', 'A', 'B', subject, 'Check FR7: a password the policy refuses.', 'none', str(data_path))
+    type_password(subject, 'short')
+    click_send(subject)
+    wait(lambda: sheet(subject) is not None, 90, 'no alert')
+    texts, _ = sheet(subject)
+    run.expect('the alert gives the policy\'s reason', 'Password' in texts and 'Nextcloud:' in texts, texts)
+    click_sheet_button(subject, 'OK')
+    time.sleep(1)
+    run.expect('the window stays open', window_exists(subject))
+    password = 'ncam-' + os.urandom(6).hex()
+    type_password(subject, password)
+    click_send(subject)
+    ok, detail = password_protected(run.fetch(subject, 't6-policy-received.eml'), 't6-policy.bin',
+                                    data_path.read_bytes(), password)
+    run.expect('with a valid password it sends, and the links need it', ok, detail)
+
+
+def server_setting(key, value):
+    """Sets or, with None, deletes a key of the test server's core app config (D18)."""
+    values = env()
+    url = f'{values["NCAM_TEST_SERVER_URL"]}/ocs/v2.php/apps/provisioning_api/api/v1/config/apps/core/{key}'
+    command = ['curl', '-sS', '-u', f'{values["NCAM_TEST_USERNAME"]}:{values["NCAM_TEST_PASSWORD"]}',
+               '-H', 'OCS-APIRequest: true', '-H', 'Accept: application/json']
+    if value is None:
+        command += ['-X', 'DELETE', url]
+    else:
+        command += ['-X', 'POST', '--data-urlencode', f'value={value}', url]
+    answer = subprocess.run(command, capture_output=True, text=True, check=True).stdout
+    if '"statuscode":200' not in answer:
+        raise CheckError(f'the server setting {key} couldn\'t be changed')
+
+
+def check_password_required(run):
+    """When the server requires passwords and none is set, the send stops and asks for one (FR7)."""
+    subject = run.subject('t6-required')
+    data_path = run.file('t6-required.bin', 4000)
+    checks.app_settings(checks.DEFAULTS)
+    server_setting('shareapi_enforce_links_password', 'yes')
+    try:
+        checks.mail('compose', 'A', 'B', subject, 'Check FR7: the server requires a password.', 'none',
+                    str(data_path))
+        click_send(subject)
+        wait(lambda: sheet(subject) is not None, 90, 'no alert')
+        texts, _ = sheet(subject)
+        run.expect('the alert asks for a password', 'requires a password' in texts, texts)
+        click_sheet_button(subject, 'OK')
+        time.sleep(1)
+        password = 'ncam-' + os.urandom(6).hex()
+        type_password(subject, password)
+        click_send(subject)
+        received = run.fetch(subject, 't6-required-received.eml')
+    finally:
+        server_setting('shareapi_enforce_links_password', None)
+    ok, detail = password_protected(received, 't6-required.bin', data_path.read_bytes(), password)
+    run.expect('with a password it sends, and the links need it', ok, detail)
+
+
 CHECKS = {'t7': check_t7, 't21': check_t21, 't22': check_t22, 't30': check_t30, 't34': check_t34,
-          't38': check_t38, 't39': check_t39}
+          't38': check_t38, 't39': check_t39, 't36': check_t36, 't37': check_t37,
+          't37-restart': check_t37_restart, 'password-refused': check_password_refused,
+          'password-required': check_password_required}
 
 
 def main():
