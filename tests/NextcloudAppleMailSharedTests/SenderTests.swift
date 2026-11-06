@@ -131,6 +131,23 @@ struct SenderTests {
         #expect(world.nextcloud.shares.count == 1)
     }
 
+    @Test func keepsSignatureImagesThatLoseTheirContentIDs() async throws {
+        let world = World()
+        guard case .rewritten(let first) = try await world.encode("signature-file-first") else {
+            Issue.record("The first call wasn't rewritten.")
+            return
+        }
+        #expect(MimeMessage(first).files.map(\.filename) == ["Screenshot 2026-11-05 at 22.00.04.png"])
+        let second = try Fixture.message("signature-file-second")
+        #expect(second.files.allSatisfy { $0.contentID == nil })
+        guard case .rewritten(let data) = try await world.encode("signature-file-second") else {
+            Issue.record("The second call wasn't rewritten.")
+            return
+        }
+        #expect(MimeMessage(data).files.map(\.filename) == ["Screenshot 2026-11-05 at 22.00.04.png"])
+        #expect(world.nextcloud.uploads == 1)
+    }
+
     @Test func keepsMessagesApart() async throws {
         let world = World()
         _ = try await world.encode("t29-second")

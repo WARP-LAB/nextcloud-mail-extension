@@ -22,6 +22,9 @@ struct UploadLedger: Codable, Equatable {
         var files: [String: StoredFile] = [:]
         /// The Content-IDs of the signature's images, which only the first send call's HTML marks (docs/MAIL.md).
         var signatureContentIDs: [String] = []
+        /// The keys of the signature's images. When the message has other files, the second call has the images
+        /// without Content-IDs, so they're known by their contents (docs/MAIL.md).
+        var signatureFiles: [String] = []
         var updated: Date
 
         init(updated: Date) {
@@ -47,6 +50,23 @@ struct UploadLedger: Codable, Equatable {
     /// The key a file is stored under.
     static func key(for data: Data) -> String {
         SHA256.hash(data: data).map { String(format: "%02x", $0) }.joined()
+    }
+}
+
+extension UploadLedger.Entry {
+    private enum CodingKeys: String, CodingKey {
+        case folder, folderShare, files, signatureContentIDs, signatureFiles, updated
+    }
+
+    /// Reads an entry, with defaults for what an earlier version didn't store.
+    init(from decoder: Decoder) throws {
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        folder = try values.decodeIfPresent(String.self, forKey: .folder)
+        folderShare = try values.decodeIfPresent(Share.self, forKey: .folderShare)
+        files = try values.decodeIfPresent([String: UploadLedger.StoredFile].self, forKey: .files) ?? [:]
+        signatureContentIDs = try values.decodeIfPresent([String].self, forKey: .signatureContentIDs) ?? []
+        signatureFiles = try values.decodeIfPresent([String].self, forKey: .signatureFiles) ?? []
+        updated = try values.decode(Date.self, forKey: .updated)
     }
 }
 

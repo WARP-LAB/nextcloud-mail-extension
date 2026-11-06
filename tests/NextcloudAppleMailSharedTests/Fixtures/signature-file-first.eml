@@ -1,0 +1,59 @@
+From: Test Sender <sender@example.test>
+Content-Type: multipart/alternative;
+	boundary="Apple-Mail=_A1C98C18-7CAF-4A54-8585-6AB4D5638E22"
+Mime-Version: 1.0 (Mac OS X Mail 16.0 \(3901.100.1.1.12\))
+Subject: [ncam check] signature 105037
+X-Universally-Unique-Identifier: 00000000-0000-4000-8000-000000000001
+Message-Id: <fixture@example.test>
+Date: Thu, 5 Nov 2026 12:00:00 +0200
+To: Test Recipient <recipient@example.test>
+
+
+--Apple-Mail=_A1C98C18-7CAF-4A54-8585-6AB4D5638E22
+Content-Transfer-Encoding: 7bit
+Content-Type: text/plain;
+	charset=us-ascii
+
+
+--Apple-Mail=_A1C98C18-7CAF-4A54-8585-6AB4D5638E22
+Content-Type: multipart/related;
+	type="text/html";
+	boundary="Apple-Mail=_B9856642-8CCD-485E-8C15-1708D73400CD"
+
+
+--Apple-Mail=_B9856642-8CCD-485E-8C15-1708D73400CD
+Content-Transfer-Encoding: 7bit
+Content-Type: text/html;
+	charset=us-ascii
+
+<html aria-label="message body"><head></head><body style="overflow-wrap: break-word; -webkit-nbsp-mode: space; line-break: after-white-space;"><div class="Apple-Mail-URLShareUserContentTopClass"><br></div><div class="Apple-Mail-URLShareWrapperClass" style="position: relative !important;"><blockquote type="cite" style="border-left-style: none; color: inherit; padding: inherit; margin: inherit;"><p style="margin: 0.0px 0.0px 0.0px 0.0px"><font face="Helvetica" size="3" color="#000000" style="font: 12.0px Helvetica; font-kerning: none; color: #000000; -webkit-text-stroke: 0px #000000">Signature check: text above the file.</font></p>
+<p style="margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; color: #000000; -webkit-text-stroke: #000000; min-height: 14.0px"><font style="font-kerning: none"></font><br></p><span class="Apple-string-attachment"><object type="application/x-apple-msg-attachment" width="60" data="cid:F79103FB-1E45-45B5-BB7E-0DDDE38BA2F3"></object></span></blockquote></div><br><br><div id="AppleMailSignature">
+<meta charset="UTF-8"><div class="ApplePlainTextBody" style="caret-color: rgb(0, 0, 0); color: rgb(0, 0, 0); font-family: Helvetica; font-size: 12px; font-style: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration: none;">Any attachments are&nbsp;confidential.</div><br class="Apple-interchange-newline"><span class="Apple-string-attachment"><img alt="Screenshot 2026-11-05 at 22.00.04.png" src="cid:AEF717F0-8F04-44D2-82FC-5268AA0673D5" data-unique-identifier="ade6c09b-b986-44a0-8285-3c864b50583e" data-width="789"></span>
+</div>
+<br></body></html>
+--Apple-Mail=_B9856642-8CCD-485E-8C15-1708D73400CD
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment;
+	filename=file.bin
+Content-Type: application/macbinary;
+	x-unix-mode=0666;
+	name="file.bin"
+Content-Id: <F79103FB-1E45-45B5-BB7E-0DDDE38BA2F3>
+
+TcmJylKroBNiYledOkx/uLSlbpjlGReYmyuC1s+nwfgiMxhfYmFceuA48aIFhLGKKompys5dhton
+pc99RISyUwLbyRTxonKfzOUTNKUS7ZOIJmkuf5Mdj7dNAC7Memu34uq8og==
+
+--Apple-Mail=_B9856642-8CCD-485E-8C15-1708D73400CD
+Content-Transfer-Encoding: base64
+Content-Disposition: inline;
+	filename="Screenshot 2026-11-05 at 22.00.04.png"
+Content-Type: image/png;
+	name="Screenshot 2026-11-05 at 22.00.04.png"
+Content-Id: <AEF717F0-8F04-44D2-82FC-5268AA0673D5>
+
+C1A0vs6TojoUZUC5vI08fdSlS5krZhtAZYhrCstLQwG60PWZtTAcn4t2yDImCd+Qlydl9wrB2Ah5
+nt4+qG7vp7dMHihlOC3++FXtNbJ++Q74C+kQd3z3k/SZVjGq6Hwhr5GsZQ==
+
+--Apple-Mail=_B9856642-8CCD-485E-8C15-1708D73400CD--
+
+--Apple-Mail=_A1C98C18-7CAF-4A54-8585-6AB4D5638E22--

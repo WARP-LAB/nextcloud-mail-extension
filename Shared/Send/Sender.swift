@@ -77,8 +77,19 @@ actor Sender {
         var entry = ledger.entries[messageID] ?? UploadLedger.Entry(updated: dependencies.now())
         let signature = LinkPolicy.signatureContentIDs(in: message)
         entry.signatureContentIDs = Array(Set(entry.signatureContentIDs).union(signature)).sorted()
+        let signatureIDs = Set(entry.signatureContentIDs)
+        let signatureFiles = message.files.filter {
+            $0.contentID.map { signatureIDs.contains($0.lowercased()) } ?? false
+        }
+        entry.signatureFiles = Array(
+            Set(entry.signatureFiles).union(signatureFiles.map { UploadLedger.key(for: $0.data) })
+        )
+        .sorted()
         let settings = dependencies.settings()
-        let files = settings.linkPolicy.linkedFiles(in: message, signatureContentIDs: Set(entry.signatureContentIDs))
+        let known = Set(entry.signatureFiles)
+        let files = settings.linkPolicy.linkedFiles(in: message, signatureContentIDs: signatureIDs).filter { file in
+            !(file.contentType.hasPrefix("image/") && known.contains(UploadLedger.key(for: file.data)))
+        }
 
         // Mail Drop: its message has the header, and the call before it has none of the files (FR10, docs/MAIL.md).
         if message.root.field("remote-attachment-url") != nil || (files.isEmpty && entry.hasUploads) {
@@ -90,7 +101,7 @@ actor Sender {
             return nil
         }
         guard !files.isEmpty else {
-            if !signature.isEmpty {
+            if !signature.isEmpty || !signatureFiles.isEmpty {
                 store(entry, for: messageID)
             }
             return nil
