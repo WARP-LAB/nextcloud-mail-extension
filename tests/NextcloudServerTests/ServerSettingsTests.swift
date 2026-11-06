@@ -114,14 +114,14 @@ struct ServerSettingsTests {
                 let path = NextcloudClient.join(folder, "a.txt")
                 try await client.upload(Data("a".utf8), to: path)
                 let today = Date()
-                let maximum = LinkExpiry.days(7).expireDate(today: today, limits: limits)
+                let maximum = LinkExpiry.days(7).expireDate(from: today, limits: limits)
 
                 let never = try await client.share(path, expireDate: "", password: nil)
                 #expect(never.expiration == ExpiryDate(server: maximum))
 
                 let open = SharingLimits(version: limits.version, passwordEnforced: false, expiryEnforced: false)
                 do {
-                    let later = LinkExpiry.days(30).expireDate(today: today, limits: open)
+                    let later = LinkExpiry.days(30).expireDate(from: today, limits: open)
                     _ = try await client.share(path, expireDate: later, password: nil)
                     Issue.record("The server accepted a date after its enforced maximum.")
                 } catch NextcloudError.server(let status, let reason) {
@@ -129,11 +129,11 @@ struct ServerSettingsTests {
                     #expect(reason == "Cannot set expiration date more than 7 days in the future")
                 }
 
-                let year = LinkExpiry.year.expireDate(today: today, limits: limits)
+                let year = LinkExpiry.year.expireDate(from: today, limits: limits)
                 #expect(year == maximum)
                 let shortened = try await client.share(path, expireDate: year, password: nil)
                 #expect(shortened.expiration == ExpiryDate(server: maximum))
-                #expect(LinkExpiry.never.expireDate(today: today, limits: limits) == maximum)
+                #expect(LinkExpiry.never.expireDate(from: today, limits: limits) == maximum)
             }
         }
     }

@@ -53,12 +53,12 @@ Acceptance criteria:
 A setting chooses when links expire:
 
 - in a week, a month or a year, with a month as the default (OD4)
-- after a custom number of days, months or years
+- after a custom period of years, months, days and hours, such as 0 years, 2 months, 3 days and 1 hour, counted from sending
 - never
 
 Acceptance criteria:
 
-- Each choice gives links that expire at the end of the chosen day, or never.
+- Each choice gives links that expire at the end of the day the period reaches, or never. Nextcloud ends links only at the end of a day, so hours move the date only when they cross midnight, and the setting says so.
 - The email shows the expiry date the server actually set.
 - If the server enforces a maximum, the links get the maximum, and the email shows that date.
 

@@ -207,14 +207,10 @@ private struct CheckResultView: View {
     }
 }
 
-/// FR4: in a week, a month or a year, after a custom number of days, months or years, or never.
+/// FR4: in a week, a month or a year, after a custom period of years, months, days and hours, or never.
 private struct ExpiryPicker: View {
     enum Choice: Hashable {
         case week, month, year, custom, never
-    }
-
-    enum Unit: Hashable {
-        case days, months, years
     }
 
     @Binding var expiry: LinkExpiry
@@ -233,16 +229,32 @@ private struct ExpiryPicker: View {
             custom = Self.preset(expiry) == nil
         }
         if choice.wrappedValue == .custom {
-            HStack {
-                TextField("After", value: count, format: .number)
-                Picker("Unit", selection: unit) {
-                    Text("days").tag(Unit.days)
-                    Text("months").tag(Unit.months)
-                    Text("years").tag(Unit.years)
+            LabeledContent("After") {
+                HStack(spacing: 12) {
+                    amount("years", \.years)
+                    amount("months", \.months)
+                    amount("days", \.days)
+                    amount("hours", \.hours)
                 }
-                .labelsHidden()
-                .fixedSize()
             }
+            Text(
+                "Counted from sending. Nextcloud ends a link at the end of a day, so the link expires at the end of "
+                    + "the day the period reaches, and hours only matter when they cross midnight."
+            )
+            .font(.footnote)
+            .foregroundStyle(.secondary)
+        }
+    }
+
+    private func amount(_ unit: String, _ part: WritableKeyPath<LinkExpiry.Period, Int>) -> some View {
+        HStack(spacing: 4) {
+            TextField(unit, value: binding(part), format: .number)
+                .labelsHidden()
+                .multilineTextAlignment(.trailing)
+                .frame(width: 44)
+            Stepper(unit, value: binding(part), in: 0...9999)
+                .labelsHidden()
+            Text(unit)
         }
     }
 
@@ -268,32 +280,21 @@ private struct ExpiryPicker: View {
         }
     }
 
-    private var parts: (count: Int, unit: Unit) {
-        switch expiry {
-        case .never:
-            return (14, .days)
-        case .days(let count):
-            return (count, .days)
-        case .months(let count):
-            return (count, .months)
-        case .years(let count):
-            return (count, .years)
+    /// The custom period, or two weeks to start from when links don't expire.
+    private var period: LinkExpiry.Period {
+        if case .after(let period) = expiry {
+            return period
         }
+        return LinkExpiry.Period(days: 14)
     }
 
-    private var count: Binding<Int> {
+    private func binding(_ part: WritableKeyPath<LinkExpiry.Period, Int>) -> Binding<Int> {
         Binding {
-            parts.count
-        } set: { count in
-            expiry = Self.expiry(min(max(count, 1), 9999), parts.unit)
-        }
-    }
-
-    private var unit: Binding<Unit> {
-        Binding {
-            parts.unit
-        } set: { unit in
-            expiry = Self.expiry(parts.count, unit)
+            period[keyPath: part]
+        } set: { value in
+            var changed = period
+            changed[keyPath: part] = min(max(value, 0), 9999)
+            expiry = .after(changed)
         }
     }
 
@@ -308,17 +309,6 @@ private struct ExpiryPicker: View {
             return .year
         }
         return expiry == .never ? .never : nil
-    }
-
-    private static func expiry(_ count: Int, _ unit: Unit) -> LinkExpiry {
-        switch unit {
-        case .days:
-            return .days(count)
-        case .months:
-            return .months(count)
-        case .years:
-            return .years(count)
-        }
     }
 }
 
