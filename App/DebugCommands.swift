@@ -1,5 +1,6 @@
 import AppKit
 import SwiftUI
+import UserNotifications
 
 /// The debug-only command-line options that the Mail checks use (docs/TESTING.md, "Driving Mail from the command
 /// line").
@@ -42,6 +43,21 @@ enum DebugCommands {
             }
         default:
             return fail("use --debug-dumps on, off or take")
+        }
+        return true
+    }
+
+    /// Prints whether macOS lets the app, and so the extension, post notifications (R3): allowed, denied or not
+    /// asked yet.
+    static func notificationStatus() async -> Bool {
+        let settings = await UNUserNotificationCenter.current().notificationSettings()
+        switch settings.authorizationStatus {
+        case .authorized, .provisional:
+            print("allowed")
+        case .denied:
+            print("denied")
+        default:
+            print("not asked yet")
         }
         return true
     }

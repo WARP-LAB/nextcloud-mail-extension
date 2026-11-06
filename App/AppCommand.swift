@@ -9,6 +9,7 @@ import Foundation
 ///   use-test-account.sh` loads it from `.env`, and sets the upload directory to `NCAM_TEST_DIRECTORY` (D14).
 /// - `--log-out`, debug builds only: revokes the stored app password and deletes it.
 /// - `--settings [<json>]`, debug builds only: prints the settings as JSON, after changing those in `<json>`.
+/// - `--notification-status`, debug builds only: whether macOS lets the app post notifications.
 /// - `--render-window`, debug builds only: the settings window drawn off screen, as a PNG in base64.
 /// - `--debug-dumps on|off|take`, debug builds only: the copies of test messages that Mail passes the extension
 ///   (`DebugDumps`). `take` prints each as its name, a tab and the message in base64, and deletes them.
@@ -23,6 +24,7 @@ enum AppCommand {
     case settings(String?)
     case debugDumps(String)
     case renderWindow
+    case notificationStatus
 
     init?(arguments: [String]) {
         if arguments.contains("--check-storage") {
@@ -35,6 +37,8 @@ enum AppCommand {
             self = .useTestAccount
         } else if Self.debug && arguments.contains("--log-out") {
             self = .logOut
+        } else if Self.debug && arguments.contains("--notification-status") {
+            self = .notificationStatus
         } else if Self.debug && arguments.contains("--render-window") {
             self = .renderWindow
         } else if Self.debug, let index = arguments.firstIndex(of: "--settings") {
@@ -82,6 +86,8 @@ enum AppCommand {
                 passed = DebugCommands.debugDumps(action)
             case .renderWindow:
                 passed = false
+            case .notificationStatus:
+                passed = await DebugCommands.notificationStatus()
             }
             exit(passed ? 0 : 1)
         }

@@ -19,6 +19,8 @@ actor Sender {
         var store: UploadLedgerStore?
         /// The passwords typed in the toolbar popover (FR7), or nil for none.
         var passwords: MessagePasswords?
+        /// Told, with the message ID, when uploads start and end (R3).
+        var progress: (String, SendProgress) -> Void = { _, _ in }
         var now: () -> Date = Date.init
         var temporaryDirectory = FileManager.default.temporaryDirectory
     }
@@ -107,15 +109,7 @@ actor Sender {
 
         // Mail Drop: its message has the header, and the call before it has none of the files (FR10, docs/MAIL.md).
         if message.root.field("remote-attachment-url") != nil || (files.isEmpty && entry.hasUploads) {
-            if entry.hasUploads, let service = try? await dependencies.connect() {
-                let flow = SendFlow(settings: settings, service: service)
-                try? await flow.removeUploads(entry)
-            }
-            if entry.hasUploads {
-                dependencies.passwords?.forget(message: messageID)
-                applied[messageID] = nil
-            }
-            store(nil, for: messageID)
+            await removeUploads(entry, settings, messageID)
             return nil
         }
         guard !files.isEmpty else {
@@ -134,11 +128,25 @@ actor Sender {
         var flow = SendFlow(settings: settings, service: service)
         flow.today = dependencies.now()
         flow.temporaryDirectory = dependencies.temporaryDirectory
+        let report = dependencies.progress
+        flow.progress = { report(messageID, $0) }
         let password = dependencies.passwords?.password(context: contextID, message: messageID)
         let data = try await flow.run(
             message, files: files, password: password, applied: applied[messageID], record: record)
         applied[messageID] = password ?? ""
         return data
+    }
+
+    /// Deletes what was uploaded for the message, its password and its entry, after Mail Drop took over (D8).
+    private func removeUploads(_ entry: UploadLedger.Entry, _ settings: Settings, _ messageID: String) async {
+        if entry.hasUploads {
+            if let service = try? await dependencies.connect() {
+                try? await SendFlow(settings: settings, service: service).removeUploads(entry)
+            }
+            dependencies.passwords?.forget(message: messageID)
+            applied[messageID] = nil
+        }
+        store(nil, for: messageID)
     }
 
     /// How many files the send calls turned into links for the message, for FR6's check.

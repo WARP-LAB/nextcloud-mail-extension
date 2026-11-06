@@ -317,6 +317,8 @@ private struct SetupHelp: View {
     ]
 
     private let notes = [
+        "While a slow upload runs, NextcloudAppleMail shows a notification, and another when it's done. Allow "
+            + "its notifications when macOS asks, or in System Settings > Notifications.",
         "Send Later uploads the files when you schedule the email, so the links' expiry starts then.",
         "Your Sent mailbox keeps the links, not the files, so once a link expires the file is only on Nextcloud.",
         "While NextcloudAppleMail is chosen for message security, Mail can't sign or encrypt with certificates.",

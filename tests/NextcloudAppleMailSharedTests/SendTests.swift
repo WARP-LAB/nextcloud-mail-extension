@@ -194,6 +194,30 @@ struct SendFlowTests {
         #expect(NextcloudNames.folderShareName("a&b+c;d [1].pdf") == "a&b+c;d [1].pdf")
     }
 
+    @Test func reportsProgressOnlyForUploads() async throws {
+        let nextcloud = FakeNextcloud()
+        let message = try Fixture.message("t29-second")
+        let record = MessageRecord(UploadLedger.Entry(updated: SendFixtures.today))
+        var reports: [SendProgress] = []
+        var flow = SendFlow(settings: SendFixtures.settings(), service: nextcloud)
+        flow.today = SendFixtures.today
+        flow.progress = { reports.append($0) }
+        let files = SendFixtures.settings().linkPolicy.linkedFiles(in: message, signatureContentIDs: [])
+        _ = try await flow.run(message, files: files, password: nil, record: record)
+        let bytes = files.map(\.decodedSize).reduce(0, +)
+        #expect(reports == [.uploading(files: 2, bytes: bytes), .uploaded(files: 2, bytes: bytes)])
+        reports = []
+        _ = try await flow.run(message, files: files, password: nil, record: record)
+        #expect(reports.isEmpty, "the second call finds every file uploaded")
+        let failing = FakeNextcloud()
+        failing.failing = Set(files.map(\.filename))
+        var failed = SendFlow(settings: SendFixtures.settings(), service: failing)
+        failed.progress = { reports.append($0) }
+        _ = try? await failed.run(
+            message, files: files, password: nil, record: MessageRecord(UploadLedger.Entry(updated: Date())))
+        #expect(reports == [.uploading(files: 2, bytes: bytes), .failed])
+    }
+
     @Test func encodesNamesInTheDownloadLink() throws {
         let url = try #require(URL(string: "https://cloud.example.test/s/abc"))
         let share = Share(id: "1", url: url)
