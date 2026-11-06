@@ -30,7 +30,7 @@ This file covers how to work in the repository.
 - macOS 27 and Xcode 27, on Apple silicon. The probing baseline is macOS 27.0.1 with Mail 16.0.
 - Linters: `brew install swiftlint shellcheck markdownlint-cli2`. swift-format comes with Xcode.
 - Signing: create `Config/Local.xcconfig`, which git ignores, with `CODE_SIGN_STYLE = Automatic`, `CODE_SIGN_IDENTITY = Apple Development` and `DEVELOPMENT_TEAM = <team ID>`. The free Personal Team works for local builds (D11). Without the file, builds are ad-hoc signed and the App Group fails.
-- A Nextcloud test server and account (OD2), with credentials kept outside the repo.
+- The Nextcloud test server and account (D14): copy `.env.example` to `.env`, which git ignores, and fill it in.
 - To use the extension in Mail: run `scripts/install.sh`, then in Mail open Settings > Extensions, enable NextcloudAppleMail, choose it for message security, and restart Mail.
 
 ## Commands
@@ -39,6 +39,8 @@ This file covers how to work in the repository.
 scripts/build.sh            # host app and extension, into build/Debug/NextcloudAppleMail.app
 swift test                  # unit tests of Shared/, from tests/
 tests/make-fixtures.py      # remake the anonymised test messages from probe/test-results/ (local only)
+scripts/test-nextcloud.sh   # the server tests, against the test server in .env
+scripts/nextcloud.sh        # run single Nextcloud requests by hand, with no arguments for the list
 scripts/lint.sh [--fix]     # all linters on every file git doesn't ignore, with --fix applying automatic fixes first
 scripts/install.sh          # copy the build to ~/Applications and register the extension (see Boundaries)
 ~/Applications/NextcloudAppleMail.app/Contents/MacOS/NextcloudAppleMail --check-storage   # App Group check
@@ -53,9 +55,9 @@ Only what isn't obvious from directory names:
 - `App/`: the host app. `Extension/`: the Mail extension.
 - `Shared/`: code both use. `Package.swift` also builds it as a Swift package, and `tests/` holds that package's unit tests (D13).
 - `Config/`: signing, entitlements and `Info.plist` files. The App Group is `<team ID>.lv.warp.nextcloudapplemail`, built from `$(TeamIdentifierPrefix)`, so the team ID appears only in `Local.xcconfig`.
-- `scripts/`: build, install and lint.
+- `scripts/`: build, install, lint, and the Nextcloud tests and tool. `tools/ncam-nextcloud/`: that tool.
 - `probe/`: MailProbe. Frozen: change it only to probe Mail again.
-- Ignored by git: `probe/test-results/`, which holds real emails, `probe/test-files/`, `build/`, `.build/` and `Config/Local.xcconfig`.
+- Ignored by git: `probe/test-results/`, which holds real emails, `probe/test-files/`, `build/`, `.build/`, `Config/Local.xcconfig` and `.env`.
 
 ## Conventions
 
@@ -85,6 +87,7 @@ Only what isn't obvious from directory names:
 - Reading Mail's Sign state at compose start instead of at send, or detecting auto-saves by headers instead of the message's `state` (`docs/MAIL.md`).
 - An unescaped `|` inside a Markdown table cell splits the cell, so avoid pipes in code within tables.
 - In Swift, `"\r\n"` is one `Character`, so `hasSuffix("\n")` is false for CRLF text. `MimePart.text` returns text with `\n` line endings for this reason. The package builds in Swift 5 mode, where a bare `/…/` regex literal doesn't compile: write `#/…/#`.
+- Running the server tests again and again: Nextcloud allows 20 new shares in 10 minutes, so the third run in a row fails with 429. Wait 10 minutes.
 
 ## Definition of done
 

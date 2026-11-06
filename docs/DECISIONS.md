@@ -67,3 +67,8 @@ Settled decisions, and why they were made. The current design is in [ARCHITECTUR
 
 - **Decision:** code that the host app and the extension both use lives in `Shared/`. The Xcode project compiles it into both targets, and `Package.swift` also builds it as a Swift package, with its unit tests in `tests/`. The App Group's identifier reaches the code through an `Info.plist` key built from `$(TeamIdentifierPrefix)`, so the team ID stays out of tracked files.
 - **Why:** `swift test` then runs the unit tests from the command line, with no Xcode window and no signing, and the shared code can't depend on Mail or the app.
+
+## D14: The Nextcloud test server (2026-11-06)
+
+- **Decision:** Nextcloud tests run against the test server and account the user gave, which resolves OD2. Its URL, login, password and upload directory are in the git-ignored `.env`, with `.env.example` as the template. Tests upload only into that directory, each run in its own folder, and delete what they made. They log in with an app password made from the account password, and revoke it at the end.
+- **Why:** the user's choice. A file outside the repository keeps the credentials out of git, and an app password per run means the account password isn't used for the requests themselves.
