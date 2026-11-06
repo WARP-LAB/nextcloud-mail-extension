@@ -22,7 +22,7 @@ What could go wrong, how we'd notice, and what's being done about it. Each entry
 
 - **Risk:** Mail shows nothing while `encode()` runs, so a slow upload looks like Mail has hung.
 - **Signal:** users close the window or quit Mail during an upload.
-- **Mitigation:** a notification when an upload starts and finishes, or the host app's window (task T8).
+- **Mitigation:** a notification while an upload runs and when it ends, done in T8. Tested in Mail with a 30 MB file: both notifications appeared.
 - **Judgment call:** an agent may choose whichever of the two works from the extension. If neither works, ask.
 
 ### R4: Very long uploads

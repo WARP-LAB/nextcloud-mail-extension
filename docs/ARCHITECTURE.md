@@ -174,4 +174,4 @@ An encoder error stops the send, keeps the files in the message window and shows
 
 ## Progress
 
-Mail shows nothing while `encode()` runs (t9). Post a notification when an upload starts and when it finishes, or open the host app's window if notifications from the extension don't work (R3).
+Mail shows nothing while `encode()` runs (t9). The extension posts a notification when an upload of files not yet on Nextcloud has run for 2 seconds, "Uploading 2 files (14 MB) to Nextcloud…", and replaces it when the upload is done with how long it took. If the upload fails, the notification is removed, because Mail's alert explains. Uploads under 2 seconds show none, and Mail's second send call, which finds everything uploaded, shows none. Notifications give the number of files and their size, never names. They come under the host app's permission, which the app asks for when it starts (R3).

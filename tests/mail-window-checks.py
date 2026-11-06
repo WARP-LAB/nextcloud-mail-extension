@@ -839,11 +839,9 @@ def notification_texts():
 
 
 def notifications_allowed():
-    """Whether macOS lets NextcloudAppleMail notify, from Notification Center's settings for it."""
-    exported = subprocess.run(['defaults', 'export', 'com.apple.ncprefs', '-'], capture_output=True).stdout
-    converted = subprocess.run(['plutil', '-convert', 'json', '-o', '-', '-'], input=exported, capture_output=True)
-    apps = __import__('json').loads(converted.stdout or b'{}').get('apps', [])
-    return any('nextcloudapplemail' in str(app.get('bundle-id', '')).lower() for app in apps)
+    """Whether macOS lets NextcloudAppleMail notify, as the installed Debug build reports it."""
+    return checks.mail('app', '--notification-status', capture=True).strip() == 'allowed'
+
 
 
 def check_t8(run):
