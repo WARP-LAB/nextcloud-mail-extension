@@ -245,12 +245,19 @@ struct NextcloudClient {
     }
 
     /// Runs a request, turning "offline", which is also what a server blocked by Local Network privacy gives, into
-    /// `NextcloudError.offline`, which says where to allow it.
-    static func reaching<T>(_ request: () async throws -> T) async throws -> T {
+    /// `NextcloudError.offline`, which says where to allow it. "Offline" is retried once after `retryDelay`: macOS
+    /// refuses the first request a new build makes to the local network even when it's allowed, then lets the next
+    /// one through (docs/MAIL.md, "Network").
+    static func reaching<T>(retryDelay: UInt64 = 1_000_000_000, _ request: () async throws -> T) async throws -> T {
         do {
             return try await request()
         } catch let error as URLError where error.code == .notConnectedToInternet {
-            throw NextcloudError.offline
+            try await Task.sleep(nanoseconds: retryDelay)
+            do {
+                return try await request()
+            } catch let error as URLError where error.code == .notConnectedToInternet {
+                throw NextcloudError.offline
+            }
         }
     }
 
