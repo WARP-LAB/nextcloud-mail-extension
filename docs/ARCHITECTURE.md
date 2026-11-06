@@ -147,7 +147,7 @@ Both warnings come from `allowMessageSendForSession`, which returns at most one 
 
 1. If the phrase list is empty, there's no check.
 2. Count the files in `rawData`, leaving out the signature's images, which its HTML marks. With Sign on, the first call has already turned files into links, and the ledger has them under the message ID, so the check adds those. If there are any, there's no warning.
-3. Take the text from the HTML part, because the plain-text part is empty at this point (t34, t35). Remove tags, decode entities and collapse spaces. Skip `<div class="AppleOriginalContents">`, `<blockquote type="cite">` and `<div id="AppleMailSignature">`, but keep the blockquote of shared content inside `Apple-Mail-URLShareWrapperClass`. Without HTML, use the plain text without `>` lines and without a signature after `-- `.
+3. Take the text from the HTML part, because the plain-text part is empty at this point (t34, t35). Remove tags, decode entities and collapse spaces. Skip `<div class="AppleOriginalContents">`, `<blockquote type="cite">` and `<div id="AppleMailSignature">`, but keep the blockquote of shared content inside `Apple-Mail-URLShareWrapperClass`. Without HTML, use the plain text without `>` lines and without the signature after Mail's signature separator line, two dashes and a space.
 4. Look for each phrase ignoring case, including inside longer words. Report the first one found: "Your message mentions "see attached" but has no attachment."
 
 ## Passwords in the message window (FR7)
