@@ -138,17 +138,17 @@ What could go wrong, how we'd notice, and what's being done about it. Each entry
 
 ### R19: Nextcloud behaviour is only read from the source
 
-- **Risk:** behaviour in [NEXTCLOUD.md](NEXTCLOUD.md) that hasn't been run against a server. Since T3, that is only an enforced expiry maximum and enforced passwords, which need the test server's settings changed (OD8). Other servers may also run other versions or settings than the test server's Nextcloud 35.0.2.
+- **Risk:** behaviour in [NEXTCLOUD.md](NEXTCLOUD.md) that hasn't been run against a server. Since T3, that is only an enforced expiry maximum and enforced passwords, which need the test server's settings changed (T3b, D18). Other servers may also run other versions or settings than the test server's Nextcloud 35.0.2.
 - **Signal:** shares, links or expiry dates behave differently from what NEXTCLOUD.md says.
-- **Mitigation:** the server tests (`scripts/test-nextcloud.sh`), and the enforced settings once OD8 allows them.
+- **Mitigation:** the server tests (`scripts/test-nextcloud.sh`), and the enforced settings in T3b (D18).
 - **Judgment call:** an agent may adapt to what the server really does, and update NEXTCLOUD.md.
 
 ### R21: Nextcloud's limit on new shares
 
 - **Risk:** Nextcloud allows each user 20 share creations in 10 minutes, refused attempts included ([NEXTCLOUD.md](NEXTCLOUD.md#rate-limit)). With one share per file and one per folder, an email with 20 files, or a few emails in a row, fails to send.
 - **Signal:** sends stop with the rate-limit error, `NextcloudError.rateLimited`.
-- **Mitigation:** decided by OD9. The setup help can tell admins how to raise the limit.
-- **Judgment call:** how many shares an email uses changes what FR8's links point to, so it's the user's call (OD9).
+- **Mitigation:** one link for the email's folder, the default, uses one share per email (D17). With a link for each file, the setup help tells admins how to raise the limit.
+- **Judgment call:** an agent may change how the shares are made within D17. Changing what the links point to, or the default, is the user's call.
 
 ## Tooling
 
