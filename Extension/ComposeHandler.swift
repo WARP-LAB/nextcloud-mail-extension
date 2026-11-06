@@ -2,8 +2,8 @@ import AppKit
 import MailKit
 import SwiftUI
 
-/// The toolbar popover, where the user sets the email's password (FR7), and the host app's Test from Mail, which
-/// runs when a message window opens.
+/// The send check's warnings (FR5, FR6), the toolbar popover, where the user sets the email's password (FR7), and
+/// the host app's Test from Mail, which runs when a message window opens.
 final class ComposeHandler: NSObject, MEComposeSessionHandler {
     func mailComposeSessionDidBegin(_ session: MEComposeSession) {
         // A reopened draft may already have its message ID, which finds a password kept for it.
@@ -18,6 +18,18 @@ final class ComposeHandler: NSObject, MEComposeSessionHandler {
     }
 
     func mailComposeSessionDidEnd(_ session: MEComposeSession) {}
+
+    /// Warns before sending, with Mail's Cancel and Send Anyway. Sign is read here, at send, because at compose start
+    /// it can be wrong (docs/MAIL.md).
+    func allowMessageSendForSession(_ session: MEComposeSession, completion: @escaping (Error?) -> Void) {
+        let raw = session.mailMessage.rawData
+        let signOn = session.composeContext.shouldSign
+        Task {
+            let warning = await SecurityHandler.shared.sendWarning(raw: raw, signOn: signOn)
+            completion(
+                warning.map { MEComposeSessionError(.invalidBody, userInfo: [NSLocalizedDescriptionKey: $0]) })
+        }
+    }
 
     func viewController(for session: MEComposeSession) -> MEExtensionViewController {
         PasswordPopover(context: session.composeContext.contextID)

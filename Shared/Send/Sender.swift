@@ -141,6 +141,11 @@ actor Sender {
         return data
     }
 
+    /// How many files the send calls turned into links for the message, for FR6's check.
+    func linkedFiles(messageID: String) -> Int {
+        ledger.entries[messageID]?.files.count ?? 0
+    }
+
     private func lock(_ messageID: String) async {
         while busy.contains(messageID) {
             await withCheckedContinuation { waiting[messageID, default: []].append($0) }

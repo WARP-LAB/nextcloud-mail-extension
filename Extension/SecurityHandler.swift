@@ -59,6 +59,22 @@ final class SecurityHandler: NSObject, MEMessageSecurityHandler {
         }
     }
 
+    /// The send check's warning for the message, if any (FR5, FR6).
+    func sendWarning(raw: Data?, signOn: Bool) async -> String? {
+        guard let raw else {
+            // After an error in the first send call the check gets no message, and the send has stopped anyway.
+            return nil
+        }
+        let settings =
+            SharedStorage.appGroupIdentifier.flatMap(SettingsStore.init(groupIdentifier:))?.load() ?? Settings()
+        let messageID = MimePart.headerField("x-universally-unique-identifier", in: raw)
+        var linked = 0
+        if let messageID {
+            linked = await sender.linkedFiles(messageID: messageID)
+        }
+        return SendWarnings.warning(for: MimeMessage(raw), signOn: signOn, settings: settings, linkedEarlier: linked)
+    }
+
     private static func encodingResult(_ result: SendResult) -> MEMessageEncodingResult {
         switch result {
         case .unchanged:

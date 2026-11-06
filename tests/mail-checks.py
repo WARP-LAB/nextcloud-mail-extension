@@ -51,7 +51,7 @@ CHECKS = {
 }
 
 DEFAULTS = {'sharing': 'folder', 'placement': 'whereEachFileWas', 'linkStyle': 'viewAndDownload',
-            'folderLinks': False, 'onlyLargeFiles': False, 'pastedImagesBecomeLinks': True}
+            'folderLinks': False, 'onlyLargeFiles': False, 'pastedImagesBecomeLinks': True, 'warningPhrases': []}
 
 
 def mail(*arguments, capture=False):
