@@ -17,7 +17,7 @@ Risk register: `docs/RISKS.md`.
 > - Write Acceptance Criteria or a explicit Definition of Done
 > - Take tasks in order unless told otherwise. Do not start the next task without being asked.
 
-None. T1b waits for the user, T2 for OD7, T3b for OD8 and T5 for OD9.
+None. T1b and T9b wait for the user, T2 for OD7, T3b for OD8 and T5 to T8 for OD9.
 
 ## ❓ Open Decisions (human to resolve)
 
@@ -52,6 +52,8 @@ Judgment calls and known risks are tracked separately in `docs/RISKS.md`.
   - **Acceptance:** Mail lists the extension, Sign is offered while the extension reports `canSign: true` and `canEncrypt: false` (R9), the toolbar popover shows the container and settings values the host app wrote, and the storage check passes, or the Keychain fallback is recorded in DECISIONS.md.
 - **T2: Settings and login (FR2).** The host app's settings UI, Nextcloud's browser login, the app password in the Keychain, and settings shared through the App Group. A "Test connection" button that makes the extension itself reach the server (R17, R18).
   - **Acceptance:** the extension reads the settings and the app password, and reaches the server.
+- **T9b: Check AGENTS.md in each agent tool (needs the user).** Open the repository once in each tool you use, ask what the repository's instructions say about commits, and note any tool that doesn't know. Claude Code 2.1.310 is checked, because this session loaded AGENTS.md. For Copilot in VS Code, `chat.useAgentsMdFile` must be on.
+  - **Acceptance:** each tool you use answers from AGENTS.md, or D15 records what it needs.
 - **T3b: Enforced server settings (needs OD8).** Server tests with an enforced expiry maximum and enforced passwords, switched on for the test run and off again (R19).
   - **Acceptance:** both behave as NEXTCLOUD.md says, or NEXTCLOUD.md is corrected, and the test server's settings are back as they were.
 - **T5: Send flow (FR1, FR10).** `encode()` with the upload ledger, the failure memo and the Mail Drop clean-up, with files decoded to temporary files (R5). Needs OD9. Deleted files go to the trash bin, where they still count against the quota (NEXTCLOUD.md).
@@ -62,12 +64,11 @@ Judgment calls and known risks are tracked separately in `docs/RISKS.md`.
   - **Acceptance:** the send-warning Mail checks pass.
 - **T8: Progress display.** A notification when uploads start and finish, or the host app's window (R3).
   - **Acceptance:** a slow upload shows progress, and its end, without the user having to watch Mail.
-- **T9: AGENTS.md in every agent tool.** Check which of the eleven agent tools in `writing-agent-skills` read `AGENTS.md` themselves, and add a pointer file for those that don't.
-  - **Acceptance:** each tool loads the repository's instructions, checked once in each.
 
 ## ✅ Completed Tasks (Done)
 
 - **Probing Mail with MailProbe (2026-11-05).** Four rounds of tests found what Mail does with an extension. See `probe/docs/` and `docs/MAIL.md`.
+- **T9: AGENTS.md in every agent tool (2026-11-06).** Verified from each tool's docs that all eleven read a root `AGENTS.md`, recorded in D15. `CLAUDE.md` imports it for older Claude Code versions. Claude Code 2.1.310 loaded AGENTS.md in this session. The check in the other tools moved to T9b.
 - **T3: Nextcloud client (2026-11-06).** Verified: `scripts/test-nextcloud.sh` passes 7 server tests on the test server, Nextcloud 35.0.2. They cover the browser login's start, app passwords and revoking them, folders, uploads that refuse to overwrite, shares with working view and download links, expiry dates, share passwords and the policy's refusal, password pages, the folder zip, one file from a folder share, and deletes. `swift test` passes 63 unit tests, lint is clean, the build has no warnings, and `scripts/nextcloud.sh` runs requests by hand. NEXTCLOUD.md records what the server did, including the limit of 20 new shares in 10 minutes (OD9, R21). The enforced settings moved to T3b.
 - **T4: Rewriter and link policy (2026-11-06).** Verified: `swift test` passes 46 tests over 12 anonymised fixtures. They cover every structure in MAIL.md: links in place in plain, rich, forwarded and first-call messages, the fallback list, folder links and the password notice above quotes, the size rule keeping other files byte for byte, signature and pasted images, accented names, and a message that is only a file. Unchanged messages come out byte for byte the same. Rewritten fixtures parse without defects in Python's `email` package. Lint is clean, the build has no warnings, and the storage check is unchanged.
 - **T1: Project skeleton (2026-11-06).** Verified: `scripts/build.sh` builds both targets signed with the Personal Team, with no warnings. `swift test` passes 4 tests, `scripts/lint.sh` is clean, and `scripts/install.sh` installs and registers the extension. The storage check passes for the App Group's container and settings, but not for the shared Keychain item, which needs OD7. The checks in Mail moved to T1b.

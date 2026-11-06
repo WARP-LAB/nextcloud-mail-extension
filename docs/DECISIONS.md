@@ -72,3 +72,24 @@ Settled decisions, and why they were made. The current design is in [ARCHITECTUR
 
 - **Decision:** Nextcloud tests run against the test server and account the user gave, which resolves OD2. Its URL, login, password and upload directory are in the git-ignored `.env`, with `.env.example` as the template. Tests upload only into that directory, each run in its own folder, and delete what they made. They log in with an app password made from the account password, and revoke it at the end.
 - **Why:** the user's choice. A file outside the repository keeps the credentials out of git, and an app password per run means the account password isn't used for the requests themselves.
+
+## D15: AGENTS.md is the one instruction file (2026-11-06)
+
+- **Decision:** every agent tool gets its instructions from `AGENTS.md` at the repository root. `CLAUDE.md` only imports it, with `@AGENTS.md`. No other pointer files.
+- **Why:** each of the eleven tools in the `writing-agent-skills` skill reads a root `AGENTS.md` itself, checked in their docs on 2026-11-06:
+
+  | Tool | How it reads AGENTS.md |
+  | --- | --- |
+  | OpenCode | [Rules](https://opencode.ai/docs/rules): `AGENTS.md` first, `CLAUDE.md` only without one |
+  | Command Code | [Memory](https://commandcode.ai/docs/reference/memory): `./AGENTS.md` or `./.commandcode/AGENTS.md` |
+  | Cline | [Cline rules](https://docs.cline.bot/features/cline-rules/overview): after `.clinerules`, and always |
+  | Kilo Code | [AGENTS.md](https://kilo.ai/docs/customize/agents-md): the root file, and per folder when reading files there |
+  | Pi | Loads `AGENTS.md` from the current and parent directories at startup, and lists them in its header |
+  | Claude Code | [Memory](https://code.claude.com/docs/en/memory#agents-md): from v2.1.277, when there's no `CLAUDE.md`. Older versions, and some sessions, read only `CLAUDE.md`, hence the import, which never loads the file twice |
+  | OpenAI Codex | The tool `AGENTS.md` comes from |
+  | GitHub Copilot | The coding agent, and VS Code with its `chat.useAgentsMdFile` setting on |
+  | Cursor | [Rules](https://cursor.com/docs/rules): a root `AGENTS.md`, as an alternative to `.cursor/rules` |
+  | Cognition Devin | Reads `AGENTS.md` at the repository root once the repository is indexed |
+  | Amazon Kiro | Steering: a root `AGENTS.md` is always included |
+
+  One file means the instructions can't drift apart. A tool-specific file would only be needed for rules that differ by tool, and there are none.
