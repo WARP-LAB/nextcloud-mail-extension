@@ -96,6 +96,9 @@ The extension's requests are subject to macOS's Local Network privacy, found in 
 ## Installing and AppleScript
 
 - **Replacing the extension while Mail runs:** Mail kept using its connection to the old copy. Its log said "other version in use", and the next send stopped with Mail's own alert, "An error occurred while trying to encrypt your message", without reaching the extension. Quitting and reopening Mail fixed it (T5b, 2026-11-06).
+- **Undo Send needs the Send button:** a message sent with AppleScript's `send` goes out at once, without Undo Send. After a click on the window's Send button, Edit > Undo Send undoes it during the undo send delay, 10 seconds by default. The menu only shows Undo Send once it's opened, and reads as a disabled Undo before (T5c).
+- **Send Later:** Message > Send Later offers tonight at 21:00, tomorrow at 08:00, or a time to choose. The first time, Mail confirms with a sheet that the message goes out at the scheduled time, and `encode()` runs after that. The scheduled copy, already with the links, waits in the local SendLater mailbox (T5c).
+- **Replies made in Mail's window** aren't among AppleScript's outgoing messages, so AppleScript can't add files to them (T5c).
 - **AppleScript sends go through the extension:** a message that AppleScript made, gave a file and sent from a visible window reached `encode()` with Sign on, so Mail checks can be run without a person at the keyboard ([TESTING.md](TESTING.md#driving-mail-from-the-command-line)). The extension's errors appear in that window as usual, and need a click on OK.
 
 ## The toolbar popover

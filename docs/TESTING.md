@@ -79,7 +79,9 @@ Without Accessibility, the checks that need Mail's windows stay with the user: U
 - **Debug options:** the Debug build's `--render-window` draws the settings window off screen and prints it as a PNG in base64, which needs no Screen Recording, and its `--settings [<json>]` prints and changes the settings, and `--debug-dumps on|off|take` keeps copies of what Mail passes `encode()` for messages whose subject has `[ncam`, so a check can see each call's structure. Turn the dumps off afterwards.
 - **What AppleScript can't make:** its messages have the text first and the files after it, with no pasted images, and its replies have no quote, so those structures still come from the fixtures and from the user.
 - **Signature check:** `NCAM_MAIL_SIGNATURE` in `.env` names a signature with an image, which the check chooses, since Mail's default can change.
-- **Leftover windows:** a send that fails leaves its message window open, and AppleScript can't close it, so close it by hand.
+- **Leftover windows:** a send that fails leaves its message window open, and AppleScript can't close it. With Accessibility, its close button and then Don’t Save, with a curly apostrophe, close it.
+- **Window checks:** `python3 tests/mail-window-checks.py [check …]` runs T5c's checks through System Events: an upload failure's alert (t7), Undo Send (t21), Send Later (t22), a pasted image (t30), a reply's quote (t34), and Mail Drop with Try Sending in Email (t38) and Use Mail Drop (t39). It brings Mail to the front, and checks that it is, before every key press, so keys never reach another app. It never ticks "Don't ask again". Send Later schedules the email for 21:00, when Mail sends it. The clipboard is used for pasting and put back afterwards, when it held text.
+- **Pasting into a message:** a click on the body doesn't reliably move the keyboard focus there. Setting the body's web area `AXFocused` through Accessibility does.
 
 ## After a macOS or Mail update
 

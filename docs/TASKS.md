@@ -17,7 +17,7 @@ Risk register: `docs/RISKS.md`.
 > - Write Acceptance Criteria or a explicit Definition of Done
 > - Take tasks in order unless told otherwise. Do not start the next task without being asked.
 
-None. T5c is next: the user turned on Accessibility for Visual Studio Code, which takes effect once VS Code restarts. Then T6.
+None. T6 is next.
 
 ## ❓ Open Decisions (human to resolve)
 
@@ -41,8 +41,6 @@ Judgment calls and known risks are tracked separately in `docs/RISKS.md`.
 
 ## 📋 Backlog (To Be Done)
 
-- **T5c: The rest of T5's Mail checks (needs the user, or Accessibility for the agent).** What AppleScript alone can't do (docs/TESTING.md): an upload failure's alert (t7), Undo Send and sending again (t21), Send Later (t22), an email over the account's size limit with Try Sending in Email (t38) and with Use Mail Drop (t39), a pasted image (t30), and a reply's links above its quote (t34, since AppleScript replies have no quote). The user looked at the delivered emails in Gmail on the web and Outlook, and they looked right, except that View opens the folder rather than the file (OD10).
-  - **Acceptance:** FR1's failure case and FR10's criteria hold, and nothing uploaded for the Mail Drop email is left on Nextcloud.
 - **T6: Password popover (FR7).** The popover's password field, kept per message in memory and the Keychain (R8).
   - **Acceptance:** the password Mail checks pass, and the links need the password.
 - **T7: Send warnings (FR5, FR6).** Both warnings in the send check (R10).
@@ -55,6 +53,7 @@ Judgment calls and known risks are tracked separately in `docs/RISKS.md`.
 ## ✅ Completed Tasks (Done)
 
 - **Probing Mail with MailProbe (2026-11-05).** Four rounds of tests found what Mail does with an extension. See `probe/docs/` and `docs/MAIL.md`.
+- **T5c: The rest of T5's Mail checks (2026-11-06).** Run by the agent with `tests/mail-window-checks.py`, through System Events. All passed: an upload failure's alert named the server's reason, kept the window open with its file, and sending again went through (t7). Undo Send brought the window back, and sending again reused the upload, with one folder on Nextcloud (t21). Send Later uploaded the file at scheduling, and the scheduled copy in the SendLater mailbox had working links (t22, twice; the second run checked by hand after the script's sheet handling was fixed, and both emails go out at 21:00). A pasted image became links to a PNG (t30). A reply made in Mail's window kept its quote, with the file's links above it (t34). Over the size limit, Try Sending in Email gave a small email whose 30 MB file downloaded intact (t38), and Use Mail Drop gave Mail Drop's link with nothing left on Nextcloud (t39). "Don't ask again" was never ticked. The user found the emails right in Gmail on the web and Outlook.
 - **T11: Phrases as tags (2026-11-06).** The user's request: the FR6 field turns each word or phrase entered with Return into a bubble with an x. Verified: the window drawn with `--render-window` shows three tags, one of two words, with their x buttons, and the custom period's fields, with "hour" for 1. The build has no warnings, lint is clean, and a Mail check passed on the installed build, whose folder carried the new time-stamped name.
 - **T12: Custom expiry periods (2026-11-06).** The user's request: a custom period of years, months, days and hours. Verified: `swift test` passes 112 unit tests, with periods counted from the time of sending, hours crossing midnight or not, a mixed period, the server's maximum, and stored settings from before the change. The build has no warnings and lint is clean. Tested on the server that Nextcloud drops a time of day, which the setting now explains.
 - **T10: Folder names with the time (2026-11-06).** The user's request: `<yyyy-MM-dd-HH-mm-ss> <subject>`, so that emails with the same subject on one day don't clash (D19). Verified: `swift test` passes 110 unit tests with the new names. The View link the user asked about at the same time is OD10.
