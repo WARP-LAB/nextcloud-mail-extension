@@ -29,15 +29,16 @@ How changes get checked before they count as done. The parts of Mail's behaviour
 
 ## Nextcloud tests
 
-Run against the test server and account only (open decision OD2), with credentials kept outside the repo, for example in environment variables or the Keychain. Cover every request in [NEXTCLOUD.md](NEXTCLOUD.md):
+Run against the test server and account only (D14), whose credentials are in the git-ignored `.env`. `scripts/test-nextcloud.sh` loads it and runs `tests/NextcloudServerTests`, which `swift test` alone skips. Each test makes its own app password and its own folder inside `NCAM_TEST_DIRECTORY`, and deletes both. The deleted folders stay in the account's trash bin. They cover every request in [NEXTCLOUD.md](NEXTCLOUD.md):
 
-- login and the app password
+- the browser login's start, the app password, and revoking it
 - folders and uploads, including the refusal to overwrite an existing file
 - shares with and without a password, and their view and download links
-- an enforced expiry maximum, enforced passwords, and a password the policy rejects
+- expiry dates, and a password the policy rejects
 - the password page, and the zip from a folder share
+- not yet: an enforced expiry maximum and enforced passwords, which need the server's settings changed (OD8)
 
-Record what the server really did in NEXTCLOUD.md (R19).
+One run creates 7 shares, and Nextcloud allows 20 in 10 minutes, so a third run within 10 minutes fails with 429 ([NEXTCLOUD.md](NEXTCLOUD.md#rate-limit)). `scripts/nextcloud.sh` runs single requests by hand with the same `.env`. Record what the server really did in NEXTCLOUD.md (R19).
 
 ## Mail checks
 

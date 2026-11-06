@@ -26,7 +26,7 @@ The extension's toolbar button in the message window opens a popover, where the 
 | `LinkPolicy` | Extension | Decide which files become links (FR3) and which count as attachments (FR6) | Done for FR3: [LinkPolicy.swift](../Shared/Links/LinkPolicy.swift) |
 | `LinkRewriter`, `LinkText` | Extension | Put each file's links in the message (FR8), and the links to all files and the password notice (FR7, FR9) | Done: [Shared/Links/](../Shared/Links/) |
 | `TextCheck` | Extension | Find FR6 phrases in the text the user wrote | New |
-| `NextcloudClient` | Both | Login, folders, uploads, shares, server limits | New |
+| `NextcloudClient` | Both | Login, folders, uploads, shares, server limits | Done: [Shared/Nextcloud/](../Shared/Nextcloud/), with `LinkExpiry` (FR4) and `NextcloudNames` (FR2) |
 | `UploadLedger` | Extension | Remember each message's folder and finished uploads | New |
 | `MessagePasswords` | Extension | Passwords typed in the popover | `PopoverPasswords` in the probe's compose handler |
 | `Settings`, `Credentials` | Both | Shared settings and the app password | New |
@@ -109,7 +109,8 @@ The requests are in [NEXTCLOUD.md](NEXTCLOUD.md).
 
 - **Folders (FR2):** name each message's folder `<yyyy-MM-dd> <subject>`, inside the settings' directory. Shorten the subject to 60 characters, replace `/` and `\`, and trim spaces and dots from the ends. Use `Email` if there's no subject. If the folder exists, add a number, as in `2026-11-05 Report (2)`. Recipients see this name on the folder's page, and probably as the zip's name. Two different files with the same name in one message get an index.
 - **Uploads:** always upload with `If-None-Match: *`, so a file that older links point to is never overwritten.
-- **Shares (FR8, FR9):** create one share per file, plus one for the folder when FR9 applies. A folder share alone has no view page for a single file.
+- **Shares (FR8, FR9):** create one share per file, plus one for the folder when FR9 applies. A folder share alone has no view page for a single file. Nextcloud allows each user only 20 new shares in 10 minutes, so this may change (OD9, R21).
+- **Requests:** every request sends Basic auth with the app password, and the client keeps no cookies, because Nextcloud's session cookie is tied to the app password that made it ([NEXTCLOUD.md](NEXTCLOUD.md#requests)). A 401 means the app password no longer works, and a 429 means the share limit was reached. Both stop the send with their own message.
 - **Expiry (FR4):** send every share an explicit `expireDate`. For a week, month, year, or a custom number of days, months or years, use today plus that period by calendar. For never, send an empty string. Read the server's limits first, and shorten the date to the maximum when one is enforced. Show the `expiration` the server returns next to each link, never the requested date. The folder share gets the same date as the file shares.
 - **Passwords (FR7):** send the email's password with every share. If the server enforces passwords and there's none, stop the send with an alert asking for one. If the password policy rejects the password, stop the send with the server's reason.
 

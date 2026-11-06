@@ -1,49 +1,82 @@
 # Nextcloud API
 
-The Nextcloud requests the design in [ARCHITECTURE.md](ARCHITECTURE.md) uses, and how the server behaves. The share, password and expiry behaviour was read from the Nextcloud server's source code on 2026-11-05: `ShareAPIController.php`, `Manager.php`, `Capabilities.php`, `ShareController.php`, `AuthPublicShareController.php` and the password policy app's `PasswordPolicyConfig.php`. The rest is standard API use. None of it has been run against a server yet (R19), so update this file with what testing finds.
+The Nextcloud requests the design in [ARCHITECTURE.md](ARCHITECTURE.md) uses, and how the server behaves. The share, password and expiry behaviour was first read from the Nextcloud server's source code on 2026-11-05: `ShareAPIController.php`, `Manager.php`, `Capabilities.php`, `ShareController.php`, `AuthPublicShareController.php` and the password policy app's `PasswordPolicyConfig.php`.
+
+Everything here was then run against the test server (D14) on 2026-11-06, which runs Nextcloud 35.0.2, except an enforced expiry maximum and enforced passwords, which need the server's settings changed (OD8, R19). The server tests in `tests/NextcloudServerTests` repeat these checks.
 
 ## Requests
 
-| Step | Request | Notes |
+| Step | Request | What the server did |
 | --- | --- | --- |
-| Log in | Login Flow v2: `POST /index.php/login/v2`, open the returned URL in the browser, then poll for `server`, `loginName` and `appPassword` | The extension never sees the user's password |
-| Find the user ID | `GET /ocs/v2.php/cloud/user` | WebDAV paths need the ID, which can differ from the login name |
+| Log in | Login Flow v2: `POST /index.php/login/v2` returns `login`, the page to open in the browser, and `poll` with `endpoint` and `token`. Then `POST` the token to the endpoint until it returns `server`, `loginName` and `appPassword` | The endpoint answers 404 until the user has logged in. The extension never sees the user's password |
+| Log out | `DELETE /ocs/v2.php/core/apppassword` | 200. The app password then gets 401 |
+| Find the user ID | `GET /ocs/v2.php/cloud/user` | Its `id` is what WebDAV paths need, which can differ from the login name |
 | Read server limits | `GET /ocs/v2.php/cloud/capabilities` | See [Capabilities](#capabilities) |
-| Create a folder | `MKCOL /remote.php/dav/files/<user>/<path>` | Fails when the folder exists |
-| Upload | `PUT /remote.php/dav/files/<user>/<path>/<name>`, with `If-None-Match: *` | The header makes the server refuse to overwrite an existing file |
-| Share a file or folder | `POST /ocs/v2.php/apps/files_sharing/api/v1/shares` with `path`, `shareType=3` (public link), `expireDate`, and `password` if set | The response gives `id`, `url` and `expiration` |
-| Change a password | `PUT /ocs/v2.php/apps/files_sharing/api/v1/shares/<id>` with `password` | |
-| Delete a share or file | `DELETE /ocs/v2.php/apps/files_sharing/api/v1/shares/<id>`, `DELETE /remote.php/dav/files/<user>/<path>` | |
+| Create a folder | `MKCOL /remote.php/dav/files/<user>/<path>` | 201. 405 when the folder exists, 409 when its parent doesn't |
+| Upload | `PUT /remote.php/dav/files/<user>/<path>/<name>`, with `If-None-Match: *` | 201. 412 when the file exists, because of the header, and 409 when its folder doesn't |
+| Share a file or folder | `POST /ocs/v2.php/apps/files_sharing/api/v1/shares` with `path`, `shareType=3` (public link), `expireDate`, and `password` if set | The response's `data` has `id` (a string), `token`, `url` and `expiration`. See [Rate limit](#rate-limit) |
+| Change a password | `PUT /ocs/v2.php/apps/files_sharing/api/v1/shares/<id>` with `password` | 200. The old password stops working at once |
+| Delete a share | `DELETE /ocs/v2.php/apps/files_sharing/api/v1/shares/<id>` | 200, then the link gives 404. Again: 404, "Wrong share ID, share does not exist" |
+| Delete a file or folder | `DELETE /remote.php/dav/files/<user>/<path>` | 204, and 404 when it's gone. It goes to the user's trash bin, where it still counts against the quota until the trash expires. Deleting a folder deletes its shares too |
 
-OCS requests need the header `OCS-APIRequest: true`. Single `PUT` requests may hit server or proxy limits on very large files. Nextcloud also has a chunked upload API for those.
+- **Headers:** OCS requests need `OCS-APIRequest: true`, and `Accept: application/json` for JSON. Each request sends Basic auth with the login name and the app password.
+- **Errors:** OCS errors have the HTTP status, and `ocs.meta.message` gives the reason. WebDAV errors give it in `<s:message>`, such as "The resource you tried to create already exists".
+- **Names:** WebDAV paths are percent-encoded name by name. Names with accents, spaces, `#` and `%` uploaded and downloaded unchanged.
+- **Cookies:** the server sets a session cookie tied to the app password that made the request. A client that keeps cookies and then uses another app password, or one that was revoked, gets 401. The client keeps no cookies.
+- **Large files:** single `PUT` requests may hit server or proxy limits on very large files. Nextcloud also has a chunked upload API for those. The test server's `files.chunked_upload.max_size` is 100 MB.
+- **Testing without a browser:** `GET /ocs/v2.php/core/getapppassword` with the account password returns an app password. Only the tests and the command-line tool use it (D14).
 
 ## Capabilities
 
-- **`files_sharing.public.expire_date`:** whether link shares get an expiry date by default (`enabled`), the default number of days (`days`), and whether that is a maximum (`enforced`).
+- **`files_sharing.public.expire_date`:** whether link shares get an expiry date by default (`enabled`), the default number of days (`days`), and whether that is a maximum (`enforced`). With `enabled` false, the other two are left out.
 - **`files_sharing.public.password.enforced`:** whether link shares must have a password.
+- **`password_policy`:** the password policy app's rules, such as `minLength`.
+- **`version.string`:** such as `35.0.2`.
+
+The test server has no default expiry and no enforced password. Its password policy asks for 10 characters, and rejects common passwords and ones found in Have I Been Pwned.
+
+## Rate limit
+
+Nextcloud 34 and 35 allow each user 20 share creations in 10 minutes: `createShare` has `#[UserRateLimit(limit: 20, period: 600)]`. Refused attempts count too. The 21st gets HTTP 429 "Too Many Requests", seen when the server tests ran twice in a row. Uploads, folders and password changes aren't limited this way.
+
+An admin can raise the limit in `config.php`:
+
+```php
+'ratelimit_overwrite' => [
+    'files_sharing.shareapi.createshare' => ['user' => ['limit' => 200, 'period' => 600]],
+],
+```
+
+How the extension stays within the limit is open (OD9, R21).
 
 ## Share links
 
 | Link | URL |
 | --- | --- |
 | View a shared file | The share's `url`, which is `/s/<token>` |
-| Download a shared file | `/s/<token>/download`, which redirects to `/public.php/dav/files/<token>` |
+| Download a shared file | `/s/<token>/download`, which answers 303 to `/public.php/dav/files/<token>` |
 | View a shared folder | The folder share's `url` |
-| Download a shared folder | The folder share's `/s/<token>/download`, which redirects with `accept=zip` and gives one zip file |
+| Download a shared folder | The folder share's `/s/<token>/download`, which answers 303 to `/public.php/dav/files/<token>?accept=zip` |
+| Download one file from a folder share | `/s/<token>/download?files=<name>` |
 
-- **Password pages:** a visitor without the password of a protected share is sent to `/s/<token>/authenticate/<redirect>`, then continues to the page or download.
+- **Folder zips:** `application/zip`, named `<folder>.zip`, with the folder as the zip's top level. Names are UTF-8 with the zip's UTF-8 flag set, so macOS's Archive Utility shows accents correctly. The old `unzip` command doesn't.
+- **Password pages:** without the password, the view link goes to `/s/<token>/authenticate/showshare` and the download link to `/s/<token>/authenticate/downloadshare`. Both are password pages with status 200, so a script downloading the link gets HTML, not the file.
+- **Public WebDAV:** `/public.php/dav/files/<token>` accepts Basic auth with the user `anonymous` and the share's password. A wrong password gives 401.
 - **Hidden downloads:** a share with "hide download" set fails to download. Shares created without that setting are unaffected.
-- **Single files from a folder share:** `/s/<token>/download?files=<name>` downloads one file, but there's no view page for a single file inside a folder share.
+- **No view page for one file in a folder share.** Whether a link can open one file in the folder's page is untested.
 
 ## Passwords
 
 - **No password:** an empty `password` means none.
-- **Enforced passwords:** when the server enforces passwords, creating a share without one fails with "Passwords are enforced for link and mail shares".
-- **Password policy:** the password policy app can reject a password with a 400 response and a reason. Its default minimum is 10 characters, and admins can add rules.
+- **Enforced passwords:** when the server enforces passwords, creating a share without one fails with "Passwords are enforced for link and mail shares" (from the source, OD8).
+- **Password policy:** a rejected password gets 400, with every broken rule in one message, such as "Password is among the 1,000,000 most common ones. Please make it unique. Password needs to be at least 10 characters long. Password is present in compromised password list. Please choose a different password." Changing a share's password to a weak one is rejected the same way.
 
 ## Expiry
 
-- **`expireDate`** takes a date as `YYYY-MM-DD`. A link expires at 23:59:59 on that date, in the server's or account's time zone.
-- **Omitting it** applies the server default. An empty string means no expiry.
-- **Enforced maximum:** "no expiry" silently becomes the server default, and a later date is rejected with "Cannot set expiration date more than %n days in the future".
+- **`expireDate`** takes a date as `YYYY-MM-DD`. The response's `expiration` is that date at `23:59:59`, when the link expires, in the server's or account's time zone.
+- **An empty string** means no expiry, and `expiration` is null.
+- **Omitting it** applies the server default. With none, as on the test server, the link doesn't expire.
+- **A date far ahead,** such as 2099-01-01, is accepted when there's no enforced maximum.
+- **A date in the past** gets 404, "Expiration date is in the past".
+- **Enforced maximum:** "no expiry" silently becomes the server default, and a later date is rejected with "Cannot set expiration date more than %n days in the future" (from the source, OD8).
 - **After expiry:** the share is deleted when someone next opens it, but the file stays in its folder.

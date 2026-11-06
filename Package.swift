@@ -14,6 +14,18 @@ let package = Package(
             path: "tests/NextcloudAppleMailSharedTests",
             resources: [.copy("Fixtures")]
         ),
+        // Run against the test server in .env by scripts/test-nextcloud.sh, and skipped without it.
+        .testTarget(
+            name: "NextcloudServerTests",
+            dependencies: ["NextcloudAppleMailShared"],
+            path: "tests/NextcloudServerTests"
+        ),
+        // The command-line tool for running Nextcloud requests by hand, through scripts/nextcloud.sh.
+        .executableTarget(
+            name: "ncam-nextcloud",
+            dependencies: ["NextcloudAppleMailShared"],
+            path: "tools/ncam-nextcloud"
+        ),
     ],
     swiftLanguageModes: [.v5]
 )
