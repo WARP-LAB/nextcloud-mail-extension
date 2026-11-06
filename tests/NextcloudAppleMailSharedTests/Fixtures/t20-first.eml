@@ -1,0 +1,93 @@
+From: Test Sender <sender@example.test>
+Content-Type: multipart/alternative;
+	boundary="Apple-Mail=_8DD94188-F66A-46A5-A0CA-DCAD5E80B295"
+Mime-Version: 1.0 (Mac OS X Mail 16.0 \(3901.100.1.1.12\))
+Subject: [probe ff] t20
+X-Universally-Unique-Identifier: 00000000-0000-4000-8000-000000000001
+Message-Id: <fixture@example.test>
+References: <recipient@example.test>
+To: Test Recipient <recipient@example.test>
+Date: Thu, 5 Nov 2026 12:00:00 +0200
+
+
+--Apple-Mail=_8DD94188-F66A-46A5-A0CA-DCAD5E80B295
+Content-Transfer-Encoding: 7bit
+Content-Type: text/plain;
+	charset=us-ascii
+
+
+--Apple-Mail=_8DD94188-F66A-46A5-A0CA-DCAD5E80B295
+Content-Type: multipart/related;
+	type="text/html";
+	boundary="Apple-Mail=_0F6AF627-CFCB-450E-9C41-9EE52048207A"
+
+
+--Apple-Mail=_0F6AF627-CFCB-450E-9C41-9EE52048207A
+Content-Transfer-Encoding: quoted-printable
+Content-Type: text/html;
+	charset=utf-8
+
+<html aria-label=3D"message body"><head></head><body =
+style=3D"overflow-wrap: break-word; -webkit-nbsp-mode: space; =
+line-break: after-white-space;"><br =
+id=3D"lineBreakAtBeginningOfMessage"><div =
+class=3D"AppleOriginalContents"><br><blockquote type=3D"cite"><div>Begin =
+forwarded message:</div><br class=3D"Apple-interchange-newline"><div =
+style=3D"margin-top: 0px; margin-right: 0px; margin-bottom: 0px; =
+margin-left: 0px;"><span style=3D"font-family: -webkit-system-font, =
+Helvetica Neue, Helvetica, sans-serif; color:rgba(0, 0, 0, =
+1.0);"><b>From: </b></span><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif;">Test Sender &lt;sender@example.test&gt;<br></span></div><div =
+style=3D"margin-top: 0px; margin-right: 0px; margin-bottom: 0px; =
+margin-left: 0px;"><span style=3D"font-family: -webkit-system-font, =
+Helvetica Neue, Helvetica, sans-serif; color:rgba(0, 0, 0, =
+1.0);"><b>Subject: </b></span><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif;"><b>[probe =
+log] t1</b><br></span></div><div style=3D"margin-top: 0px; margin-right: =
+0px; margin-bottom: 0px; margin-left: 0px;"><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif; =
+color:rgba(0, 0, 0, 1.0);"><b>Date: </b></span><span style=3D"font-family:=
+ -webkit-system-font, Helvetica Neue, Helvetica, sans-serif;">5 November =
+2026 at 16:37:46 GMT+2<br></span></div><div style=3D"margin-top: 0px; =
+margin-right: 0px; margin-bottom: 0px; margin-left: 0px;"><span =
+style=3D"font-family: -webkit-system-font, Helvetica Neue, Helvetica, =
+sans-serif; color:rgba(0, 0, 0, 1.0);"><b>To: </b></span><span =
+style=3D"font-family: -webkit-system-font, Helvetica Neue, Helvetica, =
+sans-serif;">Test Recipient =
+&lt;recipient@example.test&gt;<br></span></div><br><div><div>[probe =
+log] t1<br><object type=3D"application/x-apple-msg-attachment" =
+width=3D"104" =
+data=3D"cid:74081ECE-E45D-41E2-BDBE-2BA7BE07058C"></object></div></div></b=
+lockquote></div><br></body></html>=
+
+--Apple-Mail=_0F6AF627-CFCB-450E-9C41-9EE52048207A
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment;
+	filename=dummy-1MB.bin
+Content-Type: application/macbinary;
+	x-unix-mode=0644;
+	name="dummy-1MB.bin"
+Content-Id: <74081ECE-E45D-41E2-BDBE-2BA7BE07058C>
+
+WPtBi2X37IYv2jsbXebR9O3s7FVmW3CoDHEeE3yq5Cs0axNTi01cmfoL8IPCXrhjuGK9WG/wAGJQ
+x2iFxhQiMkZyMYVcbBxnovS7LvyTXZ1G+fqN+da9bqiZHxPJVh0xpcTtramXPJkYJzyGZ8FzJ7Mt
+6wPOot075h16aVjzF5dq/yfzC7E6dJEyJy8gh+G2pjwAUBf7IERQ6twOIlkEvkpX8eQhRCxgUZSR
+CFmFtWt9f+7Zlm+NrtpR4DYFjVtdCvCy5aL34ZURTIU4jmCN3Bjpz4vaPL4UFaY/Ql6Rh7iuDlcK
+q2B8mfiIEco5Aiw9Y+5+FPGjzXAWJ9VBsuoZRUPpHrtrf/wRh9lnNVoizUpqRNBlA37aS2E63Of6
+K9R3LL2LlpvbpVCXu4x8a8I5+cNf2xdRtZSBX2a5eVhp5pdXM3MwHDx2jD6uXm1mAXOWaU8XEwiY
+A5jeA0iC5sq/6/jMMWgzxR/1Kzjpub1g6zfw6+18HdYKNsi3oUTQZzXtlWk5+INzQE6kmsUFVxEN
+rh1xkuClJNtAZaI7IYEzKtdE3G7yT7SRe7H6PUYZjsGzP3ClIAnvNaTL2URmmWTNNxZn4aWEBatt
+m5pjsIHR2IQJwXBiaaGNRZmpvdhwkxZG/PhljLpoPRJndcIVSyax3i+5CPwM/rpy+ayUrjCCJX2o
+31Ytld+jX3QUpdpYIMcJ6reUsTIeye3D80z79zbOuWPC7jy1f978kc7mHVE+BoLdGiG03f2QtOY2
+4KekYV7GtHW6Ec3u79UhTz4OWCObYg80l3af5TYsn4ZM/OV8ashgY9nEWnDdENUGQ9gyDhMFQTIE
+BMX0QUEdhbYw3GOUkgPVGBz3L9Bj5oHn7Csbt/pvkhdHGrrOmtkgVM0cpYS92+l5fK0IxyQP3WvY
+Obc1/Kcxdlq0MBjipAqRcDTUu/y65bwIpw/q0ifHgpGIXYm4AwajLQxDnbcklpq5FGyf7S6W+yBQ
+Xbnr/Btr2oIgtFou47lF6UApP3/bCnbt+HNU2LEV5aMIlX7F/6WIGu0MUfRQNW80qqR4IanhT+kg
+qn37Vcj0LAhFlLtU3gvTmb2HE6nm3xKpjGtDdgyOyUgcDvkOAE79yfv9izc+YyC2W7wl2pVuyeS7
+t7U5t6kNhOab4+NykMWzkiorQjDXwyJGQ8LG0T3hURhLjwfWiMe30RFVQtnIxksWUhSTat0RdOpA
+5idKrrexqSDcMyawfqL5IYK6XnHBgJqSR2ioCKLYJf0zYJFjr6meS+zgs5KkN44riUki9zYaHmJf
++jxu+MQ4N/Gj/oE8EjdYKaD12tZar+cVOEKTWv/3uw==
+
+--Apple-Mail=_0F6AF627-CFCB-450E-9C41-9EE52048207A--
+
+--Apple-Mail=_8DD94188-F66A-46A5-A0CA-DCAD5E80B295--

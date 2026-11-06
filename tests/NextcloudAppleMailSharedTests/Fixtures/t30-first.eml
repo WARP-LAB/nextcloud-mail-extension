@@ -1,0 +1,86 @@
+From: Test Sender <sender@example.test>
+Content-Type: multipart/alternative;
+	boundary="Apple-Mail=_8119C51B-C628-4D10-A650-191525A80661"
+Mime-Version: 1.0 (Mac OS X Mail 16.0 \(3901.100.1.1.12\))
+Subject: [probe log] t30
+X-Universally-Unique-Identifier: 00000000-0000-4000-8000-000000000001
+Message-Id: <fixture@example.test>
+Date: Thu, 5 Nov 2026 12:00:00 +0200
+To: Test Recipient <recipient@example.test>
+
+
+--Apple-Mail=_8119C51B-C628-4D10-A650-191525A80661
+Content-Transfer-Encoding: 7bit
+Content-Type: text/plain;
+	charset=us-ascii
+
+
+--Apple-Mail=_8119C51B-C628-4D10-A650-191525A80661
+Content-Type: multipart/related;
+	type="text/html";
+	boundary="Apple-Mail=_92D3460A-3BD9-4130-94A6-A24F05783718"
+
+
+--Apple-Mail=_92D3460A-3BD9-4130-94A6-A24F05783718
+Content-Transfer-Encoding: 7bit
+Content-Type: text/html;
+	charset=us-ascii
+
+<html aria-label="message body"><head></head><body style="overflow-wrap: break-word; -webkit-nbsp-mode: space; line-break: after-white-space;">[probe log] t30<div><br></div><div><img src="cid:7E6EEE94-EAA6-4346-905F-50AA58324FEA" alt="dummy-1MB.png" data-unique-identifier="3c4b66da-a205-4bb1-8fee-378f6c55e5e5" data-width="560"></div><div><br></div><img width="476" alt="PastedGraphic-1.png" src="cid:2892C84E-A67F-48B5-9D61-0B9BF958A534" data-unique-identifier="40446b93-fdd2-465c-9343-92d326dcb1ad" data-width="476"><br><br><div id="AppleMailSignature">
+<meta charset="UTF-8"><div class="ApplePlainTextBody" style="caret-color: rgb(0, 0, 0); color: rgb(0, 0, 0); font-family: Helvetica; font-size: 12px; font-style: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration: none;">Any attachments are&nbsp;confidential.</div><br class="Apple-interchange-newline"><span class="Apple-string-attachment"><img alt="Screenshot 2026-11-05 at 22.00.04.png" src="cid:AEF717F0-8F04-44D2-82FC-5268AA0673D5" data-unique-identifier="e31abf05-f166-43ac-af45-3dedc73ae0c0" data-width="789"></span>
+</div>
+<br></body></html>
+--Apple-Mail=_92D3460A-3BD9-4130-94A6-A24F05783718
+Content-Transfer-Encoding: base64
+Content-Disposition: inline;
+	filename="Screenshot 2026-11-05 at 22.00.04.png"
+Content-Type: image/png;
+	name="Screenshot 2026-11-05 at 22.00.04.png"
+Content-Id: <AEF717F0-8F04-44D2-82FC-5268AA0673D5>
+
+xHdN/hyIiZUOaVeKKwNLtFOCy6F5iizP1ZZhfsUysLb+Prm6UW0t/r2JhyYWLYeAsaToEBYXJ7Ux
+1/6WK8kPubcOizCnd1nmd9HXB1XrJ9h1tUuQibMaCCDNHCZAT/G8RMV3+g==
+
+--Apple-Mail=_92D3460A-3BD9-4130-94A6-A24F05783718
+Content-Transfer-Encoding: base64
+Content-Disposition: inline;
+	filename=dummy-1MB.png
+Content-Type: image/png;
+	x-unix-mode=0644;
+	name="dummy-1MB.png"
+Content-Id: <7E6EEE94-EAA6-4346-905F-50AA58324FEA>
+
+YT9oC5hOIYmULTFklYgB42Er5Rp//0NN5rc2LCuxDlLFkAu7VI3bmqBzyhEl9bE7H+XzkS1lWhu+
+01MFgYSlkMWxVRp3jJLWc81guuSxaYnQs5jTYBj9/1akheIch16kCqJX5TAkZMrHwHk0bTx7QNl4
+d3YV6J6+qPQQjinZgPElZSqQbSfNe+kOc83AKY0yHP6hbo4VWQxIT/LQAiu54W1hTDeRPC+ugU7u
+tBoumJcSsf9HlL4HJ3Xp5h4oNFRvTS7RzQIwCxRdy82QDPXAdjZBjLX9tfDsgESkpcfv3r08Cas6
+95iGG9mdylkiweI8SHAM2W7mP/7kwgrJdsX6zqU4PJpEt6Zm5LhUE/Mgq39njVo1ZiQvBQlmrtw9
+0H1NNOJZ17LvJ1ngQbpjSiWQ7ULxuU3i2pEUjwS1YJwI6fUQ8RrqITVBx3d1nZjUVWGhYwEKf0Yt
+tKGxGA34G9TYhQZ71DxoNXD3gs5PUECOpJTZGdVTefSVfRZww4giFoiC6UaHKwNsKqLCz2S7sOou
+1htj5Kpi01x/uYZLxJHnuPbWX+ggbRtOYLV+VH8uBs1azdwFfgv49hWGRzqmZ6uYumZqwcT+yhFk
+qgIQlepKaqjHdXyjePZoeLBzlfNp7kqgjQ3LRgQsmm4zF5H/yZW+Lomnox4A7NRAFmKFVlFjQ10s
+W1pzbOg2tfJN79KxNxCIBezlPMACa4ch0/IBIZm+7aPTKmrVGKmcL5aqYZ/9N9QPt13XOzPwD1IW
+qVBkgft2FDAZw4UR5DaAzuadQ/0SrV6dqY6JJ3aNGELkI8Bc+ZgT34eNxsyfwK0uWOxJD8M5T++a
+Eu7UJpLaIzOzg4iNNcvCVmfc+r6196M/sirfvgbjis2mdqWcRehaqdy7Yd89YfwF8h9dtssKMxh4
+K9jGqbMveVgpC2SQFP36EozXJhUcegA48Pg4Hm8cwVmXZMgWFHsaqX01W7e9mHICEetJU4P82kC/
+KXbKgN2eZybxdE8izdDg04k0+eqQlp5isasP0FSmDN6s+HgCMunGVi9YENdDJYi1Oa58/+YmnssM
+eoTE5WhME6ITriUg0C2+SSJiLJ69fR6EzV/YwfPoTniDl3fyNY+EheNhxVuMloYdx0/KRhQC4gvU
+MrQJ0Xdsf/t3oQsN35toozLTaLbcl7QKmXBGK/ycPjDCEt3KpavGtFUwSDm4JbgQnWK5nHVEQrxo
+nGVYtP/kQ9GWjW19FP5sWazUQaprByslyPL030Xl7CavPcJzzfOY1hEFbwsfQzwxLc97Mc4DWhPo
+briu13PYK9zHvTraV+NTTohKsG5vlUq2AzXFjY0TVg==
+
+--Apple-Mail=_92D3460A-3BD9-4130-94A6-A24F05783718
+Content-Transfer-Encoding: base64
+Content-Disposition: inline;
+	filename=PastedGraphic-1.png
+Content-Type: image/png;
+	x-unix-mode=0666;
+	name="PastedGraphic-1.png"
+Content-Id: <2892C84E-A67F-48B5-9D61-0B9BF958A534>
+
+lOgG1qXBJuo8ZymVMvBhhRj4ro10GnjsuK43U7Pi+QTxXzClK8+2qNS2pnyUKfZB8vdZAXuPjNV6
+1vreNecWbw8jHEWRFTHDB6JZxBf6Xl1s74MNlr1UkoyhETakXL+Ny5UG3w==
+
+--Apple-Mail=_92D3460A-3BD9-4130-94A6-A24F05783718--
+
+--Apple-Mail=_8119C51B-C628-4D10-A650-191525A80661--

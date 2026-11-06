@@ -1,0 +1,94 @@
+From: Test Sender <sender@example.test>
+Content-Type: multipart/mixed;
+	boundary="Apple-Mail=_B6D9BE25-CBC2-44E0-9D61-18546210E723"
+Mime-Version: 1.0 (Mac OS X Mail 16.0 \(3901.100.1.1.12\))
+Subject: [probe ff] t15
+X-Universally-Unique-Identifier: 00000000-0000-4000-8000-000000000001
+Message-Id: <fixture@example.test>
+Date: Thu, 5 Nov 2026 12:00:00 +0200
+To: Test Recipient <recipient@example.test>
+
+
+--Apple-Mail=_B6D9BE25-CBC2-44E0-9D61-18546210E723
+Content-Transfer-Encoding: 7bit
+Content-Type: text/plain;
+	charset=us-ascii
+
+[probe ff] t15
+
+text above
+
+
+--Apple-Mail=_B6D9BE25-CBC2-44E0-9D61-18546210E723
+Content-Disposition: attachment;
+	filename=dummy-1MB.bin
+Content-Type: application/macbinary;
+	x-unix-mode=0644;
+	name="dummy-1MB.bin"
+Content-Transfer-Encoding: base64
+
+kO1kZea0bzNOup4nE/bzTnvMiGP29F/mbAuwhetgy17TVxVXkD+q3Aarp/4dCfo4saYA3XucImZT
+qE5V1P9MiCg3hYP2A6dYJjZ2Njm2RQZhMXGc3NT7kpp8Uw3PAmXec3dh0l5IpIXHUgivqAcFxQxN
+OdON/jWmrrPk8rrTnTTKlt4YbKXYZY4kbB8Z2oEQDcqh1pAAgBHcbKIQUzTo412bPVm/1EgGbiB8
+fls2BrV6vYDBSanlr+o77qtiWJ0swhWRr1LAr5xY5MA7evA7civXD8S+tdkVKk+0Pobzo1ef/kIX
+FhJ0OxvA6U+16besG6zBZiqE/SEtZrMDTjvY19Z8piT50olb4gtgUPXj5E0ossXlYNXA032RG+Zg
+3efy2at1luUk5jprfBaOsZw4Tspu9gu9voK+XDUQ0RYmifEqtCZ83KRr8uuNrCBsETntBAxryz2r
+6V6oy4hC9ArBqqLp3I+gzLCrQS6U4eZI9aMHIIzyOA5sNG7YHy5bZFCE+OaSNv+PAfnb7Y5a3QCa
+vHJ3+IxNzX/TXcTE0O7esvMD4QKaEJCzjUWQ0UbIwzlNUJQiINCm6AhQd6MsDiAVQIS81QFlXHQD
+66U37cCXo2PYaWdnmR9+EFPOzxKNZYsiFxs4fHmHO6hBwkXk17gVVnlZzdbNJu6Gi02PVVQ8ViQp
+HjrsER4GkwzjGqMf/7Xf4h4pSpqgCNTV997Q1CHbS+ayBG5I5g5b70iQfMVtI93jY0CoN+GGMM++
+JWsWoX6l/qh4/hkCPZlO8JpoiZw1I/nsqkJkb4auPNviIJDAGkQAZ//pvKFHUWbMfoSQ69/PqXck
+Ld9HDYXtjtNgzPC6utkmVMu50QGeu4lFIFENoVzj+DsuNq7AgdXpL5OutRDfOH4rOHdGXcin7/99
+uPL0Tfxjptvzv7oIwyLgK8Lryxfd5nEXWkWVZW4R0PNIPY+7PaNLV3x1UQIvQXr0tO+Ji9AiQSFw
+8WAmYAazaViNjNmaWSRfzA+tTfZF5fx2us+VjlflD90hHCQg3PnYA8jszJx7Jzid/yqV7b4rZ7iS
+ZsOrnKbaTJF+ni6xfvn/6kBbekS2e16ze7IGmLRUrby/zm2OmF772iKspwpu+qmNsq+rrLLMj7K0
+5ozI6b+IaiGt0UXHaAm1jjnG6WhY0QYzHE5aMs/fRi6R1H0LBEgZISD+EUGfHjTFrdOcsuMXq+oQ
+7BDAvXqDl1nXQHaPUa2HwQzfI6SCR7OxG4HmN5IF3Y7Kq0RbKEOxzBp4aw8dVCnkpuc2DxJ3A3+R
+v54FT3CNZoxhc1DRprvBfUeA2GvhWCKtoQfBe5r4Ug==
+
+--Apple-Mail=_B6D9BE25-CBC2-44E0-9D61-18546210E723
+Content-Transfer-Encoding: 7bit
+Content-Type: text/plain;
+	charset=us-ascii
+
+
+
+text in between
+
+
+--Apple-Mail=_B6D9BE25-CBC2-44E0-9D61-18546210E723
+Content-Disposition: attachment;
+	filename=dummy-1MB.bin
+Content-Type: application/macbinary;
+	x-unix-mode=0644;
+	name="dummy-1MB.bin"
+Content-Transfer-Encoding: base64
+
+Z5NqlEBXaSWKPJmAlBUJMmfS0/XKzaHIUF9DKqBkeT6oxG0Ojy8Ws/9xonthiJjRtwQ9FdmMqnEY
+V2erQV9EhpxJaJe/Avqq5E8IRqUPx4mShODR8JKpiLflOihPSwEi4f4oGHB2ZPzBqwtWvnfPIxzg
+EzOc4sDFY3nNxuncv7B6uSIuyljvJG+SIj1by6RbIHL4KAE7cuJ+mE/rztC0w32Qd799seb6MKzh
+s3MaIHniH2mJrjDbVCb4qwOZjh8qr7qmNuEPw0P2I9SMNtTGHLwWbeT3wXGGJTno2eE3jkWbkDiW
+2IxZ+2zHsu4FdnlshkHQRr/qYuSrmAa93UZeco6v+m8SnYNVgMKVw7DXIwoFVGw7H0Vb/erdBFtK
+qL2WL4w6Gr1sV7mRR/x1PkB8wuoQ78ppB2WrykqDHVpWhdDgdKrIvWncelQkRFUgfekSfyj8MS5L
+yrxv4IM7pD7rsSDReTFGM+epjAaOi3zLWgLhKs3H2isCPyzfGmuEc0ezNLXNpCIFgFVMuD0/FqQD
+dSJz/s7omZDlYqXLyx1DZHeSI5lIxVjF1BEQqvtQApkmif/F5kWV3ETDNrb8sP7MNWp01itVrkcv
+2QI9JdJhQwtbeyzKps4gflSP7Flw7t4c4rrFCVOca81rkCBHMry6aZMQi2vilCuV09m4rE4b0QBZ
+z1cbixAwqnhdYWmqTC1C8C3xkDME5fmrmDNhCH3vj86Fcpql1Og1a0mLwViXGDSHaTocT+tQDs8I
+KBb4I9pNqAehZvh3FTRWDN0Z41jM9rMlkaeCsbwPiMFdmscOhgdVW1cKzM4fUbXs8ZGq11OQbH6+
+CR9hGNVofvtAqwTOj8GxxVyEMud4I7/75n+alhlvhW01xrZsHdrR9k0zspYNlVicK5sD5L9Vk6vm
+zZ16za3LxyZLgYA7bkVKsIPkeQcUqM9THFjIsg3MhppTc2/sa9ROw9pYUlbTN0QFqfwL9Z6CyvGQ
+rQUD1bhemnOemQVBlcm4S6+gBOX2wUCyJa2gLQlpN9M1zIq0XJb1Hw+T9hYlilFY6c03ta9eg8aH
+TjjQfFLKIPGaWFU4aHUEaAvRc3+TtZ3RgJMEMWkZNOBc/++NayhtVJwQ196c8VI4jQalepzW200C
+/h2tRSpjIVe5nar60fHHuGtMcP0QqOxdbvBNhBG5jqrsdWlx40gHi4Vk4p8U9AJrzlTygsydvbN/
+M35b8Qz1szboCKyvXouporjcOlwqSAo1jO777PG5BTwr/3F9pOSrOkDGhY3g/hP+E9CgDl1j/mhy
+t+J7eIyPeFEWChzUHbRxEPGWDk5Rs4H9qZYbnTLxsQ==
+
+--Apple-Mail=_B6D9BE25-CBC2-44E0-9D61-18546210E723
+Content-Transfer-Encoding: 7bit
+Content-Type: text/plain;
+	charset=us-ascii
+
+
+
+text below
+--Apple-Mail=_B6D9BE25-CBC2-44E0-9D61-18546210E723--

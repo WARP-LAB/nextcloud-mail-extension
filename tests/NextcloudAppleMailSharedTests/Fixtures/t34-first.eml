@@ -1,0 +1,26 @@
+From: Test Sender <sender@example.test>
+Content-Type: multipart/alternative;
+	boundary="Apple-Mail=_3C862984-5F9B-4CDB-A2E7-E50843F9029C"
+Mime-Version: 1.0 (Mac OS X Mail 16.0 \(3901.100.1.1.12\))
+Subject: Re: [probe log] t34
+X-Universally-Unique-Identifier: 00000000-0000-4000-8000-000000000001
+Date: Thu, 5 Nov 2026 12:00:00 +0200
+References: <recipient@example.test>
+To: Test Recipient <recipient@example.test>
+In-Reply-To: <recipient@example.test>
+Message-Id: <fixture@example.test>
+
+
+--Apple-Mail=_3C862984-5F9B-4CDB-A2E7-E50843F9029C
+Content-Transfer-Encoding: 7bit
+Content-Type: text/plain;
+	charset=us-ascii
+
+
+--Apple-Mail=_3C862984-5F9B-4CDB-A2E7-E50843F9029C
+Content-Transfer-Encoding: 7bit
+Content-Type: text/html;
+	charset=us-ascii
+
+<html aria-label="message body"><head></head><body style="overflow-wrap: break-word; -webkit-nbsp-mode: space; line-break: after-white-space;">See attached.<br id="lineBreakAtBeginningOfMessage"><div class="AppleOriginalContents"><br><blockquote type="cite"><div>On 5 Nov 2026, at 16:37, Test Sender &lt;sender@example.test&gt; wrote:</div><br class="Apple-interchange-newline"><div><div>[probe log] t1<br><span class="AppleTemporaryEditingElement" id="cid:03BC8C87-B217-4004-91BB-86856D18FFFB">&lt;dummy-1MB.bin&gt;</span></div></div></blockquote></div><br></body></html>
+--Apple-Mail=_3C862984-5F9B-4CDB-A2E7-E50843F9029C--
