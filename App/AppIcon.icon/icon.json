@@ -1,0 +1,60 @@
+{
+  "fill": {
+    "linear-gradient": [
+      "display-p3:0.11000,0.68600,1.00000,1.00000",
+      "srgb:0.00000,0.51000,0.78800,1.00000"
+    ]
+  },
+  "fill-specializations": [
+    {
+      "appearance": "dark",
+      "value": {
+        "linear-gradient": [
+          "gray:0.19200,1.00000",
+          "gray:0.07800,1.00000"
+        ]
+      }
+    }
+  ],
+  "groups": [
+    {
+      "layers": [
+        {
+          "fill-specializations": [
+            {
+              "appearance": "dark",
+              "value": {
+                "linear-gradient": [
+                  "display-p3:0.11000,0.68600,1.00000,1.00000",
+                  "srgb:0.00000,0.51000,0.78800,1.00000"
+                ]
+              }
+            }
+          ],
+          "image-name": "nextcloud-logo-white.svg",
+          "name": "nextcloud-logo-white",
+          "position": {
+            "scale": 1,
+            "translation-in-points": [
+              0,
+              0
+            ]
+          }
+        }
+      ],
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0.5
+      },
+      "translucency": {
+        "enabled": true,
+        "value": 0.5
+      }
+    }
+  ],
+  "supported-platforms": {
+    "squares": [
+      "macOS"
+    ]
+  }
+}
