@@ -37,7 +37,7 @@ This file covers how to work in the repository.
 ## Commands
 
 ```sh
-scripts/build.sh            # host app and extension, into build/Debug/NextcloudMailExtension.app
+scripts/build.sh            # host app and extension, into build/Debug/NextcloudMailExtension.app.zip
 swift test                  # unit tests of Shared/, from tests/
 tests/make-fixtures.py      # remake the anonymised test messages from probe/test-results/ (local only)
 scripts/test-nextcloud.sh   # the server tests, against the test server in .env; --server-settings for the enforced ones
@@ -97,7 +97,7 @@ Only what isn't obvious from directory names:
 - zsh doesn't split an unquoted `$VAR` into words, so `grep pattern $FILES` passes one argument. Use an array or `xargs -0`. In zsh, `echo ======` also fails, and the pipeline status array is `pipestatus`, not bash's `PIPESTATUS`.
 - A `.gitignore` rule containing `/` is anchored to the repository root, so `Config/Local.xcconfig` doesn't match `probe/Config/Local.xcconfig`.
 - macOS pads `wc -l` and `wc -c` output with spaces, and has no `timeout`. In zsh, `status` is a read-only variable, so `status=$?` fails.
-- macOS registers the copy of the extension that Xcode builds in `build/`, and lists only one copy per bundle ID, so an installed copy can be ignored. `scripts/install.sh` unregisters the build's copy.
+- macOS registers every bare `.app` and `.appex` on disk, the Trash included, and an old copy with the same bundle ID can stand in for the installed one: for its icon, its extension, or its Local Network rule. So only the installed copy is ever a bundle: `scripts/build.sh` keeps the build as a zip and deletes the bare bundles, and `scripts/install.sh` unpacks the zip into `~/Applications`. Don't leave a copy anywhere else, such as Xcode's DerivedData.
 - Reading Mail's Sign state at compose start instead of at send, or detecting auto-saves by headers instead of the message's `state` (`docs/MAIL.md`).
 - An unescaped `|` inside a Markdown table cell splits the cell, so avoid pipes in code within tables.
 - In Swift, `"\r\n"` is one `Character`, so `hasSuffix("\n")` is false for CRLF text. `MimePart.text` returns text with `\n` line endings for this reason. The package builds in Swift 5 mode, where a bare `/…/` regex literal doesn't compile: write `#/…/#`.
