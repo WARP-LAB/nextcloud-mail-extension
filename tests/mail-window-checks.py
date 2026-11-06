@@ -655,10 +655,161 @@ def check_password_required(run):
     run.expect('with a password it sends, and the links need it', ok, detail)
 
 
+# MARK: Send warnings (FR5, FR6, T7)
+
+SIGN = 'first checkbox of (first group of window (item 1 of argv) whose description is "digitally sign")'
+
+
+def sign_on(subject):
+    return in_mail(f'return value of {SIGN}', subject) == '1'
+
+
+def set_sign(subject, on):
+    """Turns the window's Sign button on or off. Mail keeps that state for later messages."""
+    if sign_on(subject) != on:
+        mail_in_front()
+        in_mail(f'click {SIGN}', subject)
+        time.sleep(0.5)
+    if sign_on(subject) != on:
+        raise CheckError('Sign didn\'t change')
+
+
+def restore_sign():
+    """Turns Sign back on for later messages, through a window that's closed again without saving."""
+    subject = '[ncam check] restoring Sign ' + time.strftime('%H%M%S')
+    checks.mail('compose', 'A', 'B', subject, 'Restoring Sign.', 'none')
+    try:
+        set_sign(subject, True)
+    finally:
+        close_test_windows()
+
+
+def send_check_alert(subject):
+    """Clicks Send and waits for the send check's alert, which has Cancel and Send Anyway."""
+    click_send(subject)
+    wait(lambda: sheet(subject) is not None or not window_exists(subject), 90, 'no alert and no send')
+    return sheet(subject)
+
+
+def check_t33(run):
+    """FR5: with Sign off, the alert names the file; Cancel keeps it, and with Sign on it goes out as links."""
+    subject = run.subject('t33-sign-off')
+    data_path = run.file('t33.bin', 5000)
+    checks.app_settings(checks.DEFAULTS)
+    checks.mail('compose', 'A', 'B', subject, 'Check t33: Sign off, then on.', 'none', str(data_path))
+    try:
+        set_sign(subject, False)
+        alert = send_check_alert(subject)
+        run.expect('the alert names the file and says to turn on Sign', alert and '“t33.bin”' in alert[0]
+                   and 'turn on Sign' in alert[0] and 'Send Anyway' in alert[1], alert)
+        if not alert:
+            return
+        click_sheet_button(subject, 'Cancel')
+        time.sleep(1)
+        run.expect('Cancel keeps the window open', window_exists(subject))
+        set_sign(subject, True)
+        click_send(subject)
+    finally:
+        restore_sign()
+    _, attached, found = file_links(run.fetch(subject, 't33-received.eml'))
+    run.expect('with Sign on, the file goes out as links', downloads_match(found, 't33.bin', data_path.read_bytes())
+               and not attached)
+
+
+def check_t23(run):
+    """FR5: Send Anyway sends the file attached, and nothing is uploaded."""
+    subject = run.subject('t23-send-anyway')
+    data_path = run.file('t23.bin', 5000)
+    checks.app_settings(checks.DEFAULTS)
+    checks.mail('compose', 'A', 'B', subject, 'Check t23: Sign off, sent anyway.', 'none', str(data_path))
+    try:
+        set_sign(subject, False)
+        alert = send_check_alert(subject)
+        run.expect('the alert appears', alert and 'Send Anyway' in alert[1], alert)
+        if not alert:
+            return
+        click_sheet_button(subject, 'Send Anyway')
+        received = run.fetch(subject, 't23-received.eml')
+    finally:
+        restore_sign()
+    _, attached, found = file_links(received)
+    run.expect('the file arrives attached, byte for byte', attached.get('t23.bin') == data_path.read_bytes()
+               and not found)
+    run.expect('nothing was uploaded', not folders_for(subject), f'folders: {folders_for(subject)}')
+
+
+def phrase_check(run, name, sign):
+    """FR6: the text mentions an attachment and there's none, with Sign on or off."""
+    subject = run.subject(name)
+    checks.app_settings(dict(checks.DEFAULTS, warningPhrases=['see attach']))
+    checks.mail('compose', 'A', 'B', subject, 'Please see attached, as promised.', 'none')
+    try:
+        set_sign(subject, sign)
+        alert = send_check_alert(subject)
+        run.expect('the alert names the phrase', alert and '“see attach”' in alert[0], alert)
+        if not alert:
+            return
+        click_sheet_button(subject, 'Cancel')
+        time.sleep(1)
+        run.expect('Cancel keeps the window open', window_exists(subject))
+        alert = send_check_alert(subject)
+        run.expect('sending again warns again', alert is not None)
+        if alert:
+            click_sheet_button(subject, 'Send Anyway')
+        received = run.fetch(subject, f'{name}-received.eml')
+    finally:
+        if not sign:
+            restore_sign()
+    texts, attached, found = file_links(received)
+    run.expect('Send Anyway sends it as written', 'see attached' in '\n'.join(texts['plain']) and not found
+               and not attached)
+
+
+def check_t34_phrase(run):
+    phrase_check(run, 't34-phrase-sign-on', True)
+
+
+def check_t35_phrase(run):
+    phrase_check(run, 't35-phrase-sign-off', False)
+
+
+def check_phrase_elsewhere(run):
+    """FR6 leaves out the subject and quoted text: a phrase only there gives no alert."""
+    checks.app_settings(dict(checks.DEFAULTS, warningPhrases=['see attach']))
+    subject = run.subject('see attached in the subject only')
+    checks.mail('compose', 'A', 'B', subject, 'Nothing to mention here.', 'none')
+    alert = send_check_alert(subject)
+    run.expect('no alert for the subject', alert is None, alert)
+    if alert:
+        click_sheet_button(subject, 'Cancel')
+        return
+    run.fetch(subject, 'phrase-subject-received.eml')
+    original = run.subject('phrase-quote')
+    checks.app_settings(checks.DEFAULTS)
+    checks.mail('send', 'A', 'B', original, 'The original says: see attached.', 'none')
+    run.fetch(original, 'phrase-quote-original.eml')
+    checks.app_settings(dict(checks.DEFAULTS, warningPhrases=['see attach']))
+    osa('on run argv\ntell application "Mail"\nset m to first message of inbox whose subject is (item 1 of argv)\n'
+        'set selected mailboxes of message viewer 1 to {mailbox of m}\ndelay 1\n'
+        'set selected messages of message viewer 1 to {m}\nend tell\nend run', original)
+    mail_in_front()
+    in_mail('perform action "AXRaise" of (first window whose name starts with "Inbox")')
+    click_menu('Message', 'Reply')
+    reply = 'Re: ' + original
+    wait(lambda: window_exists(reply), 30, 'no reply window')
+    alert = send_check_alert(reply)
+    run.expect('no alert for a phrase only in the quote', alert is None, alert)
+    if alert:
+        click_sheet_button(reply, 'Cancel')
+        return
+    run.fetch(reply, 'phrase-quote-reply.eml')
+
+
 CHECKS = {'t7': check_t7, 't21': check_t21, 't22': check_t22, 't30': check_t30, 't34': check_t34,
           't38': check_t38, 't39': check_t39, 't36': check_t36, 't37': check_t37,
           't37-restart': check_t37_restart, 'password-refused': check_password_refused,
-          'password-required': check_password_required}
+          'password-required': check_password_required, 't33': check_t33, 't23': check_t23,
+          't34-phrase': check_t34_phrase, 't35-phrase': check_t35_phrase, 'phrase-elsewhere': check_phrase_elsewhere}
 
 
 def main():
