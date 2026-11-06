@@ -1,4 +1,5 @@
-import Foundation
+import AppKit
+import SwiftUI
 
 /// The debug-only command-line options that the Mail checks use (docs/TESTING.md, "Driving Mail from the command
 /// line").
@@ -42,6 +43,29 @@ enum DebugCommands {
         default:
             return fail("use --debug-dumps on, off or take")
         }
+        return true
+    }
+
+    /// Draws the settings window off screen and prints it as a PNG in base64, so that its layout can be checked
+    /// without a screen or Screen Recording.
+    @MainActor
+    static func renderWindow() -> Bool {
+        _ = NSApplication.shared
+        let view = NSHostingView(rootView: SettingsView(model: AppModel()))
+        view.frame = NSRect(x: 0, y: 0, width: 640, height: 2000)
+        let window = NSWindow(contentRect: view.frame, styleMask: [.titled], backing: .buffered, defer: false)
+        window.contentView = view
+        // Lets onAppear run and the form lay itself out.
+        RunLoop.main.run(until: Date().addingTimeInterval(1))
+        view.layoutSubtreeIfNeeded()
+        guard let bitmap = view.bitmapImageRepForCachingDisplay(in: view.bounds) else {
+            return fail("the window couldn't be drawn")
+        }
+        view.cacheDisplay(in: view.bounds, to: bitmap)
+        guard let png = bitmap.representation(using: .png, properties: [:]) else {
+            return fail("the window couldn't be drawn")
+        }
+        print(png.base64EncodedString())
         return true
     }
 

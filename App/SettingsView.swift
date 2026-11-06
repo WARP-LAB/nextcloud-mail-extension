@@ -3,7 +3,6 @@ import SwiftUI
 /// The host app's window: the account, every setting, the connection checks and the setup help.
 struct SettingsView: View {
     @ObservedObject var model: AppModel
-    @State private var phrases = ""
 
     var body: some View {
         Form {
@@ -17,12 +16,6 @@ struct SettingsView: View {
         }
         .formStyle(.grouped)
         .frame(minWidth: 560, idealWidth: 640, minHeight: 600, idealHeight: 860)
-        .onAppear {
-            phrases = model.settings.warningPhrases.joined(separator: ", ")
-        }
-        .onChange(of: phrases) { _, text in
-            model.settings.warningPhrases = Self.phrases(in: text)
-        }
     }
 
     /// FR2.
@@ -105,13 +98,15 @@ struct SettingsView: View {
     private var warnings: some View {
         Section {
             Toggle("Warn if signing (upload via link) is disabled", isOn: $model.settings.warnIfSignOff)
-            TextField("Warn if text found but no attachment", text: $phrases, prompt: Text("attachment, see attached"))
+            LabeledContent("Warn if text found but no attachment") {
+                TagField(tags: $model.settings.warningPhrases, prompt: "Type a word or phrase, then Return")
+            }
         } header: {
             Text("Warnings")
         } footer: {
             Text(
-                "Separate words and phrases with commas. Upper and lower case count the same, and a word is also "
-                    + "found inside longer words. Leave it empty for no check."
+                "Such as “attach” or “see attached”. Upper and lower case count the same, and a word is also found "
+                    + "inside longer words. With none, there's no check."
             )
             .foregroundStyle(.secondary)
         }
@@ -140,13 +135,6 @@ struct SettingsView: View {
             )
             .foregroundStyle(.secondary)
         }
-    }
-
-    /// The phrases in the comma-separated text, trimmed, without empty ones.
-    static func phrases(in text: String) -> [String] {
-        text.split(separator: ",")
-            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
-            .filter { !$0.isEmpty }
     }
 }
 
@@ -231,10 +219,10 @@ private struct ExpiryPicker: View {
         if choice.wrappedValue == .custom {
             LabeledContent("After") {
                 HStack(spacing: 12) {
-                    amount("years", \.years)
-                    amount("months", \.months)
-                    amount("days", \.days)
-                    amount("hours", \.hours)
+                    amount("year", "years", \.years)
+                    amount("month", "months", \.months)
+                    amount("day", "days", \.days)
+                    amount("hour", "hours", \.hours)
                 }
             }
             Text(
@@ -246,15 +234,17 @@ private struct ExpiryPicker: View {
         }
     }
 
-    private func amount(_ unit: String, _ part: WritableKeyPath<LinkExpiry.Period, Int>) -> some View {
+    private func amount(_ unit: String, _ units: String, _ part: WritableKeyPath<LinkExpiry.Period, Int>)
+        -> some View
+    {
         HStack(spacing: 4) {
-            TextField(unit, value: binding(part), format: .number)
+            TextField(units, value: binding(part), format: .number)
                 .labelsHidden()
                 .multilineTextAlignment(.trailing)
                 .frame(width: 44)
-            Stepper(unit, value: binding(part), in: 0...9999)
+            Stepper(units, value: binding(part), in: 0...9999)
                 .labelsHidden()
-            Text(unit)
+            Text(period[keyPath: part] == 1 ? unit : units)
         }
     }
 
