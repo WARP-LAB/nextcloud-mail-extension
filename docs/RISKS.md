@@ -57,7 +57,7 @@ What could go wrong, how we'd notice, and what's being done about it. Each entry
 
 - **Risk:** if a typed password isn't found at send, for example after Mail restarts before the draft's first auto-save, the links go out without one, and the extension can't tell.
 - **Signal:** recipients can open links that should need a password.
-- **Mitigation:** keep the password in the Keychain under the message ID as soon as that's known.
+- **Mitigation:** keep the password in the Keychain under the message ID as soon as that's known. Tested in Mail (T6): after typing it, saving the draft and restarting Mail, the reopened draft's links still needed it.
 - **Judgment call:** an agent must not drop the Keychain copy, or weaken FR7, without asking.
 
 ### R9: Offering Sign without Encrypt
