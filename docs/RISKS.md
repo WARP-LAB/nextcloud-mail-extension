@@ -132,8 +132,9 @@ What could go wrong, how we'd notice, and what's being done about it. Each entry
 ### R18: Network access from the extension
 
 - **Risk:** the extension using the network during `encode()` is untested.
+- **Tested** (T2, 2026-11-06): inside Mail, the extension read the settings and the app password, but its requests to the test server, which is on the local network, failed with "offline" because of Local Network privacy ([MAIL.md](MAIL.md#network)). Servers on the internet aren't affected by that, and haven't been tried from the extension yet.
 - **Signal:** uploads fail with sandbox or connection errors.
-- **Mitigation:** the "test connection" check in task T2.
+- **Mitigation:** the host app declares `NSLocalNetworkUsageDescription`, so macOS asks the user, and the extension shares the app's permission. The offline error and the setup help say where to allow it. Test from Mail checks it (T2b).
 - **Judgment call:** if it's blocked, stop and ask.
 
 ### R19: Nextcloud behaviour is only read from the source

@@ -94,14 +94,17 @@ struct NextcloudServerTests {
             await #expect(throws: NextcloudError.exists(report)) {
                 try await client.createFolder(report)
             }
+            #expect(try await client.exists(report))
             let second = try await client.createUniqueFolder(named: "Report", in: folder)
             #expect(second == NextcloudClient.join(folder, "Report (2)"))
             let orphan = NextcloudClient.join(folder, "missing/child")
             await #expect(throws: NextcloudError.missingParent(orphan)) {
                 try await client.createFolder(orphan)
             }
+            #expect(try await !client.exists(orphan))
             let file = NextcloudClient.join(report, "a.txt")
             try await client.upload(Data("first".utf8), to: file)
+            #expect(try await client.exists(file))
             await #expect(throws: NextcloudError.exists(file)) {
                 try await client.upload(Data("second".utf8), to: file)
             }
@@ -112,6 +115,20 @@ struct NextcloudServerTests {
             await #expect(throws: NextcloudError.notFound("“\(file)”")) {
                 try await client.delete(file)
             }
+        }
+    }
+
+    @Test func checksTheConnection() async throws {
+        try await TestServer.withFolder("check") { client, folder in
+            var settings = Settings()
+            settings.directory = folder
+            let report = await ConnectionCheck.run(settings: settings, account: client.account)
+            #expect(report.passed, "\(report.lines)")
+            #expect(report.text.contains("“\(folder)” exists"))
+            settings.directory = NextcloudClient.join(folder, "missing")
+            let missing = await ConnectionCheck.run(settings: settings, account: client.account)
+            #expect(missing.passed, "\(missing.lines)")
+            #expect(missing.text.contains("doesn't exist yet"))
         }
     }
 

@@ -44,8 +44,13 @@ scripts/test-nextcloud.sh   # the server tests, against the test server in .env
 scripts/nextcloud.sh        # run single Nextcloud requests by hand, with no arguments for the list
 scripts/lint.sh [--fix]     # all linters on every file git doesn't ignore, with --fix applying automatic fixes first
 scripts/install.sh          # copy the build to ~/Applications and register the extension (see Boundaries)
-~/Applications/NextcloudAppleMail.app/Contents/MacOS/NextcloudAppleMail --check-storage   # App Group and Keychain check
+scripts/use-test-account.sh # log the installed Debug build in to the test server in .env, or --log-out
+~/Applications/NextcloudAppleMail.app/Contents/MacOS/NextcloudAppleMail --check-storage     # App Group and Keychain
+~/Applications/NextcloudAppleMail.app/Contents/MacOS/NextcloudAppleMail --check-connection  # the app's Test connection
+~/Applications/NextcloudAppleMail.app/Contents/MacOS/NextcloudAppleMail --check-from-mail   # the extension's, in Mail
 ```
+
+`--check-from-mail` opens a new message window in Mail, so tell the user before running it. Run from a terminal, `--check-connection` is exempt from Local Network privacy, so it can pass where the app and the extension fail (`docs/MAIL.md`).
 
 The probe has its own commands, in `probe/README.md`.
 

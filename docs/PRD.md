@@ -19,7 +19,7 @@ Acceptance criteria:
 
 ## FR2: Nextcloud settings and folders
 
-The extension's settings hold the Nextcloud server URL and the directory where files are uploaded. Each email gets its own subfolder inside that directory, so that:
+The extension's settings hold the Nextcloud server URL and the directory where files are uploaded, which is "Mail attachments" by default (OD4). Each email gets its own subfolder inside that directory, so that:
 
 - files with the same name in different emails don't clash
 - all of an email's files can be downloaded at once, as that folder (FR9)
@@ -36,7 +36,7 @@ Acceptance criteria:
 
 A setting chooses one of:
 
-- All attachments become links.
+- All attachments become links. This is the default (OD4).
 - Only attachments over a set size become links. The rest stay attached, so one message can have both.
 
 A second setting, "Pasted images become links", decides whether images pasted into the body follow that rule. It is on by default. When it is off, pasted images stay in the email whatever the rule says. Images in the signature never become links.
@@ -52,7 +52,7 @@ Acceptance criteria:
 
 A setting chooses when links expire:
 
-- in a week, a month or a year
+- in a week, a month or a year, with a month as the default (OD4)
 - after a custom number of days, months or years
 - never
 

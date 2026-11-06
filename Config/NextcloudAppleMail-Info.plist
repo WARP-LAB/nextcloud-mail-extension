@@ -4,5 +4,7 @@
 <dict>
 	<key>NCAMAppGroupIdentifier</key>
 	<string>$(TeamIdentifierPrefix)lv.warp.nextcloudapplemail</string>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>NextcloudAppleMail uploads email attachments to your Nextcloud server, which may be on your local network.</string>
 </dict>
 </plist>

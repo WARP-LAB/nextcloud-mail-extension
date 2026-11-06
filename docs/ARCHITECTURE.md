@@ -19,7 +19,7 @@ The extension's toolbar button in the message window opens a popover, where the 
 
 | Component | Runs in | Job | Starting point |
 | --- | --- | --- | --- |
-| Settings UI and login | Host app | Settings for FR2–FR6, FR8 and FR9, Nextcloud login | New |
+| Settings UI and login | Host app | Settings for FR2–FR6, FR8, FR9 and D17, Nextcloud login, Test connection and the setup help | Done: [App/](../App/) |
 | `SecurityHandler` | Extension | Status, `encode()`, and stubs for decoding | [SecurityHandler.swift](../probe/MailProbeExtension/SecurityHandler.swift), without markers |
 | `ComposeHandler` | Extension | FR5 and FR6 warnings, the password popover (FR7) | [ComposeHandler.swift](../probe/MailProbeExtension/ComposeHandler.swift) |
 | `MimeMessage` | Extension | Parse the message and write it out again | Done: [Shared/Mime/](../Shared/Mime/) |
@@ -29,7 +29,7 @@ The extension's toolbar button in the message window opens a popover, where the 
 | `NextcloudClient` | Both | Login, folders, uploads, shares, server limits | Done: [Shared/Nextcloud/](../Shared/Nextcloud/), with `LinkExpiry` (FR4) and `NextcloudNames` (FR2) |
 | `UploadLedger` | Extension | Remember each message's folder and finished uploads | New |
 | `MessagePasswords` | Extension | Passwords typed in the popover | `PopoverPasswords` in the probe's compose handler |
-| `Settings`, `Credentials` | Both | Shared settings and the app password | New |
+| `Settings`, `Credentials`, `ConnectionCheck` | Both | Shared settings, the app password, and the connection check | Done: [Shared/Settings/](../Shared/Settings/) |
 
 The extension keeps both capabilities in its `Info.plist`: `MEMessageSecurityHandler` and `MEComposeSessionHandler`. The project copies code across from the probe as needed, leaving `ProbeDirective`, `ProbeLog` and the rest of MailProbe behind. Code that both the host app and the extension use lives in `Shared/`, which both targets compile and which also builds as a Swift package for its unit tests (D13).
 
@@ -111,7 +111,7 @@ The requests are in [NEXTCLOUD.md](NEXTCLOUD.md).
 - **Folders (FR2):** name each message's folder `<yyyy-MM-dd> <subject>`, inside the settings' directory. Shorten the subject to 60 characters, replace `/` and `\`, and trim spaces and dots from the ends. Use `Email` if there's no subject. If the folder exists, add a number, as in `2026-11-05 Report (2)`. Recipients see this name on the folder's page, and probably as the zip's name. Two different files with the same name in one message get an index.
 - **Uploads:** always upload with `If-None-Match: *`, so a file that older links point to is never overwritten.
 - **Shares (FR8, FR9, D17):** with one link for the email's folder, the default, share the folder once, and give each file the folder share's page as its view link and `/s/<token>/download?files=<name>` as its download link. A folder share has no view page for a single file. With a link for each file, create a share per file, plus one for the folder when FR9 applies. Nextcloud allows each user 20 new shares in 10 minutes, which a share per file reaches with one email of 20 files (R21).
-- **Requests:** every request sends Basic auth with the app password, and the client keeps no cookies, because Nextcloud's session cookie is tied to the app password that made it ([NEXTCLOUD.md](NEXTCLOUD.md#requests)). A 401 means the app password no longer works, and a 429 means the share limit was reached. Both stop the send with their own message.
+- **Requests:** every request sends Basic auth with the app password, and the client keeps no cookies, because Nextcloud's session cookie is tied to the app password that made it ([NEXTCLOUD.md](NEXTCLOUD.md#requests)). A 401 means the app password no longer works, a 429 that the share limit was reached, and "offline" may mean that Local Network privacy blocked the server ([MAIL.md](MAIL.md#network)). Each stops the send with its own message.
 - **Expiry (FR4):** send every share an explicit `expireDate`. For a week, month, year, or a custom number of days, months or years, use today plus that period by calendar. For never, send an empty string. Read the server's limits first, and shorten the date to the maximum when one is enforced. Show the `expiration` the server returns next to each link, never the requested date. The folder share gets the same date as the file shares.
 - **Passwords (FR7):** send the email's password with every share. If the server enforces passwords and there's none, stop the send with an alert asking for one. If the password policy rejects the password, stop the send with the server's reason.
 
@@ -143,7 +143,10 @@ Both warnings come from `allowMessageSendForSession`, which returns at most one 
 - **Where they live:** the settings UI is in the host app: server, directory, the FR3 rule and pasted-images option, FR4 expiry, the FR5 checkbox, the FR6 phrases, the sharing settings (D17), and the FR8 and FR9 options. Settings are shared through an App Group, and the app password through a shared Keychain group (R17). The per-email password isn't a setting.
 - **The App Group:** `<team ID>.lv.warp.nextcloudapplemail`. The build writes it into each target's `Info.plist` as `NCAMAppGroupIdentifier`, from `$(TeamIdentifierPrefix)`, and `SharedStorage` reads it from there. Its container and settings work with the free Personal Team. The shared Keychain item works once the Mac is registered with the team (D16, R17).
 - **Entitlements:** both targets need the sandbox, `com.apple.security.network.client` and the App Group, and `keychain-access-groups` with the App Group's identifier (D16, R17, R18). Leave out `files.user-selected.read-only`, which only dropping files on the popover needed.
-- **Server URLs:** accept `https://` only, because App Transport Security blocks plain HTTP by default.
+- **Server URLs:** accept `https://` only, because App Transport Security blocks plain HTTP by default. `ServerAddress` adds `https://` when the user types none, and cuts a pasted page's path, keeping a path that Nextcloud is installed under.
+- **Settings:** stored as JSON in the App Group's defaults. A setting that's missing or can't be read gets its default, so a later version can add settings without losing the others. The app password is in the shared Keychain item, as JSON with the server and login name, and nowhere else.
+- **Local network:** the host app's `Info.plist` has `NSLocalNetworkUsageDescription`, and the extension shares the app's Local Network permission. The app asks for it when it first reaches a server on the local network, such as at login ([MAIL.md](MAIL.md#network)).
+- **Test connection:** the host app runs `ConnectionCheck`, which logs in, reads the server's limits and looks for the upload directory. Test from Mail writes a request into the App Group's container and opens a new message window in Mail with `mailto:`. When that window's compose session begins, the extension runs the same check with the settings and app password it reads itself, and writes its answer next to the request. Requests older than two minutes are ignored. Until T6, the toolbar popover shows the account and has its own Test connection button.
 - **Not set up yet:** if the extension isn't set up when a file would become a link, stop the send with an error saying so. Reporting `canSign: false` instead would send the files as attachments with no warning.
 
 ## Failures

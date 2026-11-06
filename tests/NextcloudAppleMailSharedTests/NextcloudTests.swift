@@ -84,6 +84,16 @@ struct NextcloudClientTests {
         }
     }
 
+    @Test func saysWhereToAllowAServerThatCantBeReached() async {
+        await #expect(throws: NextcloudError.offline) {
+            try await NextcloudClient.reaching { throw URLError(.notConnectedToInternet) }
+        }
+        await #expect(throws: URLError(.timedOut)) {
+            try await NextcloudClient.reaching { throw URLError(.timedOut) }
+        }
+        #expect(NextcloudError.offline.localizedDescription.contains("Local Network"))
+    }
+
     @Test func readsWebDAVErrors() {
         let xml = """
             <?xml version="1.0" encoding="utf-8"?>
