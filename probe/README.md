@@ -1,6 +1,6 @@
 # MailProbe
 
-A throwaway Apple Mail extension, used to find out what Mail does with a MailKit extension before building NextcloudAppleMail. It has no Nextcloud code. On send it removes attachments, adds a `[MAILPROBE]` note to the body and logs what Mail did. Only messages with a `[probe …]` marker in the subject are changed or saved.
+A throwaway Apple Mail extension, used to find out what Mail does with a MailKit extension before building NextcloudMailExtension. It has no Nextcloud code. On send it removes attachments, adds a `[MAILPROBE]` note to the body and logs what Mail did. Only messages with a `[probe …]` marker in the subject are changed or saved.
 
 - [docs/PROBE.md](docs/PROBE.md) explains how the probe works, the Mail behaviour the real extension relies on, and how to probe again, for example after a Mail update.
 - [docs/TESTS.md](docs/TESTS.md) has every test, with its steps, question and baseline result.

@@ -6,13 +6,13 @@
 	<true/>
 	<key>com.apple.security.application-groups</key>
 	<array>
-		<string>$(TeamIdentifierPrefix)lv.warp.nextcloudapplemail</string>
+		<string>$(TeamIdentifierPrefix)lv.warp.nextcloudmailextension</string>
 	</array>
 	<key>com.apple.security.network.client</key>
 	<true/>
 	<key>keychain-access-groups</key>
 	<array>
-		<string>$(AppIdentifierPrefix)lv.warp.nextcloudapplemail</string>
+		<string>$(AppIdentifierPrefix)lv.warp.nextcloudmailextension</string>
 	</array>
 </dict>
 </plist>

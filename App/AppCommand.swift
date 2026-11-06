@@ -6,7 +6,7 @@ import Foundation
 /// - `--check-connection`: the connection check that Test connection runs.
 /// - `--check-from-mail`: the same check run by the extension, as Test from Mail does. It opens a new message window.
 /// - `--use-test-account`, debug builds only: logs in to the test server in the environment, as `scripts/
-///   use-test-account.sh` loads it from `.env`, and sets the upload directory to `NCAM_TEST_DIRECTORY` (D14).
+///   use-test-account.sh` loads it from `.env`, and sets the upload directory to `NCME_TEST_DIRECTORY` (D14).
 /// - `--log-out`, debug builds only: revokes the stored app password and deletes it.
 /// - `--settings [<json>]`, debug builds only: prints the settings as JSON, after changing those in `<json>`.
 /// - `--notification-status`, debug builds only: whether macOS lets the app post notifications.
@@ -116,10 +116,10 @@ enum AppCommand {
 
     private static func useTestAccount() async -> Bool {
         let environment = ProcessInfo.processInfo.environment
-        guard let address = environment["NCAM_TEST_SERVER_URL"], let login = environment["NCAM_TEST_USERNAME"],
-            let password = environment["NCAM_TEST_PASSWORD"], let directory = environment["NCAM_TEST_DIRECTORY"]
+        guard let address = environment["NCME_TEST_SERVER_URL"], let login = environment["NCME_TEST_USERNAME"],
+            let password = environment["NCME_TEST_PASSWORD"], let directory = environment["NCME_TEST_DIRECTORY"]
         else {
-            return fail("the NCAM_TEST_ variables aren't set. Run this through scripts/use-test-account.sh.")
+            return fail("the NCME_TEST_ variables aren't set. Run this through scripts/use-test-account.sh.")
         }
         guard let group = SharedStorage.appGroupIdentifier, let store = SettingsStore(groupIdentifier: group) else {
             return fail("no App Group identifier in Info.plist")

@@ -1,7 +1,7 @@
 import Foundation
 import Testing
 
-@testable import NextcloudAppleMailShared
+@testable import NextcloudMailExtensionShared
 
 /// The toolbar popover's choice of which of an email's files become links (FR3).
 struct LinkChoiceTests {

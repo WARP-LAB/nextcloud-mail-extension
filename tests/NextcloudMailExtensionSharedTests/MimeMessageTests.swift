@@ -1,7 +1,7 @@
 import Foundation
 import Testing
 
-@testable import NextcloudAppleMailShared
+@testable import NextcloudMailExtensionShared
 
 struct MimeMessageTests {
     @Test(arguments: Fixture.names)

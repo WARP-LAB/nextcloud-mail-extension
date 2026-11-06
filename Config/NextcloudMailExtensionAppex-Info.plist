@@ -2,8 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>NCAMAppGroupIdentifier</key>
-	<string>$(TeamIdentifierPrefix)lv.warp.nextcloudapplemail</string>
+	<key>NCMEAppGroupIdentifier</key>
+	<string>$(TeamIdentifierPrefix)lv.warp.nextcloudmailextension</string>
 	<key>NSExtension</key>
 	<dict>
 		<key>NSExtensionAttributes</key>
@@ -13,7 +13,7 @@
 				<key>MEComposeIcon</key>
 				<string>ToolbarIcon</string>
 				<key>MEComposeIconToolTip</key>
-				<string>NextcloudAppleMail: this email's links, password and expiry</string>
+				<string>NextcloudMailExtension: this email's links, password and expiry</string>
 			</dict>
 			<key>MEExtensionCapabilities</key>
 			<array>

@@ -1,7 +1,7 @@
 import Foundation
 import Testing
 
-@testable import NextcloudAppleMailShared
+@testable import NextcloudMailExtensionShared
 
 /// Mail's `encode()` calls, from auto-saves to Mail Drop (docs/MAIL.md).
 struct SenderTests {

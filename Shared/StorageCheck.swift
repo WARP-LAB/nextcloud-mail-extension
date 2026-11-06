@@ -18,7 +18,7 @@ struct StorageCheck {
 
     static let settingsKey = "storageCheck"
     static let fileName = "storage-check.txt"
-    static let keychainService = "lv.warp.nextcloudapplemail.storage-check"
+    static let keychainService = "lv.warp.nextcloudmailextension.storage-check"
     static let keychainAccount = "storage-check"
 
     let groupIdentifier: String

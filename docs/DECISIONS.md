@@ -96,7 +96,7 @@ Settled decisions, and why they were made. The current design is in [ARCHITECTUR
 
 ## D16: Register this Mac with the Personal Team (2026-11-06)
 
-- **Decision:** this Mac is registered as a device with the free Personal Team, which resolves OD7. Xcode then makes a provisioning profile for each target, so both targets can have `keychain-access-groups` with `<team ID>.lv.warp.nextcloudapplemail`, the App Group's identifier, and share the app password's Keychain item.
+- **Decision:** this Mac is registered as a device with the free Personal Team, which resolves OD7. Xcode then makes a provisioning profile for each target, so both targets can have `keychain-access-groups` with `<team ID>.lv.warp.nextcloudmailextension`, the App Group's identifier, and share the app password's Keychain item.
 - **Why:** the user's choice. The alternative was R17's fallback, logging in from the extension.
 - **How:** registering needs a build with a destination, given in AGENTS.md's setup. Building in Xcode's window before the entitlement was added didn't register the Mac, because nothing needed a profile then. The Personal Team's profiles last 7 days, and `scripts/build.sh` renews them with `-allowProvisioningUpdates`.
 
@@ -150,3 +150,8 @@ Settled decisions, and why they were made. The current design is in [ARCHITECTUR
 
 - **Decision:** the project is pushed with Nextcloud's mark as the toolbar and app icons and with Nextcloud in its name, and the user asks Nextcloud GmbH for permission at the same time (T13b). If Nextcloud GmbH objects, the icons are replaced and the project is renamed. This resolves OD11.
 - **Why:** the user's choice, accepting that Nextcloud GmbH may ask for changes. Its trademark guidelines allow the logos only as links to nextcloud.com, and say that third-party apps shouldn't have its mark in their name, and `LICENSE.Nextcloud` says so. The artwork is in three places, so replacing it is one change (R22).
+
+## D26: The product is NextcloudMailExtension (2026-11-06)
+
+- **Decision:** the product was NextcloudAppleMail and is now NextcloudMailExtension, as the user renamed the GitHub repository from `nextcloud-apple-mail` to `nextcloud-mail-extension`. The app is `NextcloudMailExtension.app` and its Mail extension `NextcloudMailExtensionAppex.appex`. The bundle IDs, App Group and Keychain services start `lv.warp.nextcloudmailextension` instead of `lv.warp.nextcloudapplemail`. The Swift package's modules are `NextcloudMailExtensionShared` and its tests, the abbreviation `ncam` became `ncme`, and the `.env` keys start `NCME_`. This resolves OD12.
+- **Why:** the user's choice. Apple's trademark guidelines don't allow Apple in a third party's product name. The extension isn't called `NextcloudMailExtensionExtension`, which reads twice, and Mail shows it under the app's name anyway. New bundle IDs make a new app for macOS: it doesn't see the old app's login, settings or Keychain items, Mail lists its extension as a new one to enable, and macOS asks again for notifications and the local network.

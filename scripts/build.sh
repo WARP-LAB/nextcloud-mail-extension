@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Builds the host app with the extension inside it, into build/<configuration>/NextcloudAppleMail.app.
+# Builds the host app with the extension inside it, into build/<configuration>/NextcloudMailExtension.app.
 # Usage: scripts/build.sh [Debug|Release]
 # Signing comes from Config/Signing.xcconfig and the git-ignored Config/Local.xcconfig. Runs on macOS only, because
 # it needs Xcode. -allowProvisioningUpdates lets Xcode create the provisioning profiles the App Group needs.
@@ -24,7 +24,7 @@ if [[ ! -f Config/Local.xcconfig ]]; then
     echo "         Copy Config/Local.example.xcconfig to Config/Local.xcconfig and fill in DEVELOPMENT_TEAM" >&2
 fi
 
-xcodebuild -project NextcloudAppleMail.xcodeproj -target NextcloudAppleMail -configuration "${configuration}" \
+xcodebuild -project NextcloudMailExtension.xcodeproj -target NextcloudMailExtension -configuration "${configuration}" \
     SYMROOT="${PWD}/build" -allowProvisioningUpdates build -quiet
 
-echo "Built build/${configuration}/NextcloudAppleMail.app"
+echo "Built build/${configuration}/NextcloudMailExtension.app"

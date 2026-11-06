@@ -219,7 +219,7 @@ private struct AccountSection: View {
                 case .waiting(let url):
                     Text(
                         "Log in on the Nextcloud page that opened in your browser, and grant access. "
-                            + "NextcloudAppleMail never sees your password."
+                            + "NextcloudMailExtension never sees your password."
                     )
                     HStack {
                         Button("Open the page again") {
@@ -257,9 +257,9 @@ private struct CheckResultView: View {
 /// How to set up Mail, and the limits worth knowing (FR5, FR10, R12, R13, R15, R21).
 private struct SetupHelp: View {
     private let steps = [
-        "Log in above. If macOS asks whether NextcloudAppleMail may find devices on your local network, allow it. "
+        "Log in above. If macOS asks whether NextcloudMailExtension may find devices on your local network, allow it. "
             + "The extension in Mail uses the same permission to reach a server on your local network.",
-        "In Mail, open Settings > Extensions, turn on NextcloudAppleMail, and choose it in the message security "
+        "In Mail, open Settings > Extensions, turn on NextcloudMailExtension, and choose it in the message security "
             + "popup. Then quit and reopen Mail.",
         "In each message window, turn on Sign, the badge button at the right of the subject line. Files become "
             + "links only while it's on, and it stays on for later messages.",
@@ -269,11 +269,11 @@ private struct SetupHelp: View {
     ]
 
     private let notes = [
-        "While a slow upload runs, NextcloudAppleMail shows a notification, and another when it's done. Allow "
+        "While a slow upload runs, NextcloudMailExtension shows a notification, and another when it's done. Allow "
             + "its notifications when macOS asks, or in System Settings > Notifications.",
         "Send Later uploads the files when you schedule the email, so the links' expiry starts then.",
         "Your Sent mailbox keeps the links, not the files, so once a link expires the file is only on Nextcloud.",
-        "While NextcloudAppleMail is chosen for message security, Mail can't sign or encrypt with certificates.",
+        "While NextcloudMailExtension is chosen for message security, Mail can't sign or encrypt with certificates.",
         "With a link for each file, an admin can raise Nextcloud's limit of 20 new links in 10 minutes in "
             + "config.php: 'ratelimit_overwrite' => ['files_sharing.shareapi.createshare' => ['user' => "
             + "['limit' => 200, 'period' => 600]]].",

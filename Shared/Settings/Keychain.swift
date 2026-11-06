@@ -96,7 +96,7 @@ enum Keychain {
 
 /// The Nextcloud account, app password included, in the shared Keychain item. Nothing else stores it (NFR2).
 struct Credentials {
-    static let service = "lv.warp.nextcloudapplemail.account"
+    static let service = "lv.warp.nextcloudmailextension.account"
     static let account = "nextcloud"
 
     /// The Keychain group, which has the same identifier as the App Group (D16).

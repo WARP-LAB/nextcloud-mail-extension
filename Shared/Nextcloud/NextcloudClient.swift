@@ -1,14 +1,14 @@
 import Foundation
 
 /// The requests in docs/NEXTCLOUD.md. Paths are relative to the user's files, with `/` between names, such as
-/// `NextcloudAppleMail/2026-11-05 Report/report.pdf`.
+/// `NextcloudMailExtension/2026-11-05 Report/report.pdf`.
 struct NextcloudClient {
     let account: NextcloudAccount
     /// The user ID, which WebDAV paths need. It can differ from the login name.
     let userID: String
     var session: URLSession = NextcloudClient.defaultSession
 
-    static let userAgent = "NextcloudAppleMail"
+    static let userAgent = "NextcloudMailExtension"
 
     /// A session without cookies. Nextcloud ties its session cookie to the app password that logged in, so a cookie
     /// kept from a revoked app password makes later requests fail with 401 (docs/NEXTCLOUD.md).

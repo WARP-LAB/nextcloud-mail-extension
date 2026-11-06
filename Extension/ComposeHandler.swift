@@ -107,7 +107,7 @@ private struct PopoverView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("NextcloudAppleMail").font(.headline)
+            Text("NextcloudMailExtension").font(.headline)
             Divider()
             linksSection
             Divider()
@@ -200,9 +200,9 @@ private struct PopoverView: View {
     }
 
     /// The Settings… button's tooltip, which the Mail checks also find it by.
-    static let settingsHelp = "Open NextcloudAppleMail's settings"
+    static let settingsHelp = "Open NextcloudMailExtension's settings"
 
-    /// Opens the app the extension is in, `NextcloudAppleMail.app`, three folders up from the extension.
+    /// Opens the app the extension is in, `NextcloudMailExtension.app`, three folders up from the extension.
     private static func openApp() {
         let app = Bundle.main.bundleURL.deletingLastPathComponent().deletingLastPathComponent()
             .deletingLastPathComponent()
@@ -215,7 +215,7 @@ private struct PopoverView: View {
         }
         do {
             guard let account = try Credentials(group: group).load() else {
-                return "Not logged in. Log in in the NextcloudAppleMail app."
+                return "Not logged in. Log in in the NextcloudMailExtension app."
             }
             return "\(account.loginName) on \(account.server.host ?? account.server.absoluteString)"
         } catch {

@@ -1,7 +1,7 @@
 import Foundation
 import Testing
 
-@testable import NextcloudAppleMailShared
+@testable import NextcloudMailExtensionShared
 
 /// Nextcloud in memory, recording what the send flow asks of it.
 final class FakeNextcloud: NextcloudService {

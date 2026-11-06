@@ -2,7 +2,7 @@
 
 ## Project
 
-NextcloudAppleMail is an Apple Mail extension for macOS, built with MailKit. When an email is sent, it uploads the attachments to Nextcloud and replaces them with share links. It succeeds [cargolifter-mail-plugin](https://github.com/WARP-LAB/cargolifter-mail-plugin).
+NextcloudMailExtension is an Apple Mail extension for macOS, built with MailKit. When an email is sent, it uploads the attachments to Nextcloud and replaces them with share links. It succeeds [cargolifter-mail-plugin](https://github.com/WARP-LAB/cargolifter-mail-plugin).
 
 `probe/` holds MailProbe, a throwaway test extension used to find out what Mail does. It isn't part of the product.
 
@@ -30,14 +30,14 @@ This file covers how to work in the repository.
 - macOS 27 and Xcode 27, on Apple silicon. The probing baseline is macOS 27.0.1 with Mail 16.0.
 - Linters: `brew install swiftlint shellcheck markdownlint-cli2`. swift-format comes with Xcode.
 - Signing: copy `Config/Local.example.xcconfig` to `Config/Local.xcconfig`, which git ignores, and fill in `DEVELOPMENT_TEAM`. The free Personal Team works for local builds (D11). Without the file, builds are ad-hoc signed and the App Group fails.
-- Provisioning: the shared Keychain item needs provisioning profiles, which need the Mac registered with the team (D16). Once per Mac, run `xcodebuild -project NextcloudAppleMail.xcodeproj -scheme NextcloudAppleMail -destination 'platform=macOS' -allowProvisioningUpdates -allowProvisioningDeviceRegistration build`, since `scripts/build.sh` builds without a destination, which can't register one. The Personal Team's profiles last 7 days, and `scripts/build.sh` renews them.
+- Provisioning: the shared Keychain item needs provisioning profiles, which need the Mac registered with the team (D16). Once per Mac, run `xcodebuild -project NextcloudMailExtension.xcodeproj -scheme NextcloudMailExtension -destination 'platform=macOS' -allowProvisioningUpdates -allowProvisioningDeviceRegistration build`, since `scripts/build.sh` builds without a destination, which can't register one. The Personal Team's profiles last 7 days, and `scripts/build.sh` renews them.
 - The Nextcloud test server and account (D14): copy `.env.example` to `.env`, which git ignores, and fill it in.
-- To use the extension in Mail: run `scripts/install.sh`, then in Mail open Settings > Extensions, enable NextcloudAppleMail, choose it for message security, and restart Mail.
+- To use the extension in Mail: run `scripts/install.sh`, then in Mail open Settings > Extensions, enable NextcloudMailExtension, choose it for message security, and restart Mail.
 
 ## Commands
 
 ```sh
-scripts/build.sh            # host app and extension, into build/Debug/NextcloudAppleMail.app
+scripts/build.sh            # host app and extension, into build/Debug/NextcloudMailExtension.app
 swift test                  # unit tests of Shared/, from tests/
 tests/make-fixtures.py      # remake the anonymised test messages from probe/test-results/ (local only)
 scripts/test-nextcloud.sh   # the server tests, against the test server in .env; --server-settings for the enforced ones
@@ -47,9 +47,9 @@ scripts/install.sh          # copy the build to ~/Applications and register the 
 scripts/use-test-account.sh # log the installed Debug build in to the test server in .env, or --log-out
 python3 tests/mail-checks.py # the Mail checks, sending between the two accounts in .env (docs/TESTING.md)
 python3 tests/mail-window-checks.py # the checks that click in Mail's windows; needs Accessibility
-~/Applications/NextcloudAppleMail.app/Contents/MacOS/NextcloudAppleMail --check-storage     # App Group and Keychain
-~/Applications/NextcloudAppleMail.app/Contents/MacOS/NextcloudAppleMail --check-connection  # the app's Test connection
-~/Applications/NextcloudAppleMail.app/Contents/MacOS/NextcloudAppleMail --check-from-mail   # the extension's, in Mail
+~/Applications/NextcloudMailExtension.app/Contents/MacOS/NextcloudMailExtension --check-storage     # App Group and Keychain
+~/Applications/NextcloudMailExtension.app/Contents/MacOS/NextcloudMailExtension --check-connection  # the app's Test connection
+~/Applications/NextcloudMailExtension.app/Contents/MacOS/NextcloudMailExtension --check-from-mail   # the extension's, in Mail
 ```
 
 `--check-from-mail` opens a new message window in Mail, so tell the user before running it. Run from a terminal, `--check-connection` is exempt from Local Network privacy, so it can pass where the app and the extension fail (`docs/MAIL.md`).
@@ -62,8 +62,8 @@ Only what isn't obvious from directory names:
 
 - `App/`: the host app. `Extension/`: the Mail extension.
 - `Shared/`: code both use. `Package.swift` also builds it as a Swift package, and `tests/` holds that package's unit tests (D13).
-- `Config/`: signing, entitlements and `Info.plist` files. The App Group is `<team ID>.lv.warp.nextcloudapplemail`, built from `$(TeamIdentifierPrefix)`, so the team ID appears only in `Local.xcconfig`.
-- `scripts/`: build, install, lint, and the Nextcloud tests and tool. `tools/ncam-nextcloud/`: that tool.
+- `Config/`: signing, entitlements and `Info.plist` files. The App Group is `<team ID>.lv.warp.nextcloudmailextension`, built from `$(TeamIdentifierPrefix)`, so the team ID appears only in `Local.xcconfig`.
+- `scripts/`: build, install, lint, and the Nextcloud tests and tool. `tools/ncme-nextcloud/`: that tool.
 - `Design/`: source artwork, such as Nextcloud's logo mark, which `Extension/Assets.xcassets` uses for the toolbar button.
 - `LICENSE.Nextcloud`: where Nextcloud's logo is used, its sources and its terms, which this repository's MIT licence doesn't cover. Keep it up to date when Nextcloud artwork changes (R22).
 - `LICENSE.Apple`: Apple's trademarks that the project names, and that it contains nothing of Apple's. Keep its list up to date (R23).

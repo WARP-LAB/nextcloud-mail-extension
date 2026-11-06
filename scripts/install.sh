@@ -7,8 +7,8 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 configuration="${1:-Debug}"
-built="build/${configuration}/NextcloudAppleMail.app"
-app="${HOME}/Applications/NextcloudAppleMail.app"
+built="build/${configuration}/NextcloudMailExtension.app"
+app="${HOME}/Applications/NextcloudMailExtension.app"
 
 if [[ ! -d "${built}" ]]; then
     echo "error: ${built} doesn't exist. Run scripts/build.sh ${configuration} first." >&2
@@ -26,11 +26,11 @@ touch "${app}"
 
 # macOS registers the copy Xcode builds, and won't list a second copy with the same bundle ID. Unregister the
 # build's copy, so that only the installed one is used.
-pluginkit -r "${PWD}/${built}/Contents/PlugIns/NextcloudAppleMailExtension.appex" 2> /dev/null || true
+pluginkit -r "${PWD}/${built}/Contents/PlugIns/NextcloudMailExtensionAppex.appex" 2> /dev/null || true
 "${lsregister}" -u "${PWD}/${built}" 2> /dev/null || true
 "${lsregister}" -f "${app}"
-pluginkit -a "${app}/Contents/PlugIns/NextcloudAppleMailExtension.appex"
+pluginkit -a "${app}/Contents/PlugIns/NextcloudMailExtensionAppex.appex"
 
 echo "Installed ${app}"
-echo "In Mail: Settings > Extensions, enable NextcloudAppleMail, choose it for message security, then restart Mail."
+echo "In Mail: Settings > Extensions, enable NextcloudMailExtension, choose it for message security, then restart Mail."
 pluginkit -m -p com.apple.email.extension

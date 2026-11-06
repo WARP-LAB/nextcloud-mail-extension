@@ -144,7 +144,7 @@ final class AppModel: ObservableObject {
         checking = true
         check = CheckResult(title: "Checking…")
         let report = await ConnectionCheck.runWithSharedStorage()
-        check = CheckResult(title: "Checked by NextcloudAppleMail", report: report)
+        check = CheckResult(title: "Checked by NextcloudMailExtension", report: report)
         checking = false
     }
 

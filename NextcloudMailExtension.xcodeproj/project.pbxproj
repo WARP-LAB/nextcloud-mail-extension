@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		B20000000000000000000017 /* NextcloudAppleMailExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = B20000000000000000000021 /* NextcloudAppleMailExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		B20000000000000000000017 /* NextcloudMailExtensionAppex.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = B20000000000000000000021 /* NextcloudMailExtensionAppex.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -16,7 +16,7 @@
 			containerPortal = B20000000000000000000001 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = B20000000000000000000020;
-			remoteInfo = NextcloudAppleMailExtension;
+			remoteInfo = NextcloudMailExtensionAppex;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -27,7 +27,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				B20000000000000000000017 /* NextcloudAppleMailExtension.appex in Embed Foundation Extensions */,
+				B20000000000000000000017 /* NextcloudMailExtensionAppex.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -36,12 +36,12 @@
 
 /* Begin PBXFileReference section */
 		B20000000000000000000005 /* Signing.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Signing.xcconfig; sourceTree = "<group>"; };
-		B20000000000000000000006 /* NextcloudAppleMail.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = NextcloudAppleMail.entitlements; sourceTree = "<group>"; };
-		B20000000000000000000007 /* NextcloudAppleMailExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = NextcloudAppleMailExtension.entitlements; sourceTree = "<group>"; };
-		B20000000000000000000008 /* NextcloudAppleMailExtension-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "NextcloudAppleMailExtension-Info.plist"; sourceTree = "<group>"; };
-		B20000000000000000000009 /* NextcloudAppleMail-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "NextcloudAppleMail-Info.plist"; sourceTree = "<group>"; };
-		B20000000000000000000011 /* NextcloudAppleMail.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NextcloudAppleMail.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		B20000000000000000000021 /* NextcloudAppleMailExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = NextcloudAppleMailExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		B20000000000000000000006 /* NextcloudMailExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = NextcloudMailExtension.entitlements; sourceTree = "<group>"; };
+		B20000000000000000000007 /* NextcloudMailExtensionAppex.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = NextcloudMailExtensionAppex.entitlements; sourceTree = "<group>"; };
+		B20000000000000000000008 /* NextcloudMailExtensionAppex-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "NextcloudMailExtensionAppex-Info.plist"; sourceTree = "<group>"; };
+		B20000000000000000000009 /* NextcloudMailExtension-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "NextcloudMailExtension-Info.plist"; sourceTree = "<group>"; };
+		B20000000000000000000011 /* NextcloudMailExtension.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NextcloudMailExtension.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		B20000000000000000000021 /* NextcloudMailExtensionAppex.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = NextcloudMailExtensionAppex.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -94,8 +94,8 @@
 		B20000000000000000000003 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				B20000000000000000000011 /* NextcloudAppleMail.app */,
-				B20000000000000000000021 /* NextcloudAppleMailExtension.appex */,
+				B20000000000000000000011 /* NextcloudMailExtension.app */,
+				B20000000000000000000021 /* NextcloudMailExtensionAppex.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -104,10 +104,10 @@
 			isa = PBXGroup;
 			children = (
 				B20000000000000000000005 /* Signing.xcconfig */,
-				B20000000000000000000006 /* NextcloudAppleMail.entitlements */,
-				B20000000000000000000009 /* NextcloudAppleMail-Info.plist */,
-				B20000000000000000000007 /* NextcloudAppleMailExtension.entitlements */,
-				B20000000000000000000008 /* NextcloudAppleMailExtension-Info.plist */,
+				B20000000000000000000006 /* NextcloudMailExtension.entitlements */,
+				B20000000000000000000009 /* NextcloudMailExtension-Info.plist */,
+				B20000000000000000000007 /* NextcloudMailExtensionAppex.entitlements */,
+				B20000000000000000000008 /* NextcloudMailExtensionAppex-Info.plist */,
 			);
 			path = Config;
 			sourceTree = "<group>";
@@ -115,9 +115,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		B20000000000000000000010 /* NextcloudAppleMail */ = {
+		B20000000000000000000010 /* NextcloudMailExtension */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = B20000000000000000000031 /* Build configuration list for PBXNativeTarget "NextcloudAppleMail" */;
+			buildConfigurationList = B20000000000000000000031 /* Build configuration list for PBXNativeTarget "NextcloudMailExtension" */;
 			buildPhases = (
 				B20000000000000000000013 /* Sources */,
 				B20000000000000000000014 /* Frameworks */,
@@ -133,16 +133,16 @@
 				B20000000000000000000012 /* App */,
 				B20000000000000000000026 /* Shared */,
 			);
-			name = NextcloudAppleMail;
+			name = NextcloudMailExtension;
 			packageProductDependencies = (
 			);
-			productName = NextcloudAppleMail;
-			productReference = B20000000000000000000011 /* NextcloudAppleMail.app */;
+			productName = NextcloudMailExtension;
+			productReference = B20000000000000000000011 /* NextcloudMailExtension.app */;
 			productType = "com.apple.product-type.application";
 		};
-		B20000000000000000000020 /* NextcloudAppleMailExtension */ = {
+		B20000000000000000000020 /* NextcloudMailExtensionAppex */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = B20000000000000000000032 /* Build configuration list for PBXNativeTarget "NextcloudAppleMailExtension" */;
+			buildConfigurationList = B20000000000000000000032 /* Build configuration list for PBXNativeTarget "NextcloudMailExtensionAppex" */;
 			buildPhases = (
 				B20000000000000000000023 /* Sources */,
 				B20000000000000000000024 /* Frameworks */,
@@ -156,11 +156,11 @@
 				B20000000000000000000022 /* Extension */,
 				B20000000000000000000026 /* Shared */,
 			);
-			name = NextcloudAppleMailExtension;
+			name = NextcloudMailExtensionAppex;
 			packageProductDependencies = (
 			);
-			productName = NextcloudAppleMailExtension;
-			productReference = B20000000000000000000021 /* NextcloudAppleMailExtension.appex */;
+			productName = NextcloudMailExtensionAppex;
+			productReference = B20000000000000000000021 /* NextcloudMailExtensionAppex.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
@@ -173,7 +173,7 @@
 				LastSwiftUpdateCheck = 2700;
 				LastUpgradeCheck = 2700;
 			};
-			buildConfigurationList = B20000000000000000000030 /* Build configuration list for PBXProject "NextcloudAppleMail" */;
+			buildConfigurationList = B20000000000000000000030 /* Build configuration list for PBXProject "NextcloudMailExtension" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -187,8 +187,8 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				B20000000000000000000010 /* NextcloudAppleMail */,
-				B20000000000000000000020 /* NextcloudAppleMailExtension */,
+				B20000000000000000000010 /* NextcloudMailExtension */,
+				B20000000000000000000020 /* NextcloudMailExtensionAppex */,
 			);
 		};
 /* End PBXProject section */
@@ -230,7 +230,7 @@
 /* Begin PBXTargetDependency section */
 		B20000000000000000000019 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = B20000000000000000000020 /* NextcloudAppleMailExtension */;
+			target = B20000000000000000000020 /* NextcloudMailExtensionAppex */;
 			targetProxy = B20000000000000000000018 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -284,17 +284,17 @@
 		B20000000000000000000042 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = Config/NextcloudAppleMail.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Config/NextcloudMailExtension.entitlements;
 				COMBINE_HIDPI_IMAGES = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "Config/NextcloudAppleMail-Info.plist";
+				INFOPLIST_FILE = "Config/NextcloudMailExtension-Info.plist";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = lv.warp.nextcloudapplemail;
+				PRODUCT_BUNDLE_IDENTIFIER = lv.warp.nextcloudmailextension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 			};
@@ -303,17 +303,17 @@
 		B20000000000000000000043 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = Config/NextcloudAppleMail.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Config/NextcloudMailExtension.entitlements;
 				COMBINE_HIDPI_IMAGES = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "Config/NextcloudAppleMail-Info.plist";
+				INFOPLIST_FILE = "Config/NextcloudMailExtension-Info.plist";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = lv.warp.nextcloudapplemail;
+				PRODUCT_BUNDLE_IDENTIFIER = lv.warp.nextcloudmailextension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 			};
@@ -322,16 +322,16 @@
 		B20000000000000000000044 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = Config/NextcloudAppleMailExtension.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Config/NextcloudMailExtensionAppex.entitlements;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "Config/NextcloudAppleMailExtension-Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = NextcloudAppleMail;
+				INFOPLIST_FILE = "Config/NextcloudMailExtensionAppex-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = NextcloudMailExtension;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 					"@executable_path/../../../../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = lv.warp.nextcloudapplemail.extension;
+				PRODUCT_BUNDLE_IDENTIFIER = lv.warp.nextcloudmailextension.extension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = NO;
@@ -341,16 +341,16 @@
 		B20000000000000000000045 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = Config/NextcloudAppleMailExtension.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Config/NextcloudMailExtensionAppex.entitlements;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "Config/NextcloudAppleMailExtension-Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = NextcloudAppleMail;
+				INFOPLIST_FILE = "Config/NextcloudMailExtensionAppex-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = NextcloudMailExtension;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 					"@executable_path/../../../../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = lv.warp.nextcloudapplemail.extension;
+				PRODUCT_BUNDLE_IDENTIFIER = lv.warp.nextcloudmailextension.extension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = NO;
@@ -360,7 +360,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		B20000000000000000000030 /* Build configuration list for PBXProject "NextcloudAppleMail" */ = {
+		B20000000000000000000030 /* Build configuration list for PBXProject "NextcloudMailExtension" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				B20000000000000000000040 /* Debug */,
@@ -369,7 +369,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
 		};
-		B20000000000000000000031 /* Build configuration list for PBXNativeTarget "NextcloudAppleMail" */ = {
+		B20000000000000000000031 /* Build configuration list for PBXNativeTarget "NextcloudMailExtension" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				B20000000000000000000042 /* Debug */,
@@ -378,7 +378,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
 		};
-		B20000000000000000000032 /* Build configuration list for PBXNativeTarget "NextcloudAppleMailExtension" */ = {
+		B20000000000000000000032 /* Build configuration list for PBXNativeTarget "NextcloudMailExtensionAppex" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				B20000000000000000000044 /* Debug */,

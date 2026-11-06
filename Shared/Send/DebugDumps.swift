@@ -1,7 +1,7 @@
 import Foundation
 
 /// Debug builds only: copies of what Mail passes `encode()`, so that the Mail checks can see each call's message
-/// (docs/TESTING.md). They're made only while turned on, and only for messages whose subject has `[ncam`, so other
+/// (docs/TESTING.md). They're made only while turned on, and only for messages whose subject has `[ncme`, so other
 /// mail is never copied. They stay in the App Group's container until taken, which deletes them.
 enum DebugDumps {
     struct Dump: Equatable {
@@ -10,7 +10,7 @@ enum DebugDumps {
     }
 
     static let settingsKey = "debugDumps"
-    static let marker = "[ncam"
+    static let marker = "[ncme"
 
     static func isOn(group: String) -> Bool {
         UserDefaults(suiteName: group)?.bool(forKey: settingsKey) ?? false

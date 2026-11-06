@@ -1,18 +1,18 @@
 import Foundation
 import Testing
 
-@testable import NextcloudAppleMailShared
+@testable import NextcloudMailExtensionShared
 
 struct SharedStorageTests {
     @Test func readsTheAppGroupIdentifier() {
-        let info = [SharedStorage.infoKey: "ABCDE12345.lv.warp.nextcloudapplemail"]
-        #expect(SharedStorage.appGroupIdentifier(in: info) == "ABCDE12345.lv.warp.nextcloudapplemail")
+        let info = [SharedStorage.infoKey: "ABCDE12345.lv.warp.nextcloudmailextension"]
+        #expect(SharedStorage.appGroupIdentifier(in: info) == "ABCDE12345.lv.warp.nextcloudmailextension")
     }
 
     @Test(arguments: [
         [:],
         [SharedStorage.infoKey: ""],
-        [SharedStorage.infoKey: "$(TeamIdentifierPrefix)lv.warp.nextcloudapplemail"],
+        [SharedStorage.infoKey: "$(TeamIdentifierPrefix)lv.warp.nextcloudmailextension"],
     ])
     func rejectsMissingOrUnexpandedIdentifiers(info: [String: String]) {
         #expect(SharedStorage.appGroupIdentifier(in: info) == nil)

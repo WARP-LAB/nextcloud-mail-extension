@@ -1,6 +1,6 @@
 # Product Requirements Document
 
-NextcloudAppleMail is an Apple Mail extension for macOS, a successor to [cargolifter-mail-plugin](https://github.com/WARP-LAB/cargolifter-mail-plugin). This document says what it must do. [ARCHITECTURE.md](ARCHITECTURE.md) describes how, and [MAIL.md](MAIL.md) records the Mail behaviour that showed each requirement can be met.
+NextcloudMailExtension is an Apple Mail extension for macOS, a successor to [cargolifter-mail-plugin](https://github.com/WARP-LAB/cargolifter-mail-plugin). This document says what it must do. [ARCHITECTURE.md](ARCHITECTURE.md) describes how, and [MAIL.md](MAIL.md) records the Mail behaviour that showed each requirement can be met.
 
 The upload can run only while Sign is on in the message window, because Mail doesn't give the extension the outgoing message otherwise. FR5 covers messages sent with Sign off.
 

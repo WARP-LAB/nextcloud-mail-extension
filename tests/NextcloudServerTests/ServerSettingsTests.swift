@@ -1,12 +1,12 @@
 import Foundation
 import Testing
 
-@testable import NextcloudAppleMailShared
+@testable import NextcloudMailExtensionShared
 
 /// The test server's sharing settings, keys in Nextcloud's `core` app config that an admin can change through the
 /// provisioning API (D18). They apply to the whole server, so tests that change them run on their own.
 enum ServerSettings {
-    static let enabled = TestServer.environment["NCAM_TEST_CHANGE_SERVER_SETTINGS"] == "1"
+    static let enabled = TestServer.environment["NCME_TEST_CHANGE_SERVER_SETTINGS"] == "1"
 
     static let expiryMaximum = [
         "shareapi_default_expire_date": "yes",
@@ -54,8 +54,8 @@ enum ServerSettings {
     /// password can't do, so these requests alone use the account password (D18).
     static func adminAccount() throws -> NextcloudAccount {
         NextcloudAccount(
-            server: try TestServer.server(), loginName: try #require(TestServer.environment["NCAM_TEST_USERNAME"]),
-            appPassword: try #require(TestServer.environment["NCAM_TEST_PASSWORD"]))
+            server: try TestServer.server(), loginName: try #require(TestServer.environment["NCME_TEST_USERNAME"]),
+            appPassword: try #require(TestServer.environment["NCME_TEST_PASSWORD"]))
     }
 
     static func keys(_ account: NextcloudAccount) async throws -> Set<String> {

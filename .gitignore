@@ -1645,6 +1645,6 @@ test-files/
 test-results/
 probe/Config/Local.xcconfig
 
-# NextcloudAppleMail
+# NextcloudMailExtension
 Config/Local.xcconfig
 .swiftpm/

@@ -7,11 +7,11 @@ enum Launcher {
         if let command = AppCommand(arguments: CommandLine.arguments) {
             command.runAndExit()
         }
-        NextcloudAppleMailApp.main()
+        NextcloudMailExtensionApp.main()
     }
 }
 
-struct NextcloudAppleMailApp: App {
+struct NextcloudMailExtensionApp: App {
     @StateObject private var model = AppModel()
 
     var body: some Scene {

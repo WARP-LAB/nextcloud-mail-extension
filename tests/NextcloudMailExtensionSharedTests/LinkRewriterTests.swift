@@ -1,7 +1,7 @@
 import Foundation
 import Testing
 
-@testable import NextcloudAppleMailShared
+@testable import NextcloudMailExtensionShared
 
 /// The rewriter on each message structure in docs/MAIL.md.
 struct LinkRewriterTests {
