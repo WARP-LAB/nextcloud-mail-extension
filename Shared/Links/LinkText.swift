@@ -42,7 +42,7 @@ struct ExpiryDate: Equatable {
 
 /// How each file's links read in the email (FR8), and the links to all files (FR9).
 struct LinkText {
-    enum Style: Equatable {
+    enum Style: String, Codable, CaseIterable {
         /// A link to the file's page in Nextcloud, and a download link. The default.
         case viewAndDownload
         /// Only a download link.

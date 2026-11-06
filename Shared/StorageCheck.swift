@@ -1,5 +1,4 @@
 import Foundation
-import Security
 
 /// Checks that the App Group's container, its settings and a Keychain item in the group all work.
 ///
@@ -89,45 +88,31 @@ struct StorageCheck {
 
     // MARK: - Keychain
 
-    private var keychainQuery: [String: Any] {
-        [
-            kSecClass as String: kSecClassGenericPassword,
-            kSecAttrService as String: Self.keychainService,
-            kSecAttrAccount as String: Self.keychainAccount,
-            kSecAttrAccessGroup as String: groupIdentifier,
-            kSecUseDataProtectionKeychain as String: true,
-        ]
-    }
-
     private func writeKeychain(_ value: String) -> String {
-        SecItemDelete(keychainQuery as CFDictionary)
-        var item = keychainQuery
-        item[kSecValueData as String] = Data(value.utf8)
-        let status = SecItemAdd(item as CFDictionary, nil)
-        guard status == errSecSuccess else {
-            return "failed: \(Self.message(for: status))"
+        do {
+            try Keychain.write(
+                Data(value.utf8), service: Self.keychainService, account: Self.keychainAccount, group: groupIdentifier)
+        } catch {
+            return "failed: \(error.localizedDescription)"
         }
         return readKeychain()
     }
 
     private func readKeychain() -> String {
-        var query = keychainQuery
-        query[kSecReturnData as String] = true
-        query[kSecMatchLimit as String] = kSecMatchLimitOne
-        var result: CFTypeRef?
-        let status = SecItemCopyMatching(query as CFDictionary, &result)
-        guard status == errSecSuccess, let data = result as? Data else {
-            return "failed: \(Self.message(for: status))"
+        do {
+            guard
+                let data = try Keychain.read(
+                    service: Self.keychainService, account: Self.keychainAccount, group: groupIdentifier)
+            else {
+                return "failed: nothing written yet"
+            }
+            return "ok: \(Self.text(data))"
+        } catch {
+            return "failed: \(error.localizedDescription)"
         }
-        return "ok: \(Self.text(data))"
     }
 
     private static func text(_ data: Data) -> String {
         String(bytes: data, encoding: .utf8) ?? "<not UTF-8>"
-    }
-
-    private static func message(for status: OSStatus) -> String {
-        let text = SecCopyErrorMessageString(status, nil) as String? ?? "unknown error"
-        return "\(text) (\(status))"
     }
 }
