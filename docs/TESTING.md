@@ -57,6 +57,30 @@ Build and install the extension, keep Sign on, and send each test to your own ad
 - **Recording:** list the checks that were run in the task's Done note.
 - **Never** tick "Don't ask again" in Mail's prompts (R2).
 
+### Driving Mail from the command line
+
+An agent can run Mail checks itself through AppleScript: Mail builds and sends a message with files between two of the user's own accounts, and reads what arrived and the Sent copy. The two accounts, A and B, are in the git-ignored `.env` as `NCAM_MAIL_A_ACCOUNT` and `NCAM_MAIL_A_ADDRESS`, and the same for B (`.env.example`). Their names and addresses never go into tracked files. Messages saved by the checks go in the git-ignored `test-results/`.
+
+macOS asks for these permissions, for the app that runs the terminal, such as Visual Studio Code or Terminal. Each appears in System Settings > Privacy & Security once it's been asked for, and the user can turn it off there again.
+
+| Permission | Section in Privacy & Security | Asked for when | Needed for |
+| --- | --- | --- | --- |
+| Automation of Mail | Automation, under the terminal's app | The first AppleScript sent to Mail | Sending, and reading mailboxes and messages |
+| Automation of System Events | Automation, under the terminal's app | The first AppleScript sent to System Events | Reading Mail's alerts and clicking their buttons |
+| Accessibility | Accessibility | The first time System Events reads or clicks in Mail's windows | Alerts, Undo Send, Send Later and the Mail Drop prompt |
+| Screen Recording | Screen & System Audio Recording | The first `screencapture` | Screenshots of Mail's windows, to see an alert or a layout |
+| Local Network, for NextcloudAppleMail | Local Network | The app's first request to a server on the local network, opened normally rather than from a terminal | The extension's uploads to such a server ([MAIL.md](MAIL.md#network)) |
+
+Mail itself needs the extension turned on and chosen for message security, and Sign on, which AppleScript can't read or change. After `scripts/install.sh` replaces a build, quit and reopen Mail. Until then, sends stop with Mail's own alert, "An error occurred while trying to encrypt your message", because Mail can't reach the replaced extension.
+
+Without Accessibility, the checks that need Mail's windows stay with the user: Undo Send, Send Later, the Mail Drop prompt, the send warnings and the toolbar popover.
+
+- **Running them:** `python3 tests/mail-checks.py [check …]`, with `--list` for the checks. Each sets the app's settings, sends a message with files from A to B, fetches what arrived and the Sent copy, downloads every link and compares it with the original file, and puts the settings back at the end. It uses `scripts/mail.sh`, which sends, fetches by subject, and runs the installed Debug build's options.
+- **Debug options:** the Debug build's `--settings [<json>]` prints and changes the settings, and `--debug-dumps on|off|take` keeps copies of what Mail passes `encode()` for messages whose subject has `[ncam`, so a check can see each call's structure. Turn the dumps off afterwards.
+- **What AppleScript can't make:** its messages have the text first and the files after it, with no pasted images, and its replies have no quote, so those structures still come from the fixtures and from the user.
+- **Signature check:** `NCAM_MAIL_SIGNATURE` in `.env` names a signature with an image, which the check chooses, since Mail's default can change.
+- **Leftover windows:** a send that fails leaves its message window open, and AppleScript can't close it, so close it by hand.
+
 ## After a macOS or Mail update
 
 Run the quick regression set in [probe/docs/PROBE.md](../probe/docs/PROBE.md), then update [MAIL.md](MAIL.md) and [RISKS.md](RISKS.md) with any change.

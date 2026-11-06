@@ -45,6 +45,7 @@ scripts/nextcloud.sh        # run single Nextcloud requests by hand, with no arg
 scripts/lint.sh [--fix]     # all linters on every file git doesn't ignore, with --fix applying automatic fixes first
 scripts/install.sh          # copy the build to ~/Applications and register the extension (see Boundaries)
 scripts/use-test-account.sh # log the installed Debug build in to the test server in .env, or --log-out
+python3 tests/mail-checks.py # the Mail checks, sending between the two accounts in .env (docs/TESTING.md)
 ~/Applications/NextcloudAppleMail.app/Contents/MacOS/NextcloudAppleMail --check-storage     # App Group and Keychain
 ~/Applications/NextcloudAppleMail.app/Contents/MacOS/NextcloudAppleMail --check-connection  # the app's Test connection
 ~/Applications/NextcloudAppleMail.app/Contents/MacOS/NextcloudAppleMail --check-from-mail   # the extension's, in Mail
@@ -71,6 +72,7 @@ Only what isn't obvious from directory names:
 - Prefer small, focused changes, and after edits, build and run `scripts/lint.sh` to verify the project still works.
 - **Swift:** 4-space indentation and 120-character lines. swift-format handles layout and SwiftLint code quality, as set in `.swift-format` and `.swiftlint.yml`. No force unwrapping.
 - **Dependencies:** no third-party packages without asking.
+- **Python:** scripts such as `tests/mail-checks.py` use only the standard library. If one needs a package, it goes through uv, with the latest stable Python that uv offers: `uv add` and `uv sync`, in the project's own environment, never `pip install` into the system Python.
 - **Logging:** never log message contents, addresses or passwords.
 - **Bash:** start with `#!/usr/bin/env bash` and `set -euo pipefail`, and run unchanged on macOS (BSD tools, bash 3.2) and GNU/Linux.
 - **Markdown:** follow `.markdownlint.json`.

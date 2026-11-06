@@ -47,6 +47,11 @@ final class SecurityHandler: NSObject, MEMessageSecurityHandler {
         let raw = message.rawData
         let isAutoSave = message.state == .draft
         let contextID = composeContext.contextID
+        #if DEBUG
+            if let raw, let group = SharedStorage.appGroupIdentifier {
+                DebugDumps.save(raw, isAutoSave: isAutoSave, group: group)
+            }
+        #endif
         Task {
             let result = await sender.encode(raw, isAutoSave: isAutoSave, contextID: contextID)
             completionHandler(Self.encodingResult(result))

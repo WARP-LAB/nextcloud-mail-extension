@@ -17,7 +17,7 @@ Risk register: `docs/RISKS.md`.
 > - Write Acceptance Criteria or a explicit Definition of Done
 > - Take tasks in order unless told otherwise. Do not start the next task without being asked.
 
-🔄 T5b, which the user asked the agent to run, by driving Mail with AppleScript.
+None. T6 is next. T5c waits for the user, or for Accessibility.
 
 ## ❓ Open Decisions (human to resolve)
 
@@ -41,12 +41,8 @@ Judgment calls and known risks are tracked separately in `docs/RISKS.md`.
 
 ## 📋 Backlog (To Be Done)
 
-- **T5b: Check T5 in Mail (needs the user).** After T2b, since the extension can't reach the test server until Local Network is allowed. Installing the T5 build means every email sent with Sign on has its files uploaded to the configured server and replaced by links, so it isn't installed yet. Keep Sign off for other mail while it is.
-  1. Install it with `scripts/build.sh` and `scripts/install.sh`, or tell me to.
-  2. Send to your own address with Sign on, after TESTING.md's send-flow row: a plain email with two files between paragraphs (t15, t29), a rich one with a signature image and a pasted image (t30), a forward with a file (t20) and a reply (t34), the size rule with one small and one large file (t27, t28), a file large enough to take a while (t9), Undo Send and then sending again (t21), Send Later (t22), and an email over the account's size limit with Try Sending in Email (t38) and another with Use Mail Drop (t39). For a failure (t7), log out in the app first, so the send stops with "isn't set up".
-  3. Try each sharing setting once: the folder's links where each file was (the default), only the folder's links, and a link for each file with the all-files links on.
-  4. Open the delivered emails in Apple Mail, Gmail on the web and Outlook, and click every link.
-  - **Acceptance:** FR1's, FR8's, FR9's and FR10's criteria hold in those checks, Sent copies match what arrived, and nothing uploaded for the Mail Drop email is left on Nextcloud. The checks run are listed here.
+- **T5c: The rest of T5's Mail checks (needs the user, or Accessibility for the agent).** What AppleScript alone can't do (docs/TESTING.md): an upload failure's alert (t7), Undo Send and sending again (t21), Send Later (t22), an email over the account's size limit with Try Sending in Email (t38) and with Use Mail Drop (t39), a pasted image (t30), a reply's links above its quote (t34, since AppleScript replies have no quote), and the delivered emails in Gmail on the web and Outlook, clicking each link.
+  - **Acceptance:** FR1's failure case, FR8's display in the three clients and FR10's criteria hold, and nothing uploaded for the Mail Drop email is left on Nextcloud.
 - **T6: Password popover (FR7).** The popover's password field, kept per message in memory and the Keychain (R8).
   - **Acceptance:** the password Mail checks pass, and the links need the password.
 - **T7: Send warnings (FR5, FR6).** Both warnings in the send check (R10).
@@ -59,6 +55,7 @@ Judgment calls and known risks are tracked separately in `docs/RISKS.md`.
 ## ✅ Completed Tasks (Done)
 
 - **Probing Mail with MailProbe (2026-11-05).** Four rounds of tests found what Mail does with an extension. See `probe/docs/` and `docs/MAIL.md`.
+- **T5b: Check T5 in Mail (2026-11-06).** Run by the agent through AppleScript, with `tests/mail-checks.py` between the two accounts in `.env`. All 11 checks passed on the final build: the folder's links where each file was, only the folder's links with the zip, a link for each file with the all-files links and zip, download links only, the size rule keeping a small file byte for byte, names with `#`, `%`, accents and `&`, a file attached twice uploaded once, a signature image staying, a 12 MB file arriving 27 seconds after sending, a reply and a forward. Each link downloaded the original bytes and each Sent copy matched what arrived. The checks found and fixed four faults: a new build's first local network request is refused (retried now), signature images lose their Content-IDs in the second call when there's another file (known by their bytes now), files next to each other ran their links together in the plain text, and AppleScript's text counted as a quote. What needs Mail's windows moved to T5c.
 - **T2b: Check T2 in Mail (2026-11-06).** Done by the user: allowed NextcloudAppleMail's local network access when macOS asked, Test from Mail passed, and the browser login stored the account. The app's check afterwards showed the browser login's account on the test server.
 - **T5: Send flow (2026-11-06).** Verified: `swift test` passes 106 unit tests. Against a fake Nextcloud, they cover both send calls uploading once, auto-saves, messages without files, not being logged in, a failure repeated for the next call only and forgotten after a minute, a retry uploading only what failed, Mail Drop's two signals, signature images carried from the first call, two calls for one message at once, each sharing setting, the server's password and expiry rules, taken names, and a file attached twice. `scripts/test-nextcloud.sh` passes 9 server tests, now with one file of a password-protected folder share. That test found that Nextcloud's redirect breaks names with `#`, `%` or `?`, which folder shares now replace (NEXTCLOUD.md). The fixtures now keep a file the same in both calls, as Mail does. The build has no warnings and lint is clean. The Mail checks moved to T5b, and the build isn't installed.
 - **T3b: Enforced server settings (2026-11-06).** Verified: `scripts/test-nextcloud.sh --server-settings` passes 2 tests on the test server. With a 7-day maximum enforced, the capabilities report it, "no expiry" becomes the maximum, a later date gets 404 with the server's reason, and `LinkExpiry` shortens a year to the maximum, which the server accepts. With passwords enforced, the capabilities report it, a share without one gets 403 with the server's reason, and one with a password works. The settings were put back, checked by listing the server's keys, and `scripts/test-nextcloud.sh` still passes 8 tests. NEXTCLOUD.md has the keys and the HTTP statuses.

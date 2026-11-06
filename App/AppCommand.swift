@@ -8,6 +8,9 @@ import Foundation
 /// - `--use-test-account`, debug builds only: logs in to the test server in the environment, as `scripts/
 ///   use-test-account.sh` loads it from `.env`, and sets the upload directory to `NCAM_TEST_DIRECTORY` (D14).
 /// - `--log-out`, debug builds only: revokes the stored app password and deletes it.
+/// - `--settings [<json>]`, debug builds only: prints the settings as JSON, after changing those in `<json>`.
+/// - `--debug-dumps on|off|take`, debug builds only: the copies of test messages that Mail passes the extension
+///   (`DebugDumps`). `take` prints each as its name, a tab and the message in base64, and deletes them.
 ///
 /// Each exits with 0 if it worked.
 enum AppCommand {
@@ -16,6 +19,8 @@ enum AppCommand {
     case checkFromMail
     case useTestAccount
     case logOut
+    case settings(String?)
+    case debugDumps(String)
 
     init?(arguments: [String]) {
         if arguments.contains("--check-storage") {
@@ -28,6 +33,12 @@ enum AppCommand {
             self = .useTestAccount
         } else if Self.debug && arguments.contains("--log-out") {
             self = .logOut
+        } else if Self.debug, let index = arguments.firstIndex(of: "--settings") {
+            self = .settings(arguments.indices.contains(index + 1) ? arguments[index + 1] : nil)
+        } else if Self.debug, let index = arguments.firstIndex(of: "--debug-dumps"),
+            arguments.indices.contains(index + 1)
+        {
+            self = .debugDumps(arguments[index + 1])
         } else {
             return nil
         }
@@ -57,6 +68,10 @@ enum AppCommand {
                 passed = await Self.useTestAccount()
             case .logOut:
                 passed = await Self.logOut()
+            case .settings(let json):
+                passed = DebugCommands.settings(json)
+            case .debugDumps(let action):
+                passed = DebugCommands.debugDumps(action)
             }
             exit(passed ? 0 : 1)
         }

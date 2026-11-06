@@ -30,7 +30,8 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 RESULTS = ROOT / 'probe' / 'test-results'
 OUTPUT = ROOT / 'tests' / 'NextcloudAppleMailSharedTests' / 'Fixtures'
 
-# Fixture name: the probe's saved message (see probe/docs/TESTS.md).
+# Fixture name: the probe's saved message (see probe/docs/TESTS.md), or with a path starting with test-results/, a
+# message the Mail checks saved (docs/TESTING.md). Both folders are git-ignored.
 FIXTURES = {
     't15-first': '20261105-170130/54458-0020-call2-in.eml',
     't15-second': '20261105-170130/54458-0021-call3-in.eml',
@@ -44,6 +45,9 @@ FIXTURES = {
     't30-second': '20261105-230344/67122-0018-call5-in.eml',
     't34-first': '20261105-230344/67122-0026-call2-in.eml',
     't34-second': '20261105-230344/67122-0027-call3-in.eml',
+    # A file with a signature image: the second call has them in multipart/mixed, without Content-IDs (T5b).
+    'signature-file-first': 'test-results/mail/signature/20261106T085041.366-C8F9-send.eml',
+    'signature-file-second': 'test-results/mail/signature/20261106T085045.133-401F-send.eml',
 }
 
 ADDRESS_HEADERS = {'from', 'to', 'cc', 'bcc', 'reply-to', 'sender'}
@@ -203,10 +207,14 @@ def structure(data):
     return [(part.get_content_type(), part.get_filename(), part.get('Content-ID')) for part in message.walk()]
 
 
+def source_path(source):
+    return ROOT / source if source.startswith('test-results/') else RESULTS / source
+
+
 def main():
     OUTPUT.mkdir(parents=True, exist_ok=True)
     # Quoted messages carry the names of earlier messages, so collect the people of every source first.
-    sources = {label: (RESULTS / source).read_bytes() for label, source in FIXTURES.items()}
+    sources = {label: source_path(source).read_bytes() for label, source in FIXTURES.items()}
     found = []
     for raw in sources.values():
         found += [person for person in people(raw) if person not in found]

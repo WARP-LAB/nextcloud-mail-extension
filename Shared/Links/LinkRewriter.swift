@@ -140,7 +140,8 @@ private final class Rewriting {
     }
 
     /// Replaces Mail's U+FFFC placeholders with links. They stand for the message's files in document order, so
-    /// they're only used when there is one for each file.
+    /// they're only used when there is one for each file. Each file's links get lines of their own, also when files
+    /// were next to each other with no text between them.
     private func replacingPlainPlaceholders(in plain: String, _ branch: Branch) -> String {
         let placeholders = plain.filter { $0 == "\u{FFFC}" }.count
         guard placeholders > 0, placeholders == files.count else {
@@ -148,7 +149,12 @@ private final class Rewriting {
         }
         var position = 0
         var output = ""
+        var afterLinks = false
         for character in plain {
+            if afterLinks && character != "\n" {
+                output.append("\n")
+            }
+            afterLinks = false
             guard character == "\u{FFFC}" else {
                 output.append(character)
                 continue
@@ -156,7 +162,11 @@ private final class Rewriting {
             if let link = links[position] {
                 if inPlace {
                     branch.placed.insert(position)
+                    if let last = output.last, last != "\n" {
+                        output.append("\n")
+                    }
                     output += text.plain(link)
+                    afterLinks = true
                 }
             } else {
                 output.append(character)

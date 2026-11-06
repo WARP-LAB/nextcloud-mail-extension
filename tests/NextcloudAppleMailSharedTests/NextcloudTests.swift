@@ -86,12 +86,25 @@ struct NextcloudClientTests {
 
     @Test func saysWhereToAllowAServerThatCantBeReached() async {
         await #expect(throws: NextcloudError.offline) {
-            try await NextcloudClient.reaching { throw URLError(.notConnectedToInternet) }
+            try await NextcloudClient.reaching(retryDelay: 0) { throw URLError(.notConnectedToInternet) }
         }
         await #expect(throws: URLError(.timedOut)) {
-            try await NextcloudClient.reaching { throw URLError(.timedOut) }
+            try await NextcloudClient.reaching(retryDelay: 0) { throw URLError(.timedOut) }
         }
         #expect(NextcloudError.offline.localizedDescription.contains("Local Network"))
+    }
+
+    @Test func retriesOnceWhenOffline() async throws {
+        var attempts = 0
+        let value = try await NextcloudClient.reaching(retryDelay: 0) {
+            attempts += 1
+            if attempts == 1 {
+                throw URLError(.notConnectedToInternet)
+            }
+            return "reached"
+        }
+        #expect(value == "reached")
+        #expect(attempts == 2)
     }
 
     @Test func readsWebDAVErrors() {
