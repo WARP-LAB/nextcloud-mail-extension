@@ -95,6 +95,8 @@ Only what isn't obvious from directory names:
 - An unescaped `|` inside a Markdown table cell splits the cell, so avoid pipes in code within tables.
 - In Swift, `"\r\n"` is one `Character`, so `hasSuffix("\n")` is false for CRLF text. `MimePart.text` returns text with `\n` line endings for this reason. The package builds in Swift 5 mode, where a bare `/…/` regex literal doesn't compile: write `#/…/#`.
 - Running the server tests again and again: Nextcloud allows 20 new shares in 10 minutes, so the third run in a row fails with 429. Wait 10 minutes.
+- Narrowing the server tests with `scripts/test-nextcloud.sh --filter X`: `swift test` joins its filters with or, so that runs every server test and uses up the share limit. Load `.env` and run `swift test --filter X` alone.
+- In zsh, `log` is a builtin, so `log show` fails with "too many arguments". Use `/usr/bin/log show`.
 
 ## Definition of done
 
