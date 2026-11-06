@@ -2,7 +2,7 @@
 
 The Nextcloud requests the design in [ARCHITECTURE.md](ARCHITECTURE.md) uses, and how the server behaves. The share, password and expiry behaviour was first read from the Nextcloud server's source code on 2026-11-05: `ShareAPIController.php`, `Manager.php`, `Capabilities.php`, `ShareController.php`, `AuthPublicShareController.php` and the password policy app's `PasswordPolicyConfig.php`.
 
-Everything here was then run against the test server (D14) on 2026-11-06, which runs Nextcloud 35.0.2, except an enforced expiry maximum and enforced passwords, which need the server's settings changed (OD8, R19). The server tests in `tests/NextcloudServerTests` repeat these checks.
+Everything here was then run against the test server (D14) on 2026-11-06, which runs Nextcloud 35.0.2, except an enforced expiry maximum and enforced passwords, which need the server's settings changed (T3b, R19). The server tests in `tests/NextcloudServerTests` repeat these checks.
 
 ## Requests
 
@@ -47,7 +47,7 @@ An admin can raise the limit in `config.php`:
 ],
 ```
 
-How the extension stays within the limit is open (OD9, R21).
+By default the extension uses one share per email, of its folder (D17, R21).
 
 ## Share links
 
@@ -68,7 +68,7 @@ How the extension stays within the limit is open (OD9, R21).
 ## Passwords
 
 - **No password:** an empty `password` means none.
-- **Enforced passwords:** when the server enforces passwords, creating a share without one fails with "Passwords are enforced for link and mail shares" (from the source, OD8).
+- **Enforced passwords:** when the server enforces passwords, creating a share without one fails with "Passwords are enforced for link and mail shares" (from the source, T3b).
 - **Password policy:** a rejected password gets 400, with every broken rule in one message, such as "Password is among the 1,000,000 most common ones. Please make it unique. Password needs to be at least 10 characters long. Password is present in compromised password list. Please choose a different password." Changing a share's password to a weak one is rejected the same way.
 
 ## Expiry
@@ -78,5 +78,5 @@ How the extension stays within the limit is open (OD9, R21).
 - **Omitting it** applies the server default. With none, as on the test server, the link doesn't expire.
 - **A date far ahead,** such as 2099-01-01, is accepted when there's no enforced maximum.
 - **A date in the past** gets 404, "Expiration date is in the past".
-- **Enforced maximum:** "no expiry" silently becomes the server default, and a later date is rejected with "Cannot set expiration date more than %n days in the future" (from the source, OD8).
+- **Enforced maximum:** "no expiry" silently becomes the server default, and a later date is rejected with "Cannot set expiration date more than %n days in the future" (from the source, T3b).
 - **After expiry:** the share is deleted when someone next opens it, but the file stays in its folder.

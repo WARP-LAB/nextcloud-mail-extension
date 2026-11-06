@@ -99,3 +99,15 @@ Settled decisions, and why they were made. The current design is in [ARCHITECTUR
 - **Decision:** this Mac is registered as a device with the free Personal Team, which resolves OD7. Xcode then makes a provisioning profile for each target, so both targets can have `keychain-access-groups` with `<team ID>.lv.warp.nextcloudapplemail`, the App Group's identifier, and share the app password's Keychain item.
 - **Why:** the user's choice. The alternative was R17's fallback, logging in from the extension.
 - **How:** registering needs a build with a destination, given in AGENTS.md's setup. Building in Xcode's window before the entitlement was added didn't register the Mac, because nothing needed a profile then. The Personal Team's profiles last 7 days, and `scripts/build.sh` renews them with `-allowProvisioningUpdates`.
+
+## D17: Share the email's folder, or each file (2026-11-06)
+
+- **Decision:** a setting chooses how an email's files are shared, which resolves OD9:
+  - **One link for the email's folder,** the default: one public share per email, of its folder. Each file's view link is the folder's page and its download link is the folder share's `/download?files=<name>`. A second setting chooses whether each file's links stay where the file was, the default, or the email has only the folder's links after the user's own text, with the files' names and sizes listed above them.
+  - **A link for each file:** a share per file, plus one for the folder when FR9's setting is on.
+- **Why:** the user's choice. Nextcloud allows each user 20 new shares in 10 minutes (R21). One share per email allows 20 emails in that time, however many files they have, and FR9's links need no extra share. A share per file gives each file a page of its own, for servers whose admin has raised the limit.
+
+## D18: Tests may change the test server's sharing settings (2026-11-06)
+
+- **Decision:** server tests may switch on an enforced expiry maximum and enforced passwords on the test server for the length of a run, through Nextcloud's admin API, and switch them back to what they were at the end. This resolves OD8.
+- **Why:** the user's choice. It's the only way to test those two (R19), and the test account is an admin.

@@ -36,7 +36,7 @@ Run against the test server and account only (D14), whose credentials are in the
 - shares with and without a password, and their view and download links
 - expiry dates, and a password the policy rejects
 - the password page, and the zip from a folder share
-- not yet: an enforced expiry maximum and enforced passwords, which need the server's settings changed (OD8)
+- not yet: an enforced expiry maximum and enforced passwords, which need the server's settings changed (T3b, D18)
 
 One run creates 7 shares, and Nextcloud allows 20 in 10 minutes, so a third run within 10 minutes fails with 429 ([NEXTCLOUD.md](NEXTCLOUD.md#rate-limit)). `scripts/nextcloud.sh` runs single requests by hand with the same `.env`. Record what the server really did in NEXTCLOUD.md (R19).
 
