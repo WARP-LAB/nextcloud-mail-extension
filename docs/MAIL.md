@@ -80,6 +80,14 @@ Decoded files are byte-identical in both calls (t15). Mail didn't resize a 10 MB
 
 Mail chooses each file's transfer encoding by its content. The 10 MB test PNG, mostly padding text, was quoted-printable in both of t28's calls, while the other files were base64. Lines end in LF, not CRLF, in all 165 saved send calls.
 
+## Network
+
+The extension's requests are subject to macOS's Local Network privacy, found in T2 on 2026-11-06 with the test server, whose address is on this Mac's local network.
+
+- **Blocked until allowed:** while the host app's Local Network permission was undetermined, every request from the extension failed at once with `NSURLErrorNotConnectedToInternet`, "The Internet connection appears to be offline". The system log said "Local network prohibited".
+- **Shared with the app:** Apple's [TN3179](https://developer.apple.com/documentation/technotes/tn3179-understanding-local-network-privacy) says app extensions share their container app's permission, that extensions treated as background ones are denied while it's undetermined, and that `NSLocalNetworkUsageDescription` goes in the app's `Info.plist`, not the extension's. Whether allowing the app lets the extension through is still to be checked (T2b).
+- **Terminal runs are exempt:** the host app run from a terminal reached the same server, because command-line tools run from Terminal are allowed automatically. Only the app opened normally gets the prompt.
+
 ## The toolbar popover
 
 - **Opening it:** the compose session's view controller appears as a popover from the extension's button in the message window's toolbar.
