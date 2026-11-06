@@ -145,3 +145,8 @@ Settled decisions, and why they were made. The current design is in [ARCHITECTUR
 
 - **Decision:** the popover's first block, "For this email", chooses for the email: "Use settings", the default, "All files via Nextcloud", which ignores the size limit and the pasted-images setting, so pasted images become links too, or "All files kept as attachments", which uploads nothing. The user chose these labels. Images in the signature stay in the email even with all files, as FR3 says they always do. With the files kept, the password and expiry are greyed out, and after Undo Send what the earlier send uploaded is deleted, while the email's popover values are kept.
 - **Why:** the user's request, so that one email can differ from the settings without changing them. The signature's images are part of the signature, not files the user attached, so an agent kept them out. Keeping the values lets the user undo again and change their mind without typing the password again.
+
+## D25: Publish with Nextcloud's logo, and ask for permission meanwhile (2026-11-06)
+
+- **Decision:** the project is pushed with Nextcloud's mark as the toolbar and app icons and with Nextcloud in its name, and the user asks Nextcloud GmbH for permission at the same time (T13b). If Nextcloud GmbH objects, the icons are replaced and the project is renamed. This resolves OD11.
+- **Why:** the user's choice, accepting that Nextcloud GmbH may ask for changes. Its trademark guidelines allow the logos only as links to nextcloud.com, and say that third-party apps shouldn't have its mark in their name, and `LICENSE.Nextcloud` says so. The artwork is in three places, so replacing it is one change (R22).

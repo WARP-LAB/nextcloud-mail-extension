@@ -42,6 +42,6 @@ is a legal doctrine, not a licence.
 The trademark guidelines allow the logos "only on the Internet and only as a
 link to nextcloud.com", and say that third-party apps "should not include a
 Nextcloud mark in the name". This project uses the mark for its icons and has
-Nextcloud in its name, which goes beyond that, so Nextcloud GmbH's permission
-is to be asked before the project is published or distributed:
-https://nextcloud.com/contact
+Nextcloud in its name, which goes beyond that. The project asks Nextcloud GmbH
+for permission through https://nextcloud.com/contact, and replaces the icons
+and changes its name if Nextcloud GmbH objects.
