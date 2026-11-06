@@ -1,0 +1,12 @@
+// Signing for local builds. Without Config/Local.xcconfig, builds are ad-hoc signed, and the App Group then fails.
+// To sign with an Apple team (a free Personal Team is enough for local builds), create Config/Local.xcconfig,
+// which git ignores, with these lines:
+//   CODE_SIGN_STYLE = Automatic
+//   CODE_SIGN_IDENTITY = Apple Development
+//   DEVELOPMENT_TEAM = <your 10-character team ID>
+
+CODE_SIGN_STYLE = Manual
+CODE_SIGN_IDENTITY = -
+DEVELOPMENT_TEAM =
+
+#include? "Local.xcconfig"
