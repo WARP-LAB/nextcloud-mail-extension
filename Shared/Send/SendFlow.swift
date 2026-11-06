@@ -42,6 +42,14 @@ struct SendError: Error, Equatable, LocalizedError {
     }
 }
 
+/// What the send flow reports while it uploads, for the progress notification (R3).
+enum SendProgress: Equatable {
+    /// Uploads start of files that aren't on Nextcloud yet.
+    case uploading(files: Int, bytes: Int)
+    case uploaded(files: Int, bytes: Int)
+    case failed
+}
+
 /// A message's ledger entry, changed as each folder, upload and share is done, so that a failure part way keeps
 /// what's done for the retry.
 final class MessageRecord {
@@ -64,6 +72,8 @@ struct SendFlow {
     var service: NextcloudService
     var today = Date()
     var temporaryDirectory = FileManager.default.temporaryDirectory
+    /// Told when uploads start and end, but not for a call that finds every file uploaded already.
+    var progress: (SendProgress) -> Void = { _ in }
 
     /// The message with links in place of `files`. Files already in `record` are reused, not uploaded again.
     ///
@@ -82,16 +92,7 @@ struct SendFlow {
         let options = LinkOptions(expireDate: expireDate, password: password)
         let folder = try await folder(for: message, record)
         let eachFile = settings.sharing == .eachFile
-        let names = files.map { eachFile ? $0.filename : NextcloudNames.folderShareName($0.filename) }
-        var stored: [Int: UploadLedger.StoredFile] = [:]
-        for (file, name) in zip(files, NextcloudNames.uniqueFiles(names)) {
-            do {
-                stored[file.index] = try await put(
-                    file, named: name, in: folder, share: eachFile ? options : nil, record)
-            } catch {
-                throw SendError.file(file.filename, error)
-            }
-        }
+        let stored = try await putAll(files, in: folder, share: eachFile ? options : nil, record)
         let allFilesLinks = settings.onlyFolderLinks || (settings.folderLinks && files.count >= 2)
         let folderShare = !eachFile || allFilesLinks ? try await share(folder, options, record) : nil
         var links: [Int: LinkedFile] = [:]
@@ -159,6 +160,38 @@ struct SendFlow {
         } catch {
             throw SendError.folder(error)
         }
+    }
+
+    /// Uploads and shares the files the record doesn't have yet, telling `progress` when that starts and ends.
+    private func putAll(
+        _ files: [MessageFile], in folder: String, share options: LinkOptions?, _ record: MessageRecord
+    ) async throws -> [Int: UploadLedger.StoredFile] {
+        var pending: [String: Int] = [:]
+        for file in files where record.entry.files[UploadLedger.key(for: file.data)] == nil {
+            pending[UploadLedger.key(for: file.data)] = file.decodedSize
+        }
+        let count = pending.count
+        let bytes = pending.values.reduce(0, +)
+        if count > 0 {
+            progress(.uploading(files: count, bytes: bytes))
+        }
+        let eachFile = options != nil
+        let names = files.map { eachFile ? $0.filename : NextcloudNames.folderShareName($0.filename) }
+        var stored: [Int: UploadLedger.StoredFile] = [:]
+        for (file, name) in zip(files, NextcloudNames.uniqueFiles(names)) {
+            do {
+                stored[file.index] = try await put(file, named: name, in: folder, share: options, record)
+            } catch {
+                if count > 0 {
+                    progress(.failed)
+                }
+                throw SendError.file(file.filename, error)
+            }
+        }
+        if count > 0 {
+            progress(.uploaded(files: count, bytes: bytes))
+        }
+        return stored
     }
 
     /// Uploads the file, and shares it when each file gets a link, unless the record has it already.

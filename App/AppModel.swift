@@ -1,5 +1,6 @@
 import AppKit
 import Foundation
+import UserNotifications
 
 /// The host app's state: the settings, the account, and any login or check in progress.
 @MainActor
@@ -41,6 +42,8 @@ final class AppModel: ObservableObject {
     init() {
         store = group.flatMap(SettingsStore.init(groupIdentifier:))
         settings = store?.load() ?? Settings()
+        // The extension's upload notifications come under the app's permission (R3).
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert]) { _, _ in }
         guard let group else {
             accountProblem = "No App Group identifier in Info.plist, so the extension can't read the settings."
             return

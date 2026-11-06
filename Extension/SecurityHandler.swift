@@ -19,7 +19,8 @@ final class SecurityHandler: NSObject, MEMessageSecurityHandler {
                 return try await NextcloudClient.connect(account)
             },
             store: UploadLedgerStore.inContainer,
-            passwords: MessagePasswords.shared
+            passwords: MessagePasswords.shared,
+            progress: { ProgressNotices.shared.report($0, $1) }
         ))
 
     // MARK: - Encoding
