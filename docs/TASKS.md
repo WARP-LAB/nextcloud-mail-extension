@@ -17,7 +17,7 @@ Risk register: `docs/RISKS.md`.
 > - Write Acceptance Criteria or a explicit Definition of Done
 > - Take tasks in order unless told otherwise. Do not start the next task without being asked.
 
-None. T6 is next. T5c waits for the user, or for Accessibility.
+None. T5c waits for Accessibility, which the user turns on for Visual Studio Code by hand, and OD10 for the user. T6 is next.
 
 ## ❓ Open Decisions (human to resolve)
 
@@ -47,8 +47,8 @@ Judgment calls and known risks are tracked separately in `docs/RISKS.md`.
 
 ## 📋 Backlog (To Be Done)
 
-- **T5c: The rest of T5's Mail checks (needs the user, or Accessibility for the agent).** What AppleScript alone can't do (docs/TESTING.md): an upload failure's alert (t7), Undo Send and sending again (t21), Send Later (t22), an email over the account's size limit with Try Sending in Email (t38) and with Use Mail Drop (t39), a pasted image (t30), a reply's links above its quote (t34, since AppleScript replies have no quote), and the delivered emails in Gmail on the web and Outlook, clicking each link.
-  - **Acceptance:** FR1's failure case, FR8's display in the three clients and FR10's criteria hold, and nothing uploaded for the Mail Drop email is left on Nextcloud.
+- **T5c: The rest of T5's Mail checks (needs the user, or Accessibility for the agent).** What AppleScript alone can't do (docs/TESTING.md): an upload failure's alert (t7), Undo Send and sending again (t21), Send Later (t22), an email over the account's size limit with Try Sending in Email (t38) and with Use Mail Drop (t39), a pasted image (t30), and a reply's links above its quote (t34, since AppleScript replies have no quote). The user looked at the delivered emails in Gmail on the web and Outlook, and they looked right, except that View opens the folder rather than the file (OD10).
+  - **Acceptance:** FR1's failure case and FR10's criteria hold, and nothing uploaded for the Mail Drop email is left on Nextcloud.
 - **T6: Password popover (FR7).** The popover's password field, kept per message in memory and the Keychain (R8).
   - **Acceptance:** the password Mail checks pass, and the links need the password.
 - **T7: Send warnings (FR5, FR6).** Both warnings in the send check (R10).
