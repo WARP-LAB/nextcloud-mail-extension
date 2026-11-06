@@ -1,0 +1,88 @@
+From: Test Sender <sender@example.test>
+Content-Type: multipart/alternative;
+	boundary="Apple-Mail=_74C2A666-04DE-4ED5-A8A6-5300782F68E0"
+Mime-Version: 1.0 (Mac OS X Mail 16.0 \(3901.100.1.1.12\))
+Subject: [probe ff] t29
+X-Universally-Unique-Identifier: 00000000-0000-4000-8000-000000000001
+Message-Id: <fixture@example.test>
+Date: Thu, 5 Nov 2026 12:00:00 +0200
+To: Test Recipient <recipient@example.test>
+
+
+--Apple-Mail=_74C2A666-04DE-4ED5-A8A6-5300782F68E0
+Content-Transfer-Encoding: 7bit
+Content-Type: text/plain;
+	charset=us-ascii
+
+
+--Apple-Mail=_74C2A666-04DE-4ED5-A8A6-5300782F68E0
+Content-Type: multipart/related;
+	type="text/html";
+	boundary="Apple-Mail=_0DF7CE39-7332-4B70-B30F-CF6FDB6AE2F9"
+
+
+--Apple-Mail=_0DF7CE39-7332-4B70-B30F-CF6FDB6AE2F9
+Content-Transfer-Encoding: 7bit
+Content-Type: text/html;
+	charset=us-ascii
+
+<html aria-label="message body"><head></head><body style="overflow-wrap: break-word; -webkit-nbsp-mode: space; line-break: after-white-space;">[probe ff] t29<div><br></div><div>text above the files</div><div><br></div><div><object type="application/x-apple-msg-attachment" width="106" data="cid:47CFDB31-33DA-4F6C-BEAC-B589A5879309"></object></div><div><br></div><div>text between the files</div><div><br></div><div><img src="cid:3AA32E53-5109-4A4E-A983-2BA3F8B728DE" alt="dummy-1MB.png" data-unique-identifier="e9f10936-a55d-4c02-b227-c538ce8bd920" data-width="560"></div><div><br></div><div>text below the files</div></body></html>
+--Apple-Mail=_0DF7CE39-7332-4B70-B30F-CF6FDB6AE2F9
+Content-Transfer-Encoding: base64
+Content-Disposition: inline;
+	filename=dummy-1MB.pdf
+Content-Type: application/pdf;
+	x-unix-mode=0644;
+	name="dummy-1MB.pdf"
+Content-Id: <47CFDB31-33DA-4F6C-BEAC-B589A5879309>
+
+43f936qrf4nqkRN5pcLDG8r35dz6Ogm5oh2B0kf2SLyjp1lYekGzlwGE/ytW/nnwrLBq4Bw3grpY
+e2Zra+UKbaGEwbUZHgX/IVFNjpTTVK0OZR3Js51keiUYWYxCfrZAk63mWfh8WkOwPByL8v7nAQj6
+M6GMxSMNkVOj5T+JknyScHySpbqZf2uFqs/VVHfAPLhM9/mtmW6fi6HRT1A2myu06nhHVjMPQ2KW
+GCeji7BxEPZK+qZWfMRl303kH/hXthO0OZcr5+jqRqfSeb9kgDM0Tw+Ev0sTvpKfuF7Xo3dbRFz5
+OSIJdkhSsrqLfje0Q231Ja6MuCs636Z3E/nx1ocbJJI4fylqmptR7864T1lTKfITheE0wwI4qjeC
+HVgSrp8D+Ksrl0LxAQbOqVu8wB9yjByutZVqUNHkl2RJ5DYD2ulxVizgLAqdm9qZfzMfrvbCG49P
+6N8nA/HZoiwI0WiBWF9tBWUE8Qle3pRoqY6xPbPutsnZbmzi0YScyJ88OaPTO8wXLC+mnnHvNV28
+s+8ZVTHH1RXUM3+xx5wZ+fTofh3gKHQ7RJLaxQCoeggHBgMBUrEmMATBxuo5yQ3P78Tiw7XKr08w
+NMwY6BvTndwzfZcF97t8cR7Kx6crOpSPS8y5Y0Dssx4VsFQMmWPRYBog2wASobADpQXnqjIcAu6s
+w4eYWQ/UYS/ZKnmLwHTT1PU90K+cs8nIeDVq9mAEoDGhyyRiinY6Szfmp9xFVxFphqT9rnM+Y63+
+c1scQuL9WoklhvIV2OjxmSU0N3QmYkBmI/vWd1MZQwO2spbbC81FXFck4QUJ0CAsnA5KlRuWjQit
+Dz/wmRh0NGbrfDjFbxAdmp3DLitQTOJJqE3Wl7xLViMG5dPqyI9HcoBafKGRqrU0ImOMKD7rzXy8
+Hx3uV3gjOkXxQIvpU2skCs+Vwgv2/rpT79c3qQVi1z50PPz6HxgGWoWhuOA5TBUYIKhswqf9m5Lj
+jRvIGW5otmNVh1w7RmskYanriovXVEJTqJPX0q/bwFN1BT0Hb8scFZvQkTDyi+TtDWOUZdunKLhd
+b8UVSAyIrrX/zwnjKHk8othT/PB9R7f7Ry/uG9QHcAAMlYf+IQJJTThBMHHttYit4z67IK1O+DCL
+hcG7IlB1D46vY3MDCPO6XBfTdThJX44f6HcM2DvrAhIVGs0dvF4F8Q7tb68UpVXAmIeyVtVZ61e8
+yWdL85Y3iB4Maf+hEgQctx75wVYZhjv0mrk0/oBNji3z8Cigp4n9mbRPB5NJUUkofj5Gk4U2ZuR3
+oWG3ea/h4vFdedoSLUFQcc60o5TKj1ZBs1dRvJ9p8w==
+
+--Apple-Mail=_0DF7CE39-7332-4B70-B30F-CF6FDB6AE2F9
+Content-Transfer-Encoding: base64
+Content-Disposition: inline;
+	filename=dummy-1MB.png
+Content-Type: image/png;
+	x-unix-mode=0644;
+	name="dummy-1MB.png"
+Content-Id: <3AA32E53-5109-4A4E-A983-2BA3F8B728DE>
+
+7JtjHOqh5kXlXXJ42xdasTZb6qtVRXjtkFwH+rI8rB3tzNskMY5ZNbyUHoV6ja0/nlwdVXDkVAPD
+XJG9vRwtnVbGMm6jzc/U8QXkkD9bwv22aza1+i21zFlcbbpZ1wZJdWdf5Gf0R+fmbXrIM66n+qGR
+o2lxeyNoOjepaIRPNg8VHThsoLLaI39hd7HsL5HAr4IGUV2seN7dzY054hLG/bf4Fq1qe/GYVjcY
+eXz2ug3zTNidfSZTU0frX4ifhK2wMcim92VDuyPMJEiHCt7crlZVugZ3E4iyEnIMJpWkXV2f5iE4
+aP+adO5gJshHrxHjw4z9uPRb4QUXzksS9LxLx4b2U2mDd8AvUZZb/IoJJdn70+Qs8CtRyw0WUASs
+rF2ev7CZarE2J2H8GWr0cIPvsUYxCYAw3+e+XY6wMWHb+Mvtc+4ePiXuyxX3GbQs/wKvUJQhgaE8
+5HjAzgGikRk7asJ3V0IIXnkvjqJt3tjSR3CTtuYi0hLJmI6DqDuwEgOp6Zr2yhpqlT0mZb7Wd4Bh
+3FWUko3G++JxE5dJL4LqkD5fYOjCxRxoU248KqdZuYuLVLcZI8bpqqCLFvRyVcenin4/FPIqPd7V
+qv2W9Lf1hP2iL1eCQHT0rR2Bjz3zZiJXAQqfB0sVwLWRGCQrOTSWoljrWVZxiEz4to2iHu2lBqxm
+q30m3oBbzITwmu0mbqfH16DNss6uC6hUHZYGXNAJNWfsqB9+xY5WaUXM+Ge46kHUQwiteqE89vBh
+0+GaK1JWZgKnoIHXEG55oEsbxLCmjjL8AjKUtWvRyay7ym/yaidk+rp6FOOA0jBrURldo1oGPhnx
+29I4+6OAQa/lgxwbRaNbNI52KFgLGg/4JwTMloGyAnjiKb3tmhr7MG2kdz0ibmP4zG3DeT70K0Lg
+nx0YztseUQUfsNiPune90TpI8TUYK5UsYZXVKKMtc5b35EXIFKK6pLjDQyBSZs6NWSEU/tDla42v
+VesHoDOLSQlvHtS5JfAhMW8FaMf6D5tWKbxtnGAK1ueALEFckow8n9JC5qf0/oNdl21SJk6CejFb
+Pn7G5oS19spxlQg8Iz7khQWdH3HcLF6Z/x0ach4e0Nyv6gWsLvX2utjjmxMJys7aZCZ5Zz3grCli
+GQZJfAkqbW8O3KHvfMvVgYf+fnBaqffgRigyUFBcAhBJgNJFeeq20D78yIVQPSRrXNzfbOs4pc/6
+RDC4HvjyExwmv9WIN2C5xnYmOZiW1OsHlfaJcPucnLTs+WT1qWrsSdZUhw1xi6vBQMxOVME2Mx3Q
+nOIdjHtu2WJVXfy+2Dzs+T67Q0lf6wNLoqD4eZlg0Q==
+
+--Apple-Mail=_0DF7CE39-7332-4B70-B30F-CF6FDB6AE2F9--
+
+--Apple-Mail=_74C2A666-04DE-4ED5-A8A6-5300782F68E0--

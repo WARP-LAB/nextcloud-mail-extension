@@ -11,7 +11,8 @@ let package = Package(
         .testTarget(
             name: "NextcloudAppleMailSharedTests",
             dependencies: ["NextcloudAppleMailShared"],
-            path: "tests/NextcloudAppleMailSharedTests"
+            path: "tests/NextcloudAppleMailSharedTests",
+            resources: [.copy("Fixtures")]
         ),
     ],
     swiftLanguageModes: [.v5]

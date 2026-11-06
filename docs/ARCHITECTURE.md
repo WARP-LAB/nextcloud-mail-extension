@@ -22,8 +22,9 @@ The extension's toolbar button in the message window opens a popover, where the 
 | Settings UI and login | Host app | Settings for FR2–FR6, FR8 and FR9, Nextcloud login | New |
 | `SecurityHandler` | Extension | Status, `encode()`, and stubs for decoding | [SecurityHandler.swift](../probe/MailProbeExtension/SecurityHandler.swift), without markers |
 | `ComposeHandler` | Extension | FR5 and FR6 warnings, the password popover (FR7) | [ComposeHandler.swift](../probe/MailProbeExtension/ComposeHandler.swift) |
-| `MimeMessage` | Extension | Parse and rewrite the message | [MimeRewriter.swift](../probe/MailProbeExtension/MimeRewriter.swift) |
-| `LinkPolicy` | Extension | Decide which files become links (FR3) and which count as attachments (FR6) | `removes(_:over:)` in the rewriter |
+| `MimeMessage` | Extension | Parse the message and write it out again | Done: [Shared/Mime/](../Shared/Mime/) |
+| `LinkPolicy` | Extension | Decide which files become links (FR3) and which count as attachments (FR6) | Done for FR3: [LinkPolicy.swift](../Shared/Links/LinkPolicy.swift) |
+| `LinkRewriter`, `LinkText` | Extension | Put each file's links in the message (FR8), and the links to all files and the password notice (FR7, FR9) | Done: [Shared/Links/](../Shared/Links/) |
 | `TextCheck` | Extension | Find FR6 phrases in the text the user wrote | New |
 | `NextcloudClient` | Both | Login, folders, uploads, shares, server limits | New |
 | `UploadLedger` | Extension | Remember each message's folder and finished uploads | New |
@@ -66,13 +67,15 @@ If the user chooses Use Mail Drop, the first call has already uploaded the files
 ## Rewriter
 
 - **Selecting files:** `isAttachment` is true for any part with an attachment disposition or a filename, which includes signature images and pasted images. Signature images are inside `AppleMailSignature` in the first call's HTML, so the first call records their Content-IDs for the second call. Pasted images can only be told apart by Mail's `PastedGraphic-N.png` names (R7). Signature images never become links and don't count as attachments for FR6. Pasted images follow the FR3 rule when its pasted-images setting is on, which is the default, and stay in the email when it's off. They always count for FR6.
-- **Measuring files:** the size rule uses decoded bytes, so a file exactly at the limit stays (t27, t28). The probe's `decodedSize` decodes the whole file to measure it, so compute the size from the encoded length instead.
-- **Links in place (FR8):** in a plain message, each file part becomes the link text, merged with the text parts on either side, so the delivered message has one text part instead of several and doesn't depend on how each mail client shows a run of text parts (R16). In the structure with a signature or pasted image, replace each `<img src="cid:…">` with the links and remove its part. Also replace the matching U+FFFC in the plain text, since they come in the same order as the images in the HTML (t30). In the forward structure, replace U+FFFC in the plain text and the file part in the HTML. In the first call's structure, replace each `cid:` placeholder, which matters for FR6.
+- **Measuring files:** the size rule uses decoded bytes, so a file exactly at the limit stays (t27, t28). `TransferEncoding.decodedSize` counts base64 characters instead of decoding the file.
+- **Unchanged parts:** header fields, bodies, and each multipart's preamble and epilogue are kept as written. A message with nothing to change, and every part the rewriter doesn't touch, comes out byte for byte the same.
+- **Links in place (FR8):** in a plain message, each file part becomes the link text, merged with the text parts on either side, so the delivered message has one text part instead of several and doesn't depend on how each mail client shows a run of text parts (R16). In the structure with a signature or pasted image, replace each `<img src="cid:…">` with the links and remove its part. Also replace the matching U+FFFC in the plain text, since they come in the same order as the images in the HTML (t30). In the forward structure, replace U+FFFC in the plain text and the file part in the HTML. In the first call's structure, replace each `cid:` placeholder, which matters for FR6. In `multipart/mixed`, a file's own part marks where it was. Elsewhere, such as in `multipart/related`, a file whose placeholder isn't found goes in the fallback list. Each alternative of a `multipart/alternative` shows every linked file, in place or in its list.
 - **Fallback list (FR8):** if a file's position can't be found, for example in a structure the tests haven't shown yet, its links go in a list at the end of the user's own text, never at the top.
 - **End of the user's own text:** in HTML, this is before `<div class="AppleOriginalContents">` or the first `<blockquote type="cite">`. In plain text, it's before the first line starting with `>` (t20, t34). If no quote is found, it's the end of the message.
-- **Folder links (FR9):** add them at the end of the user's own text, after any fallback list.
-- **Non-ASCII names:** the probe replaces non-ASCII characters in names with `?`. The real rewriter must keep them, so it has to change a `us-ascii` part to UTF-8 when it adds a link.
-- **Message that is only a file:** the probe leaves this unchanged. Either replace the root part with text, or find out that Mail never produces it.
+- **Folder links (FR9):** add them at the end of the user's own text, after any fallback list. The send flow passes them to the rewriter only when FR9's setting is on and two or more files became links.
+- **No text to add to:** a branch with no text part, which no test has shown, gets a new `text/plain` part with the links, so links are never lost.
+- **Non-ASCII names:** every text part the rewriter changes is written as quoted-printable UTF-8, and the charset in the HTML's `<meta>` tags is changed to match. The probe replaced non-ASCII characters with `?`.
+- **Message that is only a file:** its root becomes `text/plain` with the file's links, keeping the message's headers. Mail hasn't been seen to produce this.
 
 ### Link text
 

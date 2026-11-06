@@ -25,7 +25,7 @@ How changes get checked before they count as done. The parts of Mail's behaviour
   - `LinkPolicy` and `TextCheck`
   - expiry dates and folder names
   - the upload ledger
-- **Fixtures:** anonymised copies of the probe's saved messages. Replace names, addresses, server headers, message IDs and dates, but keep the structure, boundaries, Content-IDs and file contents. The files can be the dummy files from `probe/scripts/make-test-files.py`. Never commit anything from `probe/test-results/`.
+- **Fixtures:** anonymised copies of the probe's saved messages, in `tests/NextcloudAppleMailSharedTests/Fixtures/`. `tests/make-fixtures.py` makes them from the git-ignored `probe/test-results/`. It replaces names, addresses, server headers, message IDs and dates, keeps the structure, boundaries and Content-IDs, and shrinks each file to 1/1000 of its size, so a test's size limit of 5000 bytes stands for 5 MB. It then checks that no personal strings are left. Never commit anything from `probe/test-results/` itself.
 
 ## Nextcloud tests
 

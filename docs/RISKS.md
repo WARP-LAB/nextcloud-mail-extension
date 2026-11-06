@@ -43,7 +43,7 @@ What could go wrong, how we'd notice, and what's being done about it. Each entry
 
 - **Risk:** finding quoted text, the signature and each file's position relies on markers in Mail's HTML, such as `AppleMailSignature`, `blockquote type="cite"`, `cid:` and U+FFFC ([MAIL.md](MAIL.md#message-structures)).
 - **Signal:** links appear inside quotes or the signature, or FR6 warns about quoted text.
-- **Mitigation:** probe tests t29, t30 and t34 in the regression set, and the fallback list for files whose position can't be found.
+- **Mitigation:** probe tests t29, t30 and t34 in the regression set, the unit tests over the fixtures made from them, and the fallback list for files whose position can't be found.
 - **Judgment call:** an agent may adapt the detection to new markers after re-probing, and update MAIL.md.
 
 ### R7: Telling pasted images from dropped ones

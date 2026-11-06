@@ -1,0 +1,90 @@
+import Foundation
+import Testing
+
+@testable import NextcloudAppleMailShared
+
+struct LinkPolicyTests {
+    @Test func linksEveryFileUnderTheAllRule() throws {
+        let files = LinkPolicy(rule: .allAttachments).linkedFiles(
+            in: try Fixture.message("t27-second"), signatureContentIDs: [])
+        #expect(files.map(\.index) == [0, 1])
+    }
+
+    @Test func linksOnlyLargerFilesUnderTheSizeRule() throws {
+        let policy = LinkPolicy(rule: .largerThan(bytes: 5000))
+        #expect(
+            policy.linkedFiles(in: try Fixture.message("t27-second"), signatureContentIDs: []).map(\.filename)
+                == ["dummy-10MB.bin"])
+        #expect(
+            policy.linkedFiles(in: try Fixture.message("t28-second"), signatureContentIDs: []).map(\.filename)
+                == ["dummy-10MB.png"])
+    }
+
+    @Test func findsSignatureImagesInTheFirstCall() throws {
+        #expect(
+            LinkPolicy.signatureContentIDs(in: try Fixture.message("t30-first"))
+                == ["aef717f0-8f04-44d2-82fc-5268aa0673d5"])
+        #expect(LinkPolicy.signatureContentIDs(in: try Fixture.message("t30-second")).isEmpty)
+        #expect(LinkPolicy.signatureContentIDs(in: try Fixture.message("t29-first")).isEmpty)
+    }
+
+    @Test func neverLinksSignatureImages() throws {
+        let signature = try Fixture.signatureContentIDs(for: "t30-second")
+        let files = LinkPolicy(rule: .allAttachments).linkedFiles(
+            in: try Fixture.message("t30-second"), signatureContentIDs: signature)
+        #expect(files.map(\.filename) == ["dummy-1MB.png", "PastedGraphic-1.png"])
+    }
+
+    @Test func keepsPastedImagesWhenTheSettingIsOff() throws {
+        var policy = LinkPolicy(rule: .allAttachments)
+        policy.pastedImagesBecomeLinks = false
+        let signature = try Fixture.signatureContentIDs(for: "t30-second")
+        let files = policy.linkedFiles(in: try Fixture.message("t30-second"), signatureContentIDs: signature)
+        #expect(files.map(\.filename) == ["dummy-1MB.png"])
+    }
+
+    @Test(arguments: [
+        ("PastedGraphic-1.png", "image/png", true),
+        ("PastedGraphic-12.tiff", "image/tiff", true),
+        ("PastedGraphic-1.png", "application/pdf", false),
+        ("PastedGraphic-.png", "image/png", false),
+        ("My PastedGraphic-1.png", "image/png", false),
+        ("Screenshot 2026-11-05 at 22.00.04.png", "image/png", false),
+    ])
+    func tellsPastedImagesByMailsNames(filename: String, contentType: String, pasted: Bool) {
+        let part = MimePart(fields: [])
+        let file = MessageFile(
+            index: 0, filename: filename, contentType: contentType, contentID: nil, decodedSize: 1, part: part)
+        #expect(LinkPolicy.isPastedImage(file) == pasted)
+    }
+}
+
+struct HTMLTests {
+    @Test func endsOwnTextBeforeQuotedMessages() throws {
+        let html = try #require(try Fixture.message("t34-first").text("html").first)
+        let end = HTML.endOfOwnText(in: html)
+        #expect(html[..<end].hasSuffix("See attached.<br id=\"lineBreakAtBeginningOfMessage\">"))
+    }
+
+    @Test func endsOwnTextBeforeTheBodyEndsWithoutQuotes() {
+        let html = "<html><body>Hello</body></html>"
+        #expect(html[..<HTML.endOfOwnText(in: html)] == "<html><body>Hello")
+    }
+
+    @Test func findsTheWholeSignature() {
+        let html = #"<body>Hi<div id="AppleMailSignature"><div>Name</div><img src="cid:a"></div>After</body>"#
+        let range = HTML.signatureRange(in: html)
+        #expect(
+            range.map { String(html[$0]) } == #"<div id="AppleMailSignature"><div>Name</div><img src="cid:a"></div>"#)
+    }
+
+    @Test func declaresUTF8() {
+        let html = #"<meta http-equiv="content-type" content="text/html; charset=us-ascii"><meta charset="ISO-8859-1">"#
+        let utf8 = #"<meta http-equiv="content-type" content="text/html; charset=utf-8"><meta charset="utf-8">"#
+        #expect(HTML.declaringUTF8(html) == utf8)
+    }
+
+    @Test func escapesMarkup() {
+        #expect(HTML.escape(#"<a & "b">"#) == "&lt;a &amp; &quot;b&quot;&gt;")
+    }
+}
