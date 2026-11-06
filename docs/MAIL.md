@@ -69,14 +69,18 @@ The two send calls receive different structures, and only the second is delivere
 | Second, message with a signature and a pasted image | `multipart/alternative`: `text/plain` with U+FFFC for each image, then `multipart/related` holding `text/html` with `<img src="cid:…">` and the images | t30 |
 | Second, forward with quoted HTML | `multipart/alternative`: `text/plain` with U+FFFC where the file was, then `multipart/mixed` holding `text/html`, file, `text/html` | t20 |
 | Second, reply or no files | Single `text/plain`, with quoted lines starting with `>` | t24–t26, t34, t35 |
+| Second, message with a file and a signature image | `multipart/alternative`: `text/plain` with U+FFFC for each, then `multipart/mixed` holding `text/html`, file, `text/html`, image, `text/html`. Neither part has a Content-ID | T5b, sent through AppleScript |
 
 In the first call's structure, the typed text is only in the HTML (t15, t24, t34, t35). The HTML also marks:
 
 - **Quoted text:** inside `<blockquote type="cite">`, which a reply wraps in `<div class="AppleOriginalContents">`. The "On … wrote:" line is inside the quote (t20, t34). A file in the quoted message appears only as its name in angle brackets.
-- **Signature:** inside `<div id="AppleMailSignature">`, including its image (t30). The second call's HTML drops these IDs and classes, but each image keeps the same Content-ID in both calls.
+- **Signature:** inside `<div id="AppleMailSignature">`, including its image (t30). The second call's HTML drops these IDs and classes. Each image keeps the same Content-ID in both calls, except when the message also has another file: then the second call's images have no Content-ID at all (T5b), and only their bytes, which are the same in both calls, tell them apart.
+- **Shared content:** text set through AppleScript, like content shared from another app, sits in `<div class="Apple-Mail-URLShareWrapperClass">` around a `<blockquote type="cite" style="border-left-style: none;…">`. It isn't a quote, although the plain-text alternative shows it with `>` (T5b).
 - **Pasted images:** named `PastedGraphic-1.png` and so on, while a dropped file keeps its own name (t30). Both are `inline` `image/png` parts.
 
 Decoded files are byte-identical in both calls (t15). Mail didn't resize a 10 MB PNG (t28), and every kept or removed file matched the original byte for byte.
+
+Files next to each other, with no text between them, have touching U+FFFC placeholders in the plain text, such as `￼￼` (T5b). A file's name comes as macOS stores it, often decomposed, so `ā` arrives as `a` and a combining macron, and Nextcloud keeps that form.
 
 Mail chooses each file's transfer encoding by its content. The 10 MB test PNG, mostly padding text, was quoted-printable in both of t28's calls, while the other files were base64. Lines end in LF, not CRLF, in all 165 saved send calls.
 
@@ -86,7 +90,13 @@ The extension's requests are subject to macOS's Local Network privacy, found in 
 
 - **Blocked until allowed:** while the host app's Local Network permission was undetermined, every request from the extension failed at once with `NSURLErrorNotConnectedToInternet`, "The Internet connection appears to be offline". The system log said "Local network prohibited".
 - **Shared with the app:** Apple's [TN3179](https://developer.apple.com/documentation/technotes/tn3179-understanding-local-network-privacy) says app extensions share their container app's permission, that extensions treated as background ones are denied while it's undetermined, and that `NSLocalNetworkUsageDescription` goes in the app's `Info.plist`, not the extension's. Allowing it for the app when macOS asked let the extension reach the server too (T2b).
+- **A new build's first request is refused:** after a build was installed, the extension's first request failed as offline although the app was allowed. The system log said "Local network allowed by preference … but received prompt. Clearing cached UUIDs": macOS knows a build by its binaries' UUIDs, refuses the first request of new ones, and then lets them through. Every update would hit this once, so the client retries an offline request once after a second (T5b, 2026-11-06).
 - **Terminal runs are exempt:** the host app run from a terminal reached the same server, because command-line tools run from Terminal are allowed automatically. Only the app opened normally gets the prompt.
+
+## Installing and AppleScript
+
+- **Replacing the extension while Mail runs:** Mail kept using its connection to the old copy. Its log said "other version in use", and the next send stopped with Mail's own alert, "An error occurred while trying to encrypt your message", without reaching the extension. Quitting and reopening Mail fixed it (T5b, 2026-11-06).
+- **AppleScript sends go through the extension:** a message that AppleScript made, gave a file and sent from a visible window reached `encode()` with Sign on, so Mail checks can be run without a person at the keyboard ([TESTING.md](TESTING.md#driving-mail-from-the-command-line)). The extension's errors appear in that window as usual, and need a click on OK.
 
 ## The toolbar popover
 
