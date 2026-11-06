@@ -18,7 +18,7 @@ struct SharingLimits: Equatable {
 }
 
 /// A public link share.
-struct Share: Equatable {
+struct Share: Equatable, Codable {
     var id: String
     /// The view link, `/s/<token>`.
     var url: URL

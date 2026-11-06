@@ -18,7 +18,7 @@ struct FolderLinks: Equatable {
 }
 
 /// A link's expiry date, as the server returns it: a day, in the server's time zone (docs/NEXTCLOUD.md).
-struct ExpiryDate: Equatable {
+struct ExpiryDate: Equatable, Codable {
     var year: Int
     var month: Int
     var day: Int
@@ -74,6 +74,15 @@ struct LinkText {
         case .downloadOnly:
             return "<div><a href=\"\(download)\">\(name)</a> (\(HTML.escape(details(file))))</div>"
         }
+    }
+
+    /// A file's name and details without links, for the list above the folder's links (FR8, D17).
+    func plainListing(_ file: LinkedFile) -> String {
+        "\(file.filename) (\(details(file)))"
+    }
+
+    func htmlListing(_ file: LinkedFile) -> String {
+        "<div>\(HTML.escape(file.filename)) (\(HTML.escape(details(file))))</div>"
     }
 
     /// The links to all files and the password notice, or nil if there's neither.

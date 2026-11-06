@@ -34,6 +34,13 @@ enum NextcloudNames {
         }
     }
 
+    /// A name that a folder share's download of one file can fetch. Nextcloud 35 redirects that download to the
+    /// file's WebDAV path without encoding the name, so `#`, `%` and `?` there cut or break it, and they become `_`
+    /// (docs/NEXTCLOUD.md, "Share links").
+    static func folderShareName(_ name: String) -> String {
+        String(name.map { "#%?".contains($0) ? "_" : $0 })
+    }
+
     /// Replaces `/`, `\` and control characters, which can't be in a name, and trims spaces from the ends, and dots
     /// too for folders.
     static func clean(_ name: String, trimmingDots: Bool) -> String {

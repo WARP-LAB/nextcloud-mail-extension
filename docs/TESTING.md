@@ -24,8 +24,8 @@ How changes get checked before they count as done. The parts of Mail's behaviour
   - the rewriter, for every message structure in [MAIL.md](MAIL.md#message-structures)
   - `LinkPolicy` and `TextCheck`
   - expiry dates and folder names
-  - the upload ledger
-- **Fixtures:** anonymised copies of the probe's saved messages, in `tests/NextcloudAppleMailSharedTests/Fixtures/`. `tests/make-fixtures.py` makes them from the git-ignored `probe/test-results/`. It replaces names, addresses, server headers, message IDs and dates, keeps the structure, boundaries and Content-IDs, and shrinks each file to 1/1000 of its size, so a test's size limit of 5000 bytes stands for 5 MB. It then checks that no personal strings are left. Never commit anything from `probe/test-results/` itself.
+  - the upload ledger, and the send flow and `Sender` against a fake Nextcloud in memory: both send calls, failures and retries, Mail Drop, signature images, and each sharing setting
+- **Fixtures:** anonymised copies of the probe's saved messages, in `tests/NextcloudAppleMailSharedTests/Fixtures/`. `tests/make-fixtures.py` makes them from the git-ignored `probe/test-results/`. It replaces names, addresses, server headers, message IDs and dates, keeps the structure, boundaries and Content-IDs, and shrinks each file to 1/1000 of its size, so a test's size limit of 5000 bytes stands for 5 MB. The shrunk bytes come from a hash of the original file, so a file is the same in a message's first and second call, as it is in Mail (t15). It then checks that no personal strings are left. Never commit anything from `probe/test-results/` itself.
 
 ## Nextcloud tests
 
@@ -38,7 +38,7 @@ Run against the test server and account only (D14), whose credentials are in the
 - the password page, and the zip from a folder share
 - with `--server-settings` only: an enforced expiry maximum and enforced passwords. They change the whole server's sharing settings for the test, so that option runs nothing else, and puts the settings back at the end, even after a failure (D18)
 
-One run creates 7 shares, and the `--server-settings` run tries 5, while Nextcloud allows 20 in 10 minutes, so a third run within 10 minutes fails with 429 ([NEXTCLOUD.md](NEXTCLOUD.md#rate-limit)). `scripts/nextcloud.sh` runs single requests by hand with the same `.env`. Record what the server really did in NEXTCLOUD.md (R19).
+One run creates 8 shares, and the `--server-settings` run tries 5, while Nextcloud allows 20 in 10 minutes, so a third run within 10 minutes fails with 429 ([NEXTCLOUD.md](NEXTCLOUD.md#rate-limit)). `scripts/nextcloud.sh` runs single requests by hand with the same `.env`. Record what the server really did in NEXTCLOUD.md (R19).
 
 `scripts/use-test-account.sh` logs the installed Debug build in to the test server with an app password, instead of the browser login, and sets the upload directory to `NCAM_TEST_DIRECTORY`, so the extension in Mail uploads there. `--log-out` revokes it. The app's `--check-connection` and `--check-from-mail` options then run the two checks from the command line.
 

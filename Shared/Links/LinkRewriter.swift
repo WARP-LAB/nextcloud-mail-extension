@@ -7,6 +7,9 @@ import Foundation
 /// in place where Mail left a placeholder or the file's own part, and otherwise in a list after the user's own text.
 struct LinkRewriter {
     var text = LinkText()
+    /// False when the email has only the folder's links (FR8, D17). Linked files are then removed where they were,
+    /// and listed by name and size after the user's own text, above the folder's links.
+    var linksInPlace = true
 
     /// Rewrites `message` in place and returns its bytes.
     ///
@@ -17,6 +20,7 @@ struct LinkRewriter {
             return message.original
         }
         let rewriting = Rewriting(message: message, links: links, text: text, folder: folder, notice: passwordNotice)
+        rewriting.inPlace = linksInPlace
         rewriting.run()
         return message.data()
     }
@@ -39,6 +43,7 @@ private final class Rewriting {
     let text: LinkText
     let folder: FolderLinks?
     let notice: Bool
+    var inPlace = true
     private let indexOfPart: [ObjectIdentifier: Int]
     private let indexOfContentID: [String: Int]
 
@@ -99,7 +104,7 @@ private final class Rewriting {
                 }
                 // In multipart/mixed, the file's part is where the file was. Elsewhere, such as in
                 // multipart/related, a file not placed by its placeholder goes in the list at the end.
-                guard part.contentType == "multipart/mixed", !branch.placed.contains(index) else {
+                guard inPlace, part.contentType == "multipart/mixed", !branch.placed.contains(index) else {
                     return nil
                 }
                 branch.placed.insert(index)
@@ -126,6 +131,9 @@ private final class Rewriting {
             guard let index = indexOfContentID[String(match.2).lowercased()], let link = links[index] else {
                 return String(match.0)
             }
+            guard inPlace else {
+                return ""
+            }
             branch.placed.insert(index)
             return text.html(link)
         }
@@ -146,8 +154,10 @@ private final class Rewriting {
                 continue
             }
             if let link = links[position] {
-                branch.placed.insert(position)
-                output += text.plain(link)
+                if inPlace {
+                    branch.placed.insert(position)
+                    output += text.plain(link)
+                }
             } else {
                 output.append(character)
             }
@@ -162,11 +172,16 @@ private final class Rewriting {
     /// user's own text.
     private func finish(_ branch: Branch, in part: MimePart) {
         let unplaced = branch.shows.filter { !branch.placed.contains($0) }.compactMap { links[$0] }
-        let htmlItems =
-            unplaced.map { text.html($0) } + [text.html(folder: folder, passwordNotice: notice)].compactMap { $0 }
-        let plainItems =
-            unplaced.map { text.plain($0) }
-            + [text.plain(folder: folder, passwordNotice: notice)].compactMap { $0 }
+        var htmlItems = unplaced.map { inPlace ? text.html($0) : text.htmlListing($0) }
+        var plainItems = unplaced.map { text.plain($0) }
+        if !inPlace {
+            plainItems = unplaced.isEmpty ? [] : [unplaced.map { text.plainListing($0) }.joined(separator: "\n")]
+            if !unplaced.isEmpty {
+                htmlItems.append("<div><br></div>")
+            }
+        }
+        htmlItems += [text.html(folder: folder, passwordNotice: notice)].compactMap { $0 }
+        plainItems += [text.plain(folder: folder, passwordNotice: notice)].compactMap { $0 }
         guard !plainItems.isEmpty else {
             return
         }
@@ -247,15 +262,26 @@ private final class Rewriting {
             if let previous = result.last, previous.isText, child.isText, previous.contentType == child.contentType,
                 let first = previous.text, let second = child.text
             {
-                let separator = first.isEmpty || first.hasSuffix("\n") || second.hasPrefix("\n") ? "" : "\n"
                 setText(
                     previous,
-                    previous.contentType == "text/html" ? joinedHTML(first, second) : first + separator + second)
+                    previous.contentType == "text/html" ? joinedHTML(first, second) : joinedPlain(first, second))
             } else {
                 result.append(child)
             }
         }
         return result
+    }
+
+    /// Joins two plain texts on a new line. Where a removed file leaves more than one blank line between them, as
+    /// with only the folder's links, one is kept.
+    private func joinedPlain(_ first: String, _ second: String) -> String {
+        let trailing = first.reversed().prefix { $0 == "\n" }.count
+        let leading = second.prefix { $0 == "\n" }.count
+        guard trailing + leading > 2 else {
+            let separator = first.isEmpty || trailing > 0 || leading > 0 ? "" : "\n"
+            return first + separator + second
+        }
+        return first.dropLast(trailing) + "\n\n" + second.dropFirst(leading)
     }
 
     /// Joins two HTML documents or fragments, keeping the first document's `<html>`, `<head>` and `<body>`.
@@ -268,7 +294,8 @@ private final class Rewriting {
 
     /// Makes a message that is only a file into a text message with the file's links.
     private func replaceRootFile(_ root: MimePart, with link: LinkedFile) {
-        let block = [text.plain(link), text.plain(folder: folder, passwordNotice: notice)].compactMap { $0 }
+        let file = inPlace ? text.plain(link) : text.plainListing(link)
+        let block = [file, text.plain(folder: folder, passwordNotice: notice)].compactMap { $0 }
         for name in ["Content-Disposition", "Content-ID", "Content-Description", "Content-Type"] {
             root.removeField(name)
         }
