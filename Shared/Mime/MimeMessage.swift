@@ -39,6 +39,33 @@ final class MimePart {
         fields.first { $0.name.lowercased() == name }?.value
     }
 
+    /// A top-level header field of a message, read without parsing the rest, as for a large draft. `name` is
+    /// lowercase.
+    static func headerField(_ name: String, in message: Data) -> String? {
+        let end =
+            message.range(of: Data("\n\n".utf8))?.lowerBound ?? message.range(of: Data("\r\n\r\n".utf8))?.lowerBound
+        let header = message[..<(end ?? message.endIndex)].prefix(256 * 1024)
+        let text = (String(bytes: header, encoding: .utf8) ?? String(bytes: header, encoding: .isoLatin1) ?? "")
+            .replacingOccurrences(of: "\r\n", with: "\n")
+        var found: String?
+        for line in text.components(separatedBy: "\n") {
+            if line.isEmpty {
+                break  // the end of the header
+            }
+            if let value = found, let first = line.first, first == " " || first == "\t" {
+                found = value + " " + line.trimmingCharacters(in: .whitespaces)
+                continue
+            }
+            if found != nil {
+                break
+            }
+            if let colon = line.firstIndex(of: ":"), line[..<colon].lowercased() == name {
+                found = line[line.index(after: colon)...].trimmingCharacters(in: .whitespaces)
+            }
+        }
+        return found
+    }
+
     /// Replaces the first field with this name, or adds one.
     func setField(_ name: String, _ value: String) {
         if let index = fields.firstIndex(where: { $0.name.lowercased() == name.lowercased() }) {

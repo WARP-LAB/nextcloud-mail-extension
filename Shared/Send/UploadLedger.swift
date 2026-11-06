@@ -25,6 +25,8 @@ struct UploadLedger: Codable, Equatable {
         /// The keys of the signature's images. When the message has other files, the second call has the images
         /// without Content-IDs, so they're known by their contents (docs/MAIL.md).
         var signatureFiles: [String] = []
+        /// Whether the shares were given a password (FR7). The password itself is never kept here.
+        var passwordProtected = false
         var updated: Date
 
         init(updated: Date) {
@@ -55,7 +57,7 @@ struct UploadLedger: Codable, Equatable {
 
 extension UploadLedger.Entry {
     private enum CodingKeys: String, CodingKey {
-        case folder, folderShare, files, signatureContentIDs, signatureFiles, updated
+        case folder, folderShare, files, signatureContentIDs, signatureFiles, passwordProtected, updated
     }
 
     /// Reads an entry, with defaults for what an earlier version didn't store.
@@ -66,6 +68,7 @@ extension UploadLedger.Entry {
         files = try values.decodeIfPresent([String: UploadLedger.StoredFile].self, forKey: .files) ?? [:]
         signatureContentIDs = try values.decodeIfPresent([String].self, forKey: .signatureContentIDs) ?? []
         signatureFiles = try values.decodeIfPresent([String].self, forKey: .signatureFiles) ?? []
+        passwordProtected = try values.decodeIfPresent(Bool.self, forKey: .passwordProtected) ?? false
         updated = try values.decode(Date.self, forKey: .updated)
     }
 }

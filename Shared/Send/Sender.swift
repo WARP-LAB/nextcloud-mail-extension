@@ -17,6 +17,8 @@ actor Sender {
         /// A client for the logged-in account, or nil when nobody is logged in.
         var connect: () async throws -> NextcloudService?
         var store: UploadLedgerStore?
+        /// The passwords typed in the toolbar popover (FR7), or nil for none.
+        var passwords: MessagePasswords?
         var now: () -> Date = Date.init
         var temporaryDirectory = FileManager.default.temporaryDirectory
     }
@@ -37,6 +39,8 @@ actor Sender {
     /// the network, so calls for the same message are queued here.
     private var busy = Set<String>()
     private var waiting: [String: [CheckedContinuation<Void, Never>]] = [:]
+    /// The password each message's shares were last given in this process, "" for none (`SendFlow.run`).
+    private var applied: [String: String] = [:]
 
     init(_ dependencies: Dependencies) {
         self.dependencies = dependencies
@@ -46,12 +50,21 @@ actor Sender {
     /// One `encode()` call. `messageID` is Mail's `X-Universally-Unique-Identifier`, found in the message, with
     /// `contextID` as a fallback.
     func encode(_ raw: Data?, isAutoSave: Bool, contextID: UUID) async -> SendResult {
+        guard let raw else {
+            return .unchanged
+        }
+        // Every call, an auto-save too, links its context to the message ID, so that a reopened draft, which gets a
+        // new context, finds the password typed in the old one (docs/MAIL.md).
+        let headerID = MimePart.headerField("x-universally-unique-identifier", in: raw)
+        if let headerID {
+            dependencies.passwords?.link(context: contextID, message: headerID)
+        }
         // Auto-saves keep their files (D3, docs/MAIL.md).
-        guard let raw, !isAutoSave else {
+        guard !isAutoSave else {
             return .unchanged
         }
         let message = MimeMessage(raw)
-        let messageID = message.root.field("x-universally-unique-identifier") ?? contextID.uuidString
+        let messageID = headerID ?? contextID.uuidString
         await lock(messageID)
         defer {
             unlock(messageID)
@@ -62,7 +75,7 @@ actor Sender {
             return .failed(failure.text)
         }
         do {
-            guard let data = try await send(message, messageID: messageID) else {
+            guard let data = try await send(message, messageID: messageID, contextID: contextID) else {
                 return .unchanged
             }
             return .rewritten(data)
@@ -73,7 +86,7 @@ actor Sender {
         }
     }
 
-    private func send(_ message: MimeMessage, messageID: String) async throws -> Data? {
+    private func send(_ message: MimeMessage, messageID: String, contextID: UUID) async throws -> Data? {
         var entry = ledger.entries[messageID] ?? UploadLedger.Entry(updated: dependencies.now())
         let signature = LinkPolicy.signatureContentIDs(in: message)
         entry.signatureContentIDs = Array(Set(entry.signatureContentIDs).union(signature)).sorted()
@@ -97,6 +110,10 @@ actor Sender {
                 let flow = SendFlow(settings: settings, service: service)
                 try? await flow.removeUploads(entry)
             }
+            if entry.hasUploads {
+                dependencies.passwords?.forget(message: messageID)
+                applied[messageID] = nil
+            }
             store(nil, for: messageID)
             return nil
         }
@@ -116,7 +133,11 @@ actor Sender {
         var flow = SendFlow(settings: settings, service: service)
         flow.today = dependencies.now()
         flow.temporaryDirectory = dependencies.temporaryDirectory
-        return try await flow.run(message, files: files, password: nil, record: record)
+        let password = dependencies.passwords?.password(context: contextID, message: messageID)
+        let data = try await flow.run(
+            message, files: files, password: password, applied: applied[messageID], record: record)
+        applied[messageID] = password ?? ""
+        return data
     }
 
     private func lock(_ messageID: String) async {

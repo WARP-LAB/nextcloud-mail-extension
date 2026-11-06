@@ -7,6 +7,7 @@ protocol NextcloudService {
     func createUniqueFolder(named name: String, in directory: String) async throws -> String
     func upload(_ file: URL, to path: String) async throws
     func share(_ path: String, expireDate: String, password: String?) async throws -> Share
+    func setPassword(_ password: String, forShare id: String) async throws
     func delete(_ path: String) async throws
 }
 
@@ -35,6 +36,10 @@ struct SendError: Error, Equatable, LocalizedError {
     static func folder(_ error: Error) -> SendError {
         SendError("NextcloudAppleMail couldn't create or share the email's folder. \(error.localizedDescription)")
     }
+
+    static func password(_ error: Error) -> SendError {
+        SendError("NextcloudAppleMail couldn't change the links' password. \(error.localizedDescription)")
+    }
 }
 
 /// A message's ledger entry, changed as each folder, upload and share is done, so that a failure part way keeps
@@ -61,14 +66,18 @@ struct SendFlow {
     var temporaryDirectory = FileManager.default.temporaryDirectory
 
     /// The message with links in place of `files`. Files already in `record` are reused, not uploaded again.
-    func run(_ message: MimeMessage, files: [MessageFile], password: String?, record: MessageRecord) async throws
-        -> Data
-    {
+    ///
+    /// - Parameter applied: the password this process last gave the record's shares, "" for none, or nil when it
+    ///   doesn't know, as after Mail restarted. Shares made earlier are brought to `password` when it differs.
+    func run(
+        _ message: MimeMessage, files: [MessageFile], password: String?, applied: String? = nil, record: MessageRecord
+    ) async throws -> Data {
         let password = password.flatMap { $0.isEmpty ? nil : $0 }
         let limits = try await service.sharingLimits()
         if limits.passwordEnforced && password == nil {
             throw SendError.passwordRequired
         }
+        try await updatePasswords(to: password, applied: applied, record)
         let expireDate = settings.expiry.expireDate(from: today, limits: limits)
         let options = LinkOptions(expireDate: expireDate, password: password)
         let folder = try await folder(for: message, record)
@@ -94,6 +103,7 @@ struct SendFlow {
         }
         let folderLinks =
             allFilesLinks ? folderShare.map { FolderLinks(viewURL: $0.url, downloadURL: $0.downloadURL) } : nil
+        record.entry.passwordProtected = password != nil
         var rewriter = LinkRewriter(text: LinkText(style: settings.linkStyle))
         rewriter.linksInPlace = !settings.onlyFolderLinks
         return rewriter.rewrite(message, links: links, folder: folderLinks, passwordNotice: password != nil)
@@ -112,6 +122,28 @@ struct SendFlow {
     }
 
     // MARK: - Steps
+
+    /// Gives the shares made in an earlier call the email's current password, as after Undo Send with another
+    /// password, or none. Nothing changes when the shares already have it.
+    private func updatePasswords(to password: String?, applied: String?, _ record: MessageRecord) async throws {
+        let wanted = password ?? ""
+        if let applied, applied == wanted {
+            return
+        }
+        if applied == nil && password == nil && !record.entry.passwordProtected {
+            return
+        }
+        var ids = [record.entry.folderShare?.id].compactMap { $0 }
+        ids += record.entry.files.values.compactMap(\.share?.id)
+        do {
+            for id in Set(ids).sorted() {
+                try await service.setPassword(wanted, forShare: id)
+            }
+        } catch {
+            throw SendError.password(error)
+        }
+        record.entry.passwordProtected = password != nil
+    }
 
     private func folder(for message: MimeMessage, _ record: MessageRecord) async throws -> String {
         if let folder = record.entry.folder {

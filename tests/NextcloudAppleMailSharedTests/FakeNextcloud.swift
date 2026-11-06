@@ -15,6 +15,8 @@ final class FakeNextcloud: NextcloudService {
     var folders = Set<String>()
     var files: [String: Data] = [:]
     var shares: [ShareCall] = []
+    /// Each password change, as share ID and password.
+    var passwordChanges: [[String]] = []
     var deleted: [String] = []
     var uploads = 0
     /// Uploads of files with these names fail, as a full disk would.
@@ -64,6 +66,10 @@ final class FakeNextcloud: NextcloudService {
         return Share(id: "\(shares.count)", url: url, expiration: ExpiryDate(server: expireDate))
     }
 
+    func setPassword(_ password: String, forShare id: String) async throws {
+        passwordChanges.append([id, password])
+    }
+
     func delete(_ path: String) async throws {
         deleted.append(path)
         folders = folders.filter { $0 != path && !$0.hasPrefix(path + "/") }
@@ -88,5 +94,22 @@ enum SendFixtures {
     static func message(_ name: String, id: String) throws -> Data {
         let text = try #require(String(bytes: try Fixture.data(name), encoding: .utf8))
         return Data(text.replacingOccurrences(of: "00000000-0000-4000-8000-000000000001", with: id).utf8)
+    }
+}
+
+/// Passwords in memory, standing in for the Keychain.
+final class MemoryVault: PasswordVault {
+    var kept: [String: String] = [:]
+
+    func read(_ messageID: String) throws -> String? {
+        kept[messageID]
+    }
+
+    func write(_ password: String, for messageID: String) throws {
+        kept[messageID] = password
+    }
+
+    func delete(_ messageID: String) throws {
+        kept[messageID] = nil
     }
 }
