@@ -36,7 +36,7 @@ What could go wrong, how we'd notice, and what's being done about it. Each entry
 
 - **Risk:** Mail passes the whole message in memory, and decoding attachments can double that.
 - **Signal:** the extension is killed or slows down with big attachments. So far a 244 MB draft and a 40.5 MB send worked.
-- **Mitigation:** decode each attachment to a temporary file and upload from there.
+- **Mitigation:** decode each attachment to a temporary file and upload from there, one file at a time, which `SendFlow` does (T5). The message itself is still in memory, as Mail passes it.
 - **Judgment call:** implementation details are the agent's.
 
 ### R6: Mail's HTML markers change

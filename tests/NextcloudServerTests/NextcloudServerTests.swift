@@ -59,6 +59,26 @@ enum TestServer {
         return (data, try #require(response as? HTTPURLResponse))
     }
 
+    /// Opens a link as a browser would, with cookies: when the share's password page appears, posts the password
+    /// with the page's request token, and returns where that leads.
+    static func openWithPassword(_ url: URL, password: String) async throws -> (Data, HTTPURLResponse) {
+        let session = URLSession(configuration: .ephemeral)
+        let (page, pageResponse) = try await session.data(from: url)
+        let response = try #require(pageResponse as? HTTPURLResponse)
+        let html = String(bytes: page, encoding: .utf8) ?? ""
+        guard let form = response.url, form.path.contains("/authenticate/"),
+            let token = html.firstMatch(of: #/data-requesttoken="([^"]+)"/#)?.1
+        else {
+            return (page, response)
+        }
+        var post = URLRequest(url: form)
+        post.httpMethod = "POST"
+        post.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
+        post.httpBody = NextcloudClient.formBody([("requesttoken", String(token)), ("password", password)])
+        let (data, postResponse) = try await session.data(for: post)
+        return (data, try #require(postResponse as? HTTPURLResponse))
+    }
+
     static func newPassword() -> String {
         "ncam-" + UUID().uuidString.prefix(13)
     }
@@ -212,6 +232,26 @@ struct NextcloudServerTests {
                 #expect(status == 400)
                 #expect(!reason.isEmpty)
             }
+        }
+    }
+
+    @Test func downloadsOneFileOfAFolderShareAfterItsPassword() async throws {
+        try await TestServer.withFolder("folder password") { client, folder in
+            let first = Data("first\n".utf8)
+            try await client.upload(first, to: NextcloudClient.join(folder, "Pārskats #1.txt"))
+            try await client.upload(Data("second\n".utf8), to: NextcloudClient.join(folder, "b.txt"))
+            let password = TestServer.newPassword()
+            let share = try await client.share(folder, expireDate: "", password: password)
+            var single = try #require(URLComponents(url: share.downloadURL, resolvingAgainstBaseURL: false))
+            single.queryItems = [URLQueryItem(name: "files", value: "Pārskats #1.txt")]
+            let url = try #require(single.url)
+
+            let (page, locked) = try await TestServer.get(url)
+            #expect(page != first)
+            #expect(locked.url?.path.contains("/authenticate/") == true)
+            let (file, response) = try await TestServer.openWithPassword(url, password: password)
+            let got = "\(response.statusCode) \(response.mimeType ?? "") from \(response.url?.path ?? "")"
+            #expect(file == first, "got \(got)")
         }
     }
 

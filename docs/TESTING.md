@@ -24,8 +24,8 @@ How changes get checked before they count as done. The parts of Mail's behaviour
   - the rewriter, for every message structure in [MAIL.md](MAIL.md#message-structures)
   - `LinkPolicy` and `TextCheck`
   - expiry dates and folder names
-  - the upload ledger
-- **Fixtures:** anonymised copies of the probe's saved messages, in `tests/NextcloudAppleMailSharedTests/Fixtures/`. `tests/make-fixtures.py` makes them from the git-ignored `probe/test-results/`. It replaces names, addresses, server headers, message IDs and dates, keeps the structure, boundaries and Content-IDs, and shrinks each file to 1/1000 of its size, so a test's size limit of 5000 bytes stands for 5 MB. It then checks that no personal strings are left. Never commit anything from `probe/test-results/` itself.
+  - the upload ledger, and the send flow and `Sender` against a fake Nextcloud in memory: both send calls, failures and retries, Mail Drop, signature images, and each sharing setting
+- **Fixtures:** anonymised copies of the probe's saved messages, in `tests/NextcloudAppleMailSharedTests/Fixtures/`. `tests/make-fixtures.py` makes them from the git-ignored `probe/test-results/`. It replaces names, addresses, server headers, message IDs and dates, keeps the structure, boundaries and Content-IDs, and shrinks each file to 1/1000 of its size, so a test's size limit of 5000 bytes stands for 5 MB. The shrunk bytes come from a hash of the original file, so a file is the same in a message's first and second call, as it is in Mail (t15). It then checks that no personal strings are left. Never commit anything from `probe/test-results/` itself.
 
 ## Nextcloud tests
 
