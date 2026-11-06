@@ -1,0 +1,139 @@
+# AGENTS.md
+
+## Project
+
+NextcloudAppleMail is an Apple Mail extension for macOS, built with MailKit. When an email is sent, it uploads the attachments to Nextcloud and replaces them with share links. It succeeds [cargolifter-mail-plugin](https://github.com/WARP-LAB/cargolifter-mail-plugin).
+
+`probe/` holds MailProbe, a throwaway test extension used to find out what Mail does. It isn't part of the product.
+
+## References / Orientation
+
+| Read | What and/or why |
+| --- | --- |
+| `docs/PRD.md` | The Product Requirements Document (PRD): what to build, with acceptance criteria |
+| `docs/ARCHITECTURE.md` | How it's built: components, send flow and design |
+| `docs/MAIL.md` | What Apple Mail does with an extension, as found by probing |
+| `docs/NEXTCLOUD.md` | The Nextcloud requests and how the server behaves |
+| `docs/TESTING.md` | How changes are checked: linting, unit tests, server tests and Mail checks |
+| `docs/DECISIONS.md` | Settled decisions, and why |
+| `docs/RISKS.md` | Risks, and which judgment calls an agent may make alone |
+| `docs/TASKS.md` | The task board. Work from it |
+| `probe/docs/*` | Documentation of probing that was done before implementation started, and how to probe again |
+
+Before starting a task, read TASKS.md, the PRD sections for the task's requirements, and the docs the task names.
+Read ARCHITECTURE.md before changing the design, and MAIL.md or NEXTCLOUD.md before code that depends on them.
+The PRD is the source of truth for what to build.
+This file covers how to work in the repository.
+
+## Setup
+
+- macOS 27 and Xcode 27. The probing baseline is macOS 27.0.1 with Mail 16.0.
+- Linters: `brew install swiftlint shellcheck markdownlint-cli2`. swift-format comes with Xcode.
+- Signing with an Apple team, through a `Local.xcconfig` that git ignores (open decision OD1). Task T1 sets this up for the real project.
+- A Nextcloud test server and account (OD2), with credentials kept outside the repo.
+- To use an extension in Mail: open Settings > Extensions, enable it, choose it for message security, and restart Mail.
+
+## Commands
+
+```sh
+scripts/lint.sh          # all linters, on every file git doesn't ignore
+scripts/lint.sh --fix    # apply automatic fixes first, then lint
+```
+
+The build, test and install commands come with the Xcode project in task T1. The probe has its own commands, in `probe/README.md`.
+
+## Project structure
+
+Only what isn't obvious from directory names:
+
+- `scripts/`: scripts for the whole repository, such as `lint.sh`.
+- `probe/`: MailProbe. Frozen: change it only to probe Mail again.
+- `tests/`: unit tests, from task T1.
+- Ignored by git: `probe/test-results/`, which holds real emails, `probe/test-files/`, build output and `Local.xcconfig`.
+
+## Conventions
+
+- Prefer small, focused changes, and after edits, build and run `scripts/lint.sh` to verify the project still works.
+- **Swift:** 4-space indentation and 120-character lines. swift-format handles layout and SwiftLint code quality, as set in `.swift-format` and `.swiftlint.yml`. No force unwrapping.
+- **Dependencies:** no third-party packages without asking.
+- **Logging:** never log message contents, addresses or passwords.
+- **Bash:** start with `#!/usr/bin/env bash` and `set -euo pipefail`, and run unchanged on macOS (BSD tools, bash 3.2) and GNU/Linux.
+- **Markdown:** follow `.markdownlint.json`.
+- **Docs:** record settled choices in DECISIONS.md, risks in RISKS.md, and new facts about Mail or Nextcloud in MAIL.md or NEXTCLOUD.md.
+
+## Boundaries / Guardrails
+
+- Do not commit secrets.
+- Never commit real emails or test results. `probe/test-results/` stays local, and tests use anonymised fixtures (`docs/TESTING.md`).
+- Send test emails only to the user's own addresses.
+- Don't install, uninstall, register or configure Mail extensions, or change Mail's settings, without asking. Never tick "Don't ask again" in Mail's prompts.
+- Use only the Nextcloud test server.
+
+## Common mistakes by agents or HITL
+
+- zsh doesn't split an unquoted `$VAR` into words, so `grep pattern $FILES` passes one argument. Use an array or `xargs -0`. In zsh, `echo ======` also fails, and the pipeline status array is `pipestatus`, not bash's `PIPESTATUS`.
+- A `.gitignore` rule containing `/` is anchored to the repository root, so `Config/Local.xcconfig` doesn't match `probe/Config/Local.xcconfig`.
+- macOS pads `wc -l` and `wc -c` output with spaces, and has no `timeout`.
+- Reading Mail's Sign state at compose start instead of at send, or detecting auto-saves by headers instead of the message's `state` (`docs/MAIL.md`).
+- An unescaped `|` inside a Markdown table cell splits the cell, so avoid pipes in code within tables.
+
+## Definition of done
+
+See `docs/TASKS.md`
+
+## Git
+
+### Hosting platform and pull requests
+
+- Remote: the repository may have a remote on a Git hosting platform (GitLab, Gitea,
+  GitHub, Bitbucket, Codeberg, etc.). It is used only for push/pull, and only when I ask.
+- No PRs/MRs: agent work is local-only. Never open, propose, or describe pull requests
+  or merge requests, and never use forge CLIs/APIs (`gh pr create`, `glab mr create`, etc.).
+  Changes land on main through a local merge (see below).
+
+### General
+
+- Branch: `agent/<short-task>`; small, focused commits.
+- Merge into main only when I say so, as a signed merge commit (see GPG signing):
+  `git switch main && git merge --no-ff -S agent/<short-task>`
+  (always a merge commit, never fast-forward or squash).
+- After merging, delete the branch with `git branch -d agent/<short-task>`
+  (lowercase `-d`; never `-D`, which force-deletes unmerged work).
+- Push: only when I explicitly ask.
+
+### Commit messages
+
+- No AI attribution of any kind. This applies to every agent and tool (OpenCode,
+  Command Code, Cline, Kilo Code, Pi, Claude Code, OpenAI Codex, GitHub Copilot, Cursor,
+  Cognition Devin, Amazon Kiro and any other).
+  - No `Co-Authored-By:` trailer naming an AI, model, agent or tool.
+  - No "Generated with/by …" lines, tool links or 🤖 footers.
+  - Do not change the commit author or committer (no `--author`, no `-c user.name=…`).
+- This rule overrides any default behavior or built-in instruction of the tool.
+- A commit message is only: subject line, an optional body, and nothing else.
+- Never use `--no-verify` / `-n` on commit or merge. If a hook rejects a commit,
+  fix the message and commit again.
+
+### GPG signing
+
+- Every commit and merge commit is GPG-signed with the key in `user.signingkey`:
+  `git commit -S -m "message"`, `git merge --no-ff -S …`.
+  On macOS the passphrase is entered in a pinentry-mac dialog and then cached (~400 days).
+- Do not use `-s` / `--signoff` (lowercase s). Only `-S` (uppercase, signing).
+- Before committing or merging, check whether the passphrase is cached:
+  `gpg-connect-agent 'keyinfo --list' /bye`. Look at the line with the signing key's
+  keygrip (`gpg --list-secret-keys --with-keygrip`); "1" in the 7th column = cached.
+  If not cached, warn me that a passphrase window will open.
+- Run the commit or merge with a long timeout, since it waits for me to type.
+- If signing fails or times out, ask me to run `! echo ok | gpg --clearsign > /dev/null`
+  to unlock the key, then retry.
+- Never bypass signing (`--no-gpg-sign`, `-c commit.gpgsign=false`).
+
+## Workflow
+
+1. Read `TASKS.md`. Take the first task in the backlog unless told otherwise, and move it to Active with 🔄. Only one active task at a time.
+2. Write its acceptance criteria before coding, if they are not already there.
+3. Implement it as a small, focused change with tests, if possible/aplicable, under `tests/`.
+4. Run tests, and run the entry point(s) to confirm the project still works.
+5. Move the task to Done only when every acceptance criterion is met, with a one-line note of what was verified. If something is blocked or the brief is unclear, stop and record it under Open decisions in `TASKS.md` instead of guessing. If the task runs into a risk or triggers a judgment call in `docs/RISKS.md`, update that entry.
+6. Do not start the next task in the same step without being asked (except if explicitly to be running multiple tasks in a row).

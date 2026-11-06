@@ -57,7 +57,7 @@ Don't tick "Don't ask again for this account" while probing. What it remembers a
 
 ## Message structures
 
-The structures themselves are described in [ARCHITECTURE.md](../../docs/ARCHITECTURE.md#what-mail-does-at-send).
+The structures themselves are described in [MAIL.md](../../docs/MAIL.md#message-structures).
 
 | # | Subject | Sign | Attach | Steps | Question | Baseline result |
 | --- | --- | --- | --- | --- | --- | --- |

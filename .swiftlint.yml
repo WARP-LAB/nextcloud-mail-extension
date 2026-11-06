@@ -1,0 +1,21 @@
+# SwiftLint checks code quality. swift-format owns layout (see .swift-format and docs/TESTING.md),
+# so SwiftLint's layout rules that overlap with it are off.
+
+excluded:
+  - probe
+  - build
+
+disabled_rules:
+  - trailing_comma # conflicts with swift-format, which adds trailing commas to multi-line collections
+  - opening_brace
+  - colon
+  - comma
+  - vertical_whitespace
+  - statement_position
+
+opt_in_rules:
+  - force_unwrapping
+  - implicitly_unwrapped_optional
+
+# Kept as a backstop: swift-format doesn't split or report long string literals.
+line_length: 120
