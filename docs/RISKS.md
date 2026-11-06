@@ -120,12 +120,13 @@ What could go wrong, how we'd notice, and what's being done about it. Each entry
 
 ## Platform and server
 
-### R17: App Groups and Keychain sharing need real signing
+### R17: Sharing the app password needs a provisioning profile
 
-- **Risk:** sharing settings and the app password between the host app and the extension may not work with ad-hoc signing.
-- **Signal:** the extension can't read the settings or the app password.
-- **Mitigation:** sign with an Apple team through `Local.xcconfig` (open decision OD1). The fallback is putting the settings in the popover.
-- **Judgment call:** the fallback changes the design, so ask.
+- **Risk:** the host app and the extension share settings through the App Group, and the app password through a Keychain item in the same group.
+- **Tested** (T1, 2026-11-06, with the free Personal Team): the App Group's container and settings work without a provisioning profile. The shared Keychain item fails with `-34018`, because it needs the `keychain-access-groups` entitlement. That entitlement needs a provisioning profile, which Xcode can only create once this Mac is registered as a device with the team.
+- **Signal:** the Keychain line of the host app's storage check fails, or the extension can't read the app password.
+- **Mitigation:** register this Mac with the Personal Team (OD7). The fallback is doing the login in the extension and keeping the app password in the extension's own Keychain.
+- **Judgment call:** registering the Mac, or switching to the fallback, is the user's call.
 
 ### R18: Network access from the extension
 

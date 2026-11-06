@@ -27,29 +27,34 @@ This file covers how to work in the repository.
 
 ## Setup
 
-- macOS 27 and Xcode 27. The probing baseline is macOS 27.0.1 with Mail 16.0.
+- macOS 27 and Xcode 27, on Apple silicon. The probing baseline is macOS 27.0.1 with Mail 16.0.
 - Linters: `brew install swiftlint shellcheck markdownlint-cli2`. swift-format comes with Xcode.
-- Signing with an Apple team, through a `Local.xcconfig` that git ignores (open decision OD1). Task T1 sets this up for the real project.
+- Signing: create `Config/Local.xcconfig`, which git ignores, with `CODE_SIGN_STYLE = Automatic`, `CODE_SIGN_IDENTITY = Apple Development` and `DEVELOPMENT_TEAM = <team ID>`. The free Personal Team works for local builds (D11). Without the file, builds are ad-hoc signed and the App Group fails.
 - A Nextcloud test server and account (OD2), with credentials kept outside the repo.
-- To use an extension in Mail: open Settings > Extensions, enable it, choose it for message security, and restart Mail.
+- To use the extension in Mail: run `scripts/install.sh`, then in Mail open Settings > Extensions, enable NextcloudAppleMail, choose it for message security, and restart Mail.
 
 ## Commands
 
 ```sh
-scripts/lint.sh          # all linters, on every file git doesn't ignore
-scripts/lint.sh --fix    # apply automatic fixes first, then lint
+scripts/build.sh            # host app and extension, into build/Debug/NextcloudAppleMail.app
+swift test                  # unit tests of Shared/, from tests/
+scripts/lint.sh [--fix]     # all linters on every file git doesn't ignore, with --fix applying automatic fixes first
+scripts/install.sh          # copy the build to ~/Applications and register the extension (see Boundaries)
+~/Applications/NextcloudAppleMail.app/Contents/MacOS/NextcloudAppleMail --check-storage   # App Group check
 ```
 
-The build, test and install commands come with the Xcode project in task T1. The probe has its own commands, in `probe/README.md`.
+The probe has its own commands, in `probe/README.md`.
 
 ## Project structure
 
 Only what isn't obvious from directory names:
 
-- `scripts/`: scripts for the whole repository, such as `lint.sh`.
+- `App/`: the host app. `Extension/`: the Mail extension.
+- `Shared/`: code both use. `Package.swift` also builds it as a Swift package, and `tests/` holds that package's unit tests (D13).
+- `Config/`: signing, entitlements and `Info.plist` files. The App Group is `<team ID>.lv.warp.nextcloudapplemail`, built from `$(TeamIdentifierPrefix)`, so the team ID appears only in `Local.xcconfig`.
+- `scripts/`: build, install and lint.
 - `probe/`: MailProbe. Frozen: change it only to probe Mail again.
-- `tests/`: unit tests, from task T1.
-- Ignored by git: `probe/test-results/`, which holds real emails, `probe/test-files/`, build output and `Local.xcconfig`.
+- Ignored by git: `probe/test-results/`, which holds real emails, `probe/test-files/`, `build/`, `.build/` and `Config/Local.xcconfig`.
 
 ## Conventions
 
@@ -66,14 +71,16 @@ Only what isn't obvious from directory names:
 - Do not commit secrets.
 - Never commit real emails or test results. `probe/test-results/` stays local, and tests use anonymised fixtures (`docs/TESTING.md`).
 - Send test emails only to the user's own addresses.
-- Don't install, uninstall, register or configure Mail extensions, or change Mail's settings, without asking. Never tick "Don't ask again" in Mail's prompts.
+- Installing, uninstalling or registering Mail extensions needs the user's permission. The user can allow it explicitly for a stretch of work, and withdraw it again. Without a permission that is still current, ask first.
+- Changing Mail's own settings, such as enabling an extension or choosing it for message security, is left to the user. Never tick "Don't ask again" in Mail's prompts.
 - Use only the Nextcloud test server.
 
 ## Common mistakes by agents or HITL
 
 - zsh doesn't split an unquoted `$VAR` into words, so `grep pattern $FILES` passes one argument. Use an array or `xargs -0`. In zsh, `echo ======` also fails, and the pipeline status array is `pipestatus`, not bash's `PIPESTATUS`.
 - A `.gitignore` rule containing `/` is anchored to the repository root, so `Config/Local.xcconfig` doesn't match `probe/Config/Local.xcconfig`.
-- macOS pads `wc -l` and `wc -c` output with spaces, and has no `timeout`.
+- macOS pads `wc -l` and `wc -c` output with spaces, and has no `timeout`. In zsh, `status` is a read-only variable, so `status=$?` fails.
+- macOS registers the copy of the extension that Xcode builds in `build/`, and lists only one copy per bundle ID, so an installed copy can be ignored. `scripts/install.sh` unregisters the build's copy.
 - Reading Mail's Sign state at compose start instead of at send, or detecting auto-saves by headers instead of the message's `state` (`docs/MAIL.md`).
 - An unescaped `|` inside a Markdown table cell splits the cell, so avoid pipes in code within tables.
 

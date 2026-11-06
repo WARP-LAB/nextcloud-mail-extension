@@ -19,7 +19,7 @@ How changes get checked before they count as done. The parts of Mail's behaviour
 
 ## Unit tests
 
-- **Where:** in `tests/`, as the Xcode project's test target, from task T1.
+- **Where:** in `tests/`, as the unit tests of the Swift package in `Package.swift`, which builds `Shared/`. `swift test` runs them without Xcode's window or signing (D13).
 - **What:**
   - the rewriter, for every message structure in [MAIL.md](MAIL.md#message-structures)
   - `LinkPolicy` and `TextCheck`

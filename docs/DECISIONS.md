@@ -52,3 +52,18 @@ Settled decisions, and why they were made. The current design is in [ARCHITECTUR
 
 - **Decision:** swift-format for Swift layout, SwiftLint for Swift code quality with its layout rules off, ShellCheck for bash, and markdownlint-cli2 with the existing `.markdownlint.json`. `scripts/lint.sh` runs them all on the files git doesn't ignore. The probe is left out of the Swift linters.
 - **Why:** each tool owns one job, so their rules don't contradict each other. Testing on the probe code showed that `trailing_comma` was the only real conflict. swift-format comes with Xcode, and the rest come from Homebrew. Details are in [TESTING.md](TESTING.md#linting).
+
+## D11: Sign local builds with the free Personal Team (2026-11-06)
+
+- **Decision:** local builds are signed with the user's free Apple Personal Team, set in the git-ignored `Config/Local.xcconfig`. The paid Apple Developer Program membership has expired, and is renewed before distributing.
+- **Why:** the probe showed that Mail loads an ad-hoc signed extension, so local builds don't need a paid team. A team gives a stable signing identity and a team ID for the App Group. Developer ID signing and notarization for other Macs do need the paid membership (OD3).
+
+## D12: Minimum versions (2026-11-06)
+
+- **Decision:** macOS 27 or later, which means Apple silicon only, since macOS 26 was the last version for Intel Macs. Nextcloud 34 or later, or 35 if 34 turns out to block something.
+- **Why:** the user's choice. macOS 27 is the probed baseline. Nextcloud 34's source has every behaviour in [NEXTCLOUD.md](NEXTCLOUD.md), checked on 2026-11-06.
+
+## D13: Shared code as a Swift package (2026-11-06)
+
+- **Decision:** code that the host app and the extension both use lives in `Shared/`. The Xcode project compiles it into both targets, and `Package.swift` also builds it as a Swift package, with its unit tests in `tests/`. The App Group's identifier reaches the code through an `Info.plist` key built from `$(TeamIdentifierPrefix)`, so the team ID stays out of tracked files.
+- **Why:** `swift test` then runs the unit tests from the command line, with no Xcode window and no signing, and the shared code can't depend on Mail or the app.

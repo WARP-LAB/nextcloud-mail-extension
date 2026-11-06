@@ -1644,3 +1644,7 @@ FodyWeavers.xsd
 test-files/
 test-results/
 probe/Config/Local.xcconfig
+
+# NextcloudAppleMail
+Config/Local.xcconfig
+.swiftpm/
