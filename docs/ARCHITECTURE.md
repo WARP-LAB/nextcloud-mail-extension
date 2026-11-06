@@ -30,7 +30,7 @@ The extension's toolbar button in the message window opens a popover, where the 
 | `MessagePasswords` | Extension | Passwords typed in the popover | `PopoverPasswords` in the probe's compose handler |
 | `Settings`, `Credentials` | Both | Shared settings and the app password | New |
 
-The extension keeps both capabilities in its `Info.plist`: `MEMessageSecurityHandler` and `MEComposeSessionHandler`. Start a new Xcode project and copy code across from the probe, leaving `ProbeDirective`, `ProbeLog` and the rest of MailProbe behind.
+The extension keeps both capabilities in its `Info.plist`: `MEMessageSecurityHandler` and `MEComposeSessionHandler`. The project copies code across from the probe as needed, leaving `ProbeDirective`, `ProbeLog` and the rest of MailProbe behind. Code that both the host app and the extension use lives in `Shared/`, which both targets compile and which also builds as a Swift package for its unit tests (D13).
 
 ## Send flow
 
@@ -136,7 +136,8 @@ Both warnings come from `allowMessageSendForSession`, which returns at most one 
 ## Settings and credentials
 
 - **Where they live:** the settings UI is in the host app: server, directory, the FR3 rule and pasted-images option, FR4 expiry, the FR5 checkbox, the FR6 phrases, and the FR8 and FR9 options. Settings are shared through an App Group, and the app password through a shared Keychain group (R17). The per-email password isn't a setting.
-- **Entitlements:** both targets need the sandbox, `com.apple.security.network.client`, the App Group and the Keychain group (R18). Leave out `files.user-selected.read-only`, which only dropping files on the popover needed.
+- **The App Group:** `<team ID>.lv.warp.nextcloudapplemail`. The build writes it into each target's `Info.plist` as `NCAMAppGroupIdentifier`, from `$(TeamIdentifierPrefix)`, and `SharedStorage` reads it from there. Its container and settings work with the free Personal Team, but the shared Keychain item needs a provisioning profile (R17).
+- **Entitlements:** both targets need the sandbox, `com.apple.security.network.client` and the App Group, and the Keychain group once a provisioning profile is possible (R17, R18). Leave out `files.user-selected.read-only`, which only dropping files on the popover needed.
 - **Server URLs:** accept `https://` only, because App Transport Security blocks plain HTTP by default.
 - **Not set up yet:** if the extension isn't set up when a file would become a link, stop the send with an error saying so. Reporting `canSign: false` instead would send the files as attachments with no warning.
 

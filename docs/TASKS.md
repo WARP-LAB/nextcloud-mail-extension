@@ -17,19 +17,19 @@ Risk register: `docs/RISKS.md`.
 > - Write Acceptance Criteria or a explicit Definition of Done
 > - Take tasks in order unless told otherwise. Do not start the next task without being asked.
 
-None.
+None. T1b waits for the user, and T2 and T3 for the Nextcloud test server (OD2).
 
 ## ❓ Open Decisions (human to resolve)
 
 Agents: do not guess these. Record questions here and stop.
 Judgment calls and known risks are tracked separately in `docs/RISKS.md`.
 
-- **OD1: Apple team for signing.** App Groups and Keychain sharing probably need it (R17). Needed for T1.
 - **OD2: Nextcloud test server and account.** Needed for T2 and T3.
-- **OD3: Supported versions and distribution.** The oldest macOS, Mail and Nextcloud versions to support, whether Intel Macs count, and how the app is distributed: Developer ID, Mac App Store or local builds only (PRD NFR1).
+- **OD3: Distribution.** How the app is distributed: Developer ID, the Mac App Store, or local builds only. Both of the first two need the renewed paid membership (D11). The supported versions are decided (D12).
 - **OD4: Defaults chosen by an agent.** Confirm or change: FR5's warning on, FR6's phrase list empty, FR8's view and download links, FR9's all-files links off, the email saying that links need a password (FR7), and folder names `<yyyy-MM-dd> <subject>` ([ARCHITECTURE.md](ARCHITECTURE.md#using-nextcloud)).
 - **OD5: Proposed requirements.** Confirm or change the non-functional requirements and the out-of-scope list in the PRD.
 - **OD6: Testing "Don't ask again".** Whether to test it in Mail's Mail Drop prompt, knowing it changes the account's behaviour and may be hard to undo (R2).
+- **OD7: Registering this Mac with the Personal Team.** The shared Keychain item for the app password needs a provisioning profile, which Xcode can only create once this Mac is registered as a device with the team: by building once in Xcode's window, or with `xcodebuild -allowProvisioningDeviceRegistration` (R17). The alternative is the fallback in R17. Needed for T1b and T2.
 
 ## ✔️ Shared Definition of Done (every task)
 
@@ -43,8 +43,8 @@ Judgment calls and known risks are tracked separately in `docs/RISKS.md`.
 
 ## 📋 Backlog (To Be Done)
 
-- **T1: Project skeleton.** A `NextcloudAppleMail` Xcode project with the host app, the extension and a unit test target in `tests/`. Entitlements for the sandbox, the network, the App Group and the Keychain group, and signing through a git-ignored `Local.xcconfig` (OD1). Fill in the Setup, Commands and Project structure sections of `AGENTS.md`. Check that Sign works when the extension reports `canSign: true` and `canEncrypt: false` (R9).
-  - **Acceptance:** it builds and installs, Mail lists the extension, Sign is offered, the empty test target runs, and `scripts/lint.sh` passes.
+- **T1b: Check T1 in Mail (needs the user).** Enable NextcloudAppleMail in Mail's Settings > Extensions, choose it for message security, and restart Mail. Once OD7 is settled, add the `keychain-access-groups` entitlement back and rerun the storage check.
+  - **Acceptance:** Mail lists the extension, Sign is offered while the extension reports `canSign: true` and `canEncrypt: false` (R9), the toolbar popover shows the container and settings values the host app wrote, and the storage check passes, or the Keychain fallback is recorded in DECISIONS.md.
 - **T2: Settings and login (FR2).** The host app's settings UI, Nextcloud's browser login, the app password in the Keychain, and settings shared through the App Group. A "Test connection" button that makes the extension itself reach the server (R17, R18).
   - **Acceptance:** the extension reads the settings and the app password, and reaches the server.
 - **T3: Nextcloud client (FR1, FR2, FR4, FR7, FR9).** Every request in `docs/NEXTCLOUD.md`, with a small command-line tool to run them, tested against the test server (OD2, R19).
@@ -65,3 +65,4 @@ Judgment calls and known risks are tracked separately in `docs/RISKS.md`.
 ## ✅ Completed Tasks (Done)
 
 - **Probing Mail with MailProbe (2026-11-05).** Four rounds of tests found what Mail does with an extension. See `probe/docs/` and `docs/MAIL.md`.
+- **T1: Project skeleton (2026-11-06).** Verified: `scripts/build.sh` builds both targets signed with the Personal Team, with no warnings. `swift test` passes 4 tests, `scripts/lint.sh` is clean, and `scripts/install.sh` installs and registers the extension. The storage check passes for the App Group's container and settings, but not for the shared Keychain item, which needs OD7. The checks in Mail moved to T1b.
