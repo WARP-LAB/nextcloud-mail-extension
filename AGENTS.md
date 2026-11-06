@@ -64,6 +64,7 @@ Only what isn't obvious from directory names:
 - `Shared/`: code both use. `Package.swift` also builds it as a Swift package, and `tests/` holds that package's unit tests (D13).
 - `Config/`: signing, entitlements and `Info.plist` files. The App Group is `<team ID>.lv.warp.nextcloudapplemail`, built from `$(TeamIdentifierPrefix)`, so the team ID appears only in `Local.xcconfig`.
 - `scripts/`: build, install, lint, and the Nextcloud tests and tool. `tools/ncam-nextcloud/`: that tool.
+- `Design/`: source artwork, such as Nextcloud's logo mark, which `Extension/Assets.xcassets` uses for the toolbar button.
 - `probe/`: MailProbe. Frozen: change it only to probe Mail again.
 - `CLAUDE.md`: only imports this file, for Claude Code versions that don't read AGENTS.md (D15). Put instructions here, not there.
 - Ignored by git: `probe/test-results/`, which holds real emails, `probe/test-files/`, `build/`, `.build/`, `Config/Local.xcconfig` and `.env`.

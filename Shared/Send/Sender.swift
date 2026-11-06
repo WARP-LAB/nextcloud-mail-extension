@@ -18,7 +18,9 @@ actor Sender {
         var connect: () async throws -> NextcloudService?
         var store: UploadLedgerStore?
         /// The passwords typed in the toolbar popover (FR7), or nil for none.
-        var passwords: MessagePasswords?
+        var passwords: MessageValues?
+        /// Each email's own link expiry from the popover, as `LinkExpiry` JSON, or nil for none.
+        var expiries: MessageValues?
         /// Told, with the message ID, when uploads start and end (R3).
         var progress: (String, SendProgress) -> Void = { _, _ in }
         var now: () -> Date = Date.init
@@ -48,6 +50,7 @@ actor Sender {
         self.dependencies = dependencies
         ledger = dependencies.store?.load() ?? UploadLedger()
         dependencies.passwords?.prune(now: dependencies.now())
+        dependencies.expiries?.prune(now: dependencies.now())
     }
 
     /// One `encode()` call. `messageID` is Mail's `X-Universally-Unique-Identifier`, found in the message, with
@@ -61,6 +64,7 @@ actor Sender {
         let headerID = MimePart.headerField("x-universally-unique-identifier", in: raw)
         if let headerID {
             dependencies.passwords?.link(context: contextID, message: headerID)
+            dependencies.expiries?.link(context: contextID, message: headerID)
         }
         // Auto-saves keep their files (D3, docs/MAIL.md).
         guard !isAutoSave else {
@@ -130,9 +134,12 @@ actor Sender {
         flow.temporaryDirectory = dependencies.temporaryDirectory
         let report = dependencies.progress
         flow.progress = { report(messageID, $0) }
-        let password = dependencies.passwords?.password(context: contextID, message: messageID)
+        let password = dependencies.passwords?.value(context: contextID, message: messageID)
+        let expiry = dependencies.expiries?.value(context: contextID, message: messageID).flatMap {
+            try? JSONDecoder().decode(LinkExpiry.self, from: Data($0.utf8))
+        }
         let data = try await flow.run(
-            message, files: files, password: password, applied: applied[messageID], record: record)
+            message, files: files, password: password, applied: applied[messageID], expiry: expiry, record: record)
         applied[messageID] = password ?? ""
         return data
     }
@@ -144,6 +151,7 @@ actor Sender {
                 try? await SendFlow(settings: settings, service: service).removeUploads(entry)
             }
             dependencies.passwords?.forget(message: messageID)
+            dependencies.expiries?.forget(message: messageID)
             applied[messageID] = nil
         }
         store(nil, for: messageID)

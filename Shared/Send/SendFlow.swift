@@ -8,6 +8,7 @@ protocol NextcloudService {
     func upload(_ file: URL, to path: String) async throws
     func share(_ path: String, expireDate: String, password: String?) async throws -> Share
     func setPassword(_ password: String, forShare id: String) async throws
+    func setExpireDate(_ date: String, forShare id: String) async throws -> Share
     func delete(_ path: String) async throws
 }
 
@@ -35,6 +36,10 @@ struct SendError: Error, Equatable, LocalizedError {
 
     static func folder(_ error: Error) -> SendError {
         SendError("NextcloudAppleMail couldn't create or share the email's folder. \(error.localizedDescription)")
+    }
+
+    static func expiry(_ error: Error) -> SendError {
+        SendError("NextcloudAppleMail couldn't change when the links expire. \(error.localizedDescription)")
     }
 
     static func password(_ error: Error) -> SendError {
@@ -77,10 +82,13 @@ struct SendFlow {
 
     /// The message with links in place of `files`. Files already in `record` are reused, not uploaded again.
     ///
-    /// - Parameter applied: the password this process last gave the record's shares, "" for none, or nil when it
-    ///   doesn't know, as after Mail restarted. Shares made earlier are brought to `password` when it differs.
+    /// - Parameters:
+    ///   - applied: the password this process last gave the record's shares, "" for none, or nil when it doesn't
+    ///     know, as after Mail restarted. Shares made earlier are brought to `password` when it differs.
+    ///   - expiry: the email's own link expiry, set in the popover, or nil for the settings'.
     func run(
-        _ message: MimeMessage, files: [MessageFile], password: String?, applied: String? = nil, record: MessageRecord
+        _ message: MimeMessage, files: [MessageFile], password: String?, applied: String? = nil,
+        expiry: LinkExpiry? = nil, record: MessageRecord
     ) async throws -> Data {
         let password = password.flatMap { $0.isEmpty ? nil : $0 }
         let limits = try await service.sharingLimits()
@@ -88,8 +96,9 @@ struct SendFlow {
             throw SendError.passwordRequired
         }
         try await updatePasswords(to: password, applied: applied, record)
-        let expireDate = settings.expiry.expireDate(from: today, limits: limits)
+        let expireDate = (expiry ?? settings.expiry).expireDate(from: today, limits: limits)
         let options = LinkOptions(expireDate: expireDate, password: password)
+        try await updateExpiry(to: expireDate, record)
         let folder = try await folder(for: message, record)
         let eachFile = settings.sharing == .eachFile
         let stored = try await putAll(files, in: folder, share: eachFile ? options : nil, record)
@@ -105,6 +114,7 @@ struct SendFlow {
         let folderLinks =
             allFilesLinks ? folderShare.map { FolderLinks(viewURL: $0.url, downloadURL: $0.downloadURL) } : nil
         record.entry.passwordProtected = password != nil
+        record.entry.expireDate = expireDate
         var rewriter = LinkRewriter(text: LinkText(style: settings.linkStyle))
         rewriter.linksInPlace = !settings.onlyFolderLinks
         return rewriter.rewrite(message, links: links, folder: folderLinks, passwordNotice: password != nil)
@@ -123,6 +133,28 @@ struct SendFlow {
     }
 
     // MARK: - Steps
+
+    /// Gives the shares made in an earlier call the email's current expiry date, as after Undo Send with another
+    /// expiry set in the popover, and keeps the dates the server returns, which the email shows.
+    private func updateExpiry(to expireDate: String, _ record: MessageRecord) async throws {
+        guard let applied = record.entry.expireDate, applied != expireDate else {
+            return
+        }
+        do {
+            if let folderShare = record.entry.folderShare {
+                record.entry.folderShare = try await service.setExpireDate(expireDate, forShare: folderShare.id)
+            }
+            for (key, stored) in record.entry.files {
+                guard let share = stored.share else {
+                    continue
+                }
+                record.entry.files[key]?.share = try await service.setExpireDate(expireDate, forShare: share.id)
+            }
+        } catch {
+            throw SendError.expiry(error)
+        }
+        record.entry.expireDate = expireDate
+    }
 
     /// Gives the shares made in an earlier call the email's current password, as after Undo Send with another
     /// password, or none. Nothing changes when the shares already have it.

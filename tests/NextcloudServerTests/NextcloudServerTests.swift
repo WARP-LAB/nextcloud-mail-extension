@@ -191,6 +191,10 @@ struct NextcloudServerTests {
             if !limits.expiryEnforced {
                 #expect(never.expiration == nil)
                 #expect(far.expiration == ExpiryDate(server: "2099-01-01"))
+                let changed = try await client.setExpireDate("2098-02-03", forShare: never.id)
+                #expect(changed.expiration == ExpiryDate(server: "2098-02-03"))
+                let removed = try await client.setExpireDate("", forShare: never.id)
+                #expect(removed.expiration == nil)
             }
             do {
                 _ = try await client.share(path, expireDate: "2020-01-01", password: nil)

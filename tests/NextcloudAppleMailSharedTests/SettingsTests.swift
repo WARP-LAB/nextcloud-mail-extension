@@ -11,7 +11,7 @@ struct SettingsTests {
 
     @Test func hasThePRDsDefaults() {
         let settings = Settings()
-        #expect(settings.directory == "Mail attachments")
+        #expect(settings.directory == "MailAttachments")
         #expect(settings.linkPolicy.rule == .allAttachments)
         #expect(settings.pastedImagesBecomeLinks)
         #expect(settings.warnIfSignOff)
@@ -76,8 +76,8 @@ struct SettingsTests {
         ("  Mail attachments/ ", "Mail attachments"),
         ("/Mail//Out/", "Mail/Out"),
         ("a/../b/./c", "a/b/c"),
-        ("", "Mail attachments"),
-        (" / ", "Mail attachments"),
+        ("", "MailAttachments"),
+        (" / ", "MailAttachments"),
     ])
     func cleansTheDirectory(directory: String, expected: String) {
         var settings = Settings()

@@ -4,7 +4,7 @@ NextcloudAppleMail is an Apple Mail extension for macOS, a successor to [cargoli
 
 The upload can run only while Sign is on in the message window, because Mail doesn't give the extension the outgoing message otherwise. FR5 covers messages sent with Sign off.
 
-Defaults that an agent chose and you haven't confirmed yet are marked "(OD4)". Requirements marked "Proposed" await confirmation (OD5). Both are open decisions in [TASKS.md](TASKS.md).
+The defaults were confirmed by the user (D21). Requirements marked "Proposed" await confirmation (OD5), an open decision in [TASKS.md](TASKS.md).
 
 ## FR1: Replace attachments with links at send
 
@@ -19,7 +19,7 @@ Acceptance criteria:
 
 ## FR2: Nextcloud settings and folders
 
-The extension's settings hold the Nextcloud server URL and the directory where files are uploaded, which is "Mail attachments" by default (OD4). Each email gets its own subfolder inside that directory, so that:
+The extension's settings hold the Nextcloud server URL and the directory where files are uploaded, which is "MailAttachments" by default. Each email gets its own subfolder inside that directory, so that:
 
 - files with the same name in different emails don't clash
 - all of an email's files can be downloaded at once, as that folder (FR9)
@@ -36,7 +36,7 @@ Acceptance criteria:
 
 A setting chooses one of:
 
-- All attachments become links. This is the default (OD4).
+- All attachments become links. This is the default.
 - Only attachments over a set size become links. The rest stay attached, so one message can have both.
 
 A second setting, "Pasted images become links", decides whether images pasted into the body follow that rule. It is on by default. When it is off, pasted images stay in the email whatever the rule says. Images in the signature never become links.
@@ -52,19 +52,22 @@ Acceptance criteria:
 
 A setting chooses when links expire:
 
-- in a week, a month or a year, with a month as the default (OD4)
+- in a week, a month or a year, with a month as the default
 - after a custom period of years, months, days and hours, such as 0 years, 2 months, 3 days and 1 hour, counted from sending
 - never
+
+In the message window, the extension's toolbar button lets the user give that email its own expiry instead, with the same choices. The button also opens the app's settings.
 
 Acceptance criteria:
 
 - Each choice gives links that expire at the end of the day the period reaches, or never. Nextcloud ends links only at the end of a day, so hours move the date only when they cross midnight, and the setting says so.
 - The email shows the expiry date the server actually set.
 - If the server enforces a maximum, the links get the maximum, and the email shows that date.
+- An email's own expiry, set from the toolbar button, applies to that email's links only.
 
 ## FR5: Warn if Sign is off
 
-The settings have a checkbox, "Warn if signing (upload via link) is disabled". It is on by default (OD4).
+The settings have a checkbox, "Warn if signing (upload via link) is disabled". It is on by default.
 
 When the checkbox is on, Sign is off, and at least one file would become a link under FR3, clicking Send shows an alert. The alert names those files and says how to turn on Sign. It has two buttons:
 
@@ -80,7 +83,7 @@ Acceptance criteria:
 
 ## FR6: Warn if text mentions an attachment but none is added
 
-The settings have a field, "Warn if text found but no attachment", where the user enters words or phrases, such as "attachment" or "see attached". Each one entered with Return becomes a tag, shown as a bubble with an x that removes it, and a tag can hold several words. It is empty by default (OD4), and while it is empty there is no check.
+The settings have a field, "Warn if text found but no attachment", where the user enters words or phrases, such as "attachment" or "see attached". Each one entered with Return becomes a tag, shown as a bubble with an x that removes it, and a tag can hold several words. It is empty by default, and while it is empty there is no check.
 
 When the message text contains one of those words or phrases and the message has no attachment, clicking Send shows an alert. The alert names the word or phrase it found. It has two buttons:
 
@@ -106,7 +109,7 @@ Acceptance criteria:
 In the message window, the user can set a password for that email's links, using the extension's button in the toolbar. It is empty by default, and then the links have no password.
 
 - The password applies to every link in that email, including the links to all files (FR9).
-- The email says that the links need a password, but doesn't contain it (OD4). The user gives it to recipients some other way.
+- The email says that the links need a password, but doesn't contain it. The user gives it to recipients some other way.
 - If Nextcloud rejects the password, for example because it's shorter than the server's password policy allows, the send stops with the server's reason and the message window stays open.
 - If the server requires passwords on links and none is set, the send stops with an alert asking for one.
 
@@ -126,13 +129,13 @@ A setting, "Share files as", chooses what Nextcloud shares (D17):
 With one link for the email's folder, a second setting, "Links in the email", chooses:
 
 - **Where each file was:** each file gets its links as described below. This is the default.
-- **Only the folder's links:** the files are removed from where they were. After the user's own text, the email lists each file's name and size (OD4), followed by FR9's two links, whatever FR9's setting and however many files became links.
+- **Only the folder's links:** the files are removed from where they were. After the user's own text, the email lists each file's name and size, followed by FR9's two links, whatever FR9's setting and however many files became links.
 
 Each file that becomes a link is replaced by its links where the file was dropped in the message, which may be between paragraphs of text. If the extension can't tell where a file was, its links go in a list after the user's own text, above any quoted messages in a reply or forward. They never go at the top.
 
 A setting, "Show download link for file", chooses how many links each file gets:
 
-- **Together with view link:** two links, one that opens the file in Nextcloud and one that downloads it. This is the default (OD4).
+- **Together with view link:** two links, one that opens the file in Nextcloud and one that downloads it. This is the default.
 - **Only:** one link, which downloads the file.
 
 Acceptance criteria:
@@ -145,7 +148,7 @@ Acceptance criteria:
 
 ## FR9: Links for all files
 
-A setting, "If multiple attachments, add view and download links at the bottom", is off by default (OD4). When it is on and two or more files in an email became links, two more links are added after the user's own text. They go below any list from FR8 and above any quoted messages in a reply or forward:
+A setting, "If multiple attachments, add view and download links at the bottom", is off by default. When it is on and two or more files in an email became links, two more links are added after the user's own text. They go below any list from FR8 and above any quoted messages in a reply or forward:
 
 - **View all files in email:** opens the email's folder (FR2) in Nextcloud.
 - **Download all files in email:** downloads that folder as one zip file.

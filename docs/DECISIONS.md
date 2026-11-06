@@ -125,3 +125,8 @@ Settled decisions, and why they were made. The current design is in [ARCHITECTUR
   - A share of its own for each file that Nextcloud can show, used only for View. It opens the viewer, but costs a share each, which brings back the limit of 20 new shares in 10 minutes (R21).
   - View showing the file itself from the folder share's WebDAV address, which Nextcloud serves without forcing a download. That's the browser's display, not Nextcloud's viewer, and with a password the browser asks for the user name "anonymous" and the password.
 - **Revisit when:** a Nextcloud version lets a link open one file of a folder share, or recipients find the folder page confusing.
+
+## D21: The defaults (2026-11-06)
+
+- **Decision:** the user confirmed the defaults that an agent had chosen, which resolves OD4, and changed one: the upload directory is `MailAttachments`, without a space. The others stay: all attachments become links (FR3), links expire in a month (FR4), FR5's warning is on, FR6 has no phrases, each file gets view and download links (FR8), the all-files links are off (FR9), the email says that the links need a password without containing it (FR7), with only the folder's links the files' names and sizes are listed (D17), and upload notifications appear only after 2 seconds (T8).
+- **Why:** the user's choice. A name without spaces reads better in paths and URLs.

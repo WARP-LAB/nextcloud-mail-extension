@@ -19,7 +19,7 @@ struct Settings: Equatable {
         case folderLinksOnly
     }
 
-    static let defaultDirectory = "Mail attachments"
+    static let defaultDirectory = "MailAttachments"
 
     /// The server address the user typed to log in. Requests use the server that the login returned.
     var server = ""

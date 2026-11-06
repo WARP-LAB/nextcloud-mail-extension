@@ -190,6 +190,14 @@ struct NextcloudClient {
         return try data.share()
     }
 
+    /// Changes a share's expiry date, `YYYY-MM-DD` or empty for none, and returns the share with the date the server
+    /// set (FR4).
+    func setExpireDate(_ date: String, forShare id: String) async throws -> Share {
+        let data: ShareData = try await ocs(
+            "PUT", "apps/files_sharing/api/v1/shares/\(Self.encode(id))", form: [("expireDate", date)])
+        return try data.share()
+    }
+
     func setPassword(_ password: String, forShare id: String) async throws {
         let _: Ignored = try await ocs(
             "PUT", "apps/files_sharing/api/v1/shares/\(Self.encode(id))", form: [("password", password)])
