@@ -46,6 +46,7 @@ scripts/lint.sh [--fix]     # all linters on every file git doesn't ignore, with
 scripts/install.sh          # copy the build to ~/Applications and register the extension (see Boundaries)
 scripts/use-test-account.sh # log the installed Debug build in to the test server in .env, or --log-out
 python3 tests/mail-checks.py # the Mail checks, sending between the two accounts in .env (docs/TESTING.md)
+python3 tests/mail-window-checks.py # the checks that click in Mail's windows; needs Accessibility
 ~/Applications/NextcloudAppleMail.app/Contents/MacOS/NextcloudAppleMail --check-storage     # App Group and Keychain
 ~/Applications/NextcloudAppleMail.app/Contents/MacOS/NextcloudAppleMail --check-connection  # the app's Test connection
 ~/Applications/NextcloudAppleMail.app/Contents/MacOS/NextcloudAppleMail --check-from-mail   # the extension's, in Mail

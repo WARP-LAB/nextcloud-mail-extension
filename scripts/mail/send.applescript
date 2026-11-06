@@ -1,6 +1,10 @@
--- Builds and sends a message in Mail. Used by scripts/mail.sh, which reads the addresses from .env.
--- usage: osascript send.applescript <from address> <to address> <subject> <body> <signature name|none> [file ...]
+-- Builds a message in Mail and sends it, or with compose leaves its window open for a check to click Send.
+-- Used by scripts/mail.sh, which reads the addresses from .env.
+-- usage: osascript send.applescript <send|compose> <from address> <to address> <subject> <body> <signature name|none>
+--        [file ...]
 on run argv
+    set mode to item 1 of argv
+    set argv to rest of argv
     set fromAddress to item 1 of argv
     set toAddress to item 2 of argv
     set theSubject to item 3 of argv
@@ -22,6 +26,10 @@ on run argv
         end tell
         -- Mail adds attachments in the background, and sends without them if sent at once.
         delay 3
-        send msg
+        if mode is "send" then
+            send msg
+        else
+            activate
+        end if
     end tell
 end run
