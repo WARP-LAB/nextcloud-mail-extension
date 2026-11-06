@@ -45,6 +45,7 @@ actor Sender {
     init(_ dependencies: Dependencies) {
         self.dependencies = dependencies
         ledger = dependencies.store?.load() ?? UploadLedger()
+        dependencies.passwords?.prune(now: dependencies.now())
     }
 
     /// One `encode()` call. `messageID` is Mail's `X-Universally-Unique-Identifier`, found in the message, with

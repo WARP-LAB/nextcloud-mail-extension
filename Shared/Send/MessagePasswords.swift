@@ -5,6 +5,8 @@ protocol PasswordVault {
     func read(_ messageID: String) throws -> String?
     func write(_ password: String, for messageID: String) throws
     func delete(_ messageID: String) throws
+    /// The message IDs of copies not changed since this date.
+    func unchanged(since date: Date) throws -> [String]
 }
 
 /// The Keychain items of the shared group, one per message ID (R8).
@@ -25,6 +27,10 @@ struct KeychainPasswordVault: PasswordVault {
 
     func delete(_ messageID: String) throws {
         try Keychain.delete(service: Self.service, account: messageID, group: group)
+    }
+
+    func unchanged(since date: Date) throws -> [String] {
+        try Keychain.items(service: Self.service, group: group).filter { $0.modified < date }.map(\.account)
     }
 }
 
@@ -78,6 +84,15 @@ final class MessagePasswords: @unchecked Sendable {
     /// What the popover shows when it opens.
     func shown(context: UUID) -> String {
         password(context: context, message: nil) ?? ""
+    }
+
+    /// Deletes the copies of passwords that weren't changed for as long as the ledger keeps a message, so that they
+    /// go with the message's entry (docs/ARCHITECTURE.md).
+    func prune(now: Date = Date()) {
+        let oldest = now.addingTimeInterval(-UploadLedger.lifetime)
+        for message in (try? vault?.unchanged(since: oldest)) ?? [] {
+            try? vault?.delete(message)
+        }
     }
 
     /// Forgets the message's password, as when Mail Drop sent it without links.

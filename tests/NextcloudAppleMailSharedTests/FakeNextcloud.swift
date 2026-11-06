@@ -100,6 +100,8 @@ enum SendFixtures {
 /// Passwords in memory, standing in for the Keychain.
 final class MemoryVault: PasswordVault {
     var kept: [String: String] = [:]
+    var modified: [String: Date] = [:]
+    var now = Date()
 
     func read(_ messageID: String) throws -> String? {
         kept[messageID]
@@ -107,9 +109,15 @@ final class MemoryVault: PasswordVault {
 
     func write(_ password: String, for messageID: String) throws {
         kept[messageID] = password
+        modified[messageID] = now
     }
 
     func delete(_ messageID: String) throws {
         kept[messageID] = nil
+        modified[messageID] = nil
+    }
+
+    func unchanged(since date: Date) throws -> [String] {
+        modified.filter { $0.value < date }.map(\.key)
     }
 }

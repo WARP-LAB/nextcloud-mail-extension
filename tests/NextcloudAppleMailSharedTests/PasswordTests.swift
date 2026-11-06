@@ -57,6 +57,23 @@ struct MessagePasswordsTests {
         #expect(passwords.password(context: context, message: message) == nil)
     }
 
+    @Test func dropsCopiesAsOldAsTheLedgersEntries() {
+        let vault = MemoryVault()
+        let passwords = MessagePasswords(vault: vault)
+        vault.now = SendFixtures.today.addingTimeInterval(-UploadLedger.lifetime - 60)
+        passwords.link(context: UUID(), message: "old")
+        passwords.set("old password", context: UUID())
+        let old = UUID()
+        passwords.link(context: old, message: "old")
+        passwords.set("old password", context: old)
+        vault.now = SendFixtures.today
+        let recent = UUID()
+        passwords.link(context: recent, message: "recent")
+        passwords.set("recent password", context: recent)
+        passwords.prune(now: SendFixtures.today)
+        #expect(vault.kept == ["recent": "recent password"])
+    }
+
     @Test func readsAHeaderWithoutTheBody() throws {
         let data = try Fixture.data("t15-first")
         #expect(MimePart.headerField("x-universally-unique-identifier", in: data) == message)
