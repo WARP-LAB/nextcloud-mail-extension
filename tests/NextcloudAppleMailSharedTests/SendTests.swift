@@ -68,10 +68,10 @@ struct SendFlowTests {
     @Test func sharesTheEmailsFolderOnceByDefault() async throws {
         let nextcloud = FakeNextcloud()
         let (output, record) = try await run("t29-second", nextcloud: nextcloud)
-        #expect(record.entry.folder == "Mail/2026-11-06 [probe ff] t29")
+        #expect(record.entry.folder == "Mail/2026-11-06-12-00-00 [probe ff] t29")
         #expect(nextcloud.files.keys.sorted() == record.entry.files.values.map(\.path).sorted())
         #expect(nextcloud.files.count == 2)
-        let call = FakeNextcloud.ShareCall(path: "Mail/2026-11-06 [probe ff] t29", expireDate: "2026-11-13")
+        let call = FakeNextcloud.ShareCall(path: "Mail/2026-11-06-12-00-00 [probe ff] t29", expireDate: "2026-11-13")
         #expect(nextcloud.shares == [call])
         let text = try #require(output.root.text)
         #expect(text.contains("View: https://cloud.example.test/s/share1\n"))
@@ -86,7 +86,7 @@ struct SendFlowTests {
         let settings = SendFixtures.settings { $0.sharing = .eachFile }
         let (output, _) = try await run("t29-second", settings: settings, nextcloud: nextcloud)
         #expect(nextcloud.shares.count == 2)
-        #expect(nextcloud.shares.allSatisfy { $0.path.hasPrefix("Mail/2026-11-06 [probe ff] t29/") })
+        #expect(nextcloud.shares.allSatisfy { $0.path.hasPrefix("Mail/2026-11-06-12-00-00 [probe ff] t29/") })
         let text = try #require(output.root.text)
         #expect(text.contains("Download: https://cloud.example.test/s/share1/download\n"))
         #expect(text.contains("View: https://cloud.example.test/s/share2\n"))
@@ -100,7 +100,7 @@ struct SendFlowTests {
         }
         let (output, _) = try await run("t29-second", settings: settings, nextcloud: nextcloud)
         #expect(nextcloud.shares.count == 3)
-        #expect(nextcloud.shares.last?.path == "Mail/2026-11-06 [probe ff] t29")
+        #expect(nextcloud.shares.last?.path == "Mail/2026-11-06-12-00-00 [probe ff] t29")
         #expect(output.root.text?.contains("View all files in email: https://cloud.example.test/s/share3") == true)
     }
 
@@ -159,12 +159,12 @@ struct SendFlowTests {
         let message = try Fixture.message("t29-second")
         let name = try #require(message.files.first?.filename)
         let record = MessageRecord(UploadLedger.Entry(updated: SendFixtures.today))
-        record.entry.folder = "Mail/2026-11-06 [probe ff] t29"
-        try await nextcloud.createFolders("Mail/2026-11-06 [probe ff] t29")
-        nextcloud.files["Mail/2026-11-06 [probe ff] t29/\(name)"] = Data("older".utf8)
+        record.entry.folder = "Mail/2026-11-06-12-00-00 [probe ff] t29"
+        try await nextcloud.createFolders("Mail/2026-11-06-12-00-00 [probe ff] t29")
+        nextcloud.files["Mail/2026-11-06-12-00-00 [probe ff] t29/\(name)"] = Data("older".utf8)
         let (output, _) = try await run("t29-second", nextcloud: nextcloud, record: record)
         let numbered = NextcloudNames.numbered(name, 2)
-        #expect(nextcloud.files["Mail/2026-11-06 [probe ff] t29/\(numbered)"] != nil)
+        #expect(nextcloud.files["Mail/2026-11-06-12-00-00 [probe ff] t29/\(numbered)"] != nil)
         #expect(output.root.text?.contains(NextcloudClient.encode(numbered)) == true)
     }
 

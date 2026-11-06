@@ -180,17 +180,18 @@ struct LinkExpiryTests {
 }
 
 struct NextcloudNamesTests {
-    static let day = LinkExpiryTests.calendar.date(from: DateComponents(year: 2026, month: 11, day: 5)) ?? Date()
+    static let time = DateComponents(year: 2026, month: 11, day: 5, hour: 14, minute: 3, second: 9)
+    static let day = LinkExpiryTests.calendar.date(from: time) ?? Date()
 
     @Test(arguments: [
-        ("Quarterly report", "2026-11-05 Quarterly report"),
-        (nil, "2026-11-05 Email"),
-        (" ... ", "2026-11-05 Email"),
-        ("Re: a/b\\c", "2026-11-05 Re: a-b-c"),
-        ("Line\nbreak\tand tab", "2026-11-05 Line break and tab"),
-        ("..Hidden. ", "2026-11-05 Hidden"),
-        (String(repeating: "x", count: 80), "2026-11-05 " + String(repeating: "x", count: 60)),
-        (String(repeating: "y", count: 59) + " .z", "2026-11-05 " + String(repeating: "y", count: 59)),
+        ("Quarterly report", "2026-11-05-14-03-09 Quarterly report"),
+        (nil, "2026-11-05-14-03-09 Email"),
+        (" ... ", "2026-11-05-14-03-09 Email"),
+        ("Re: a/b\\c", "2026-11-05-14-03-09 Re: a-b-c"),
+        ("Line\nbreak\tand tab", "2026-11-05-14-03-09 Line break and tab"),
+        ("..Hidden. ", "2026-11-05-14-03-09 Hidden"),
+        (String(repeating: "x", count: 80), "2026-11-05-14-03-09 " + String(repeating: "x", count: 60)),
+        (String(repeating: "y", count: 59) + " .z", "2026-11-05-14-03-09 " + String(repeating: "y", count: 59)),
     ])
     func namesTheEmailsFolder(subject: String?, name: String) {
         #expect(NextcloudNames.folder(date: Self.day, subject: subject, calendar: LinkExpiryTests.calendar) == name)

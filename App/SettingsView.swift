@@ -34,7 +34,7 @@ struct SettingsView: View {
         } footer: {
             Text(
                 "Each email's files go in a folder of their own inside this directory on Nextcloud, named with the "
-                    + "date and the subject, such as “2026-11-05 Report”."
+                    + "time of sending and the subject, such as “2026-11-05-14-03-09 Report”."
             )
             .foregroundStyle(.secondary)
         }

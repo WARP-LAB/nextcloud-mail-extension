@@ -25,9 +25,15 @@ Agents: do not guess these. Record questions here and stop.
 Judgment calls and known risks are tracked separately in `docs/RISKS.md`.
 
 - **OD3: Distribution.** How the app is distributed: Developer ID, the Mac App Store, or local builds only. Both of the first two need the renewed paid membership (D11). The supported versions are decided (D12).
-- **OD4: Defaults chosen by an agent.** Confirm or change: the upload directory "Mail attachments" (FR2), all attachments becoming links (FR3), links expiring in a month (FR4), FR5's warning on, FR6's phrase list empty, FR8's view and download links, FR9's all-files links off, the list of file names above the folder's links when FR8 gives only those (D17), the email saying that links need a password (FR7), and folder names `<yyyy-MM-dd> <subject>` ([ARCHITECTURE.md](ARCHITECTURE.md#using-nextcloud)).
+- **OD4: Defaults chosen by an agent.** Confirm or change: the upload directory "Mail attachments" (FR2), all attachments becoming links (FR3), links expiring in a month (FR4), FR5's warning on, FR6's phrase list empty, FR8's view and download links, FR9's all-files links off, the list of file names above the folder's links when FR8 gives only those (D17), the email saying that links need a password (FR7).
 - **OD5: Proposed requirements.** Confirm or change the non-functional requirements and the out-of-scope list in the PRD.
 - **OD6: Testing "Don't ask again".** Whether to test it in Mail's Mail Drop prompt, knowing it changes the account's behaviour and may be hard to undo (R2).
+
+- **OD10: View links for one file in a shared folder.** Nextcloud 35 can't open one file of a folder share in its viewer from a link: the public page opens the viewer only for a share of a single file, and takes no file from the URL (checked in its source, apps/files_sharing/src/init-public.ts). With one link for the email's folder, each file's View link therefore opens the folder's page. Options:
+  - **(a) Keep it,** and the recipient clicks the file in the folder's page.
+  - **(b) A share of its own for each file a browser or Nextcloud can show,** such as text, images, PDFs and office documents, used only for View. That opens Nextcloud's viewer, at the cost of a share each, so an email with many images can reach the limit of 20 new shares in 10 minutes (R21).
+  - **(c) View shows the file itself in the browser,** from the folder share's WebDAV address, which Nextcloud serves without forcing a download. That's the browser's own display, not Nextcloud's viewer, it doesn't work for every type, and on a share with a password the browser asks for a user name, "anonymous", and the password.
+  - Recommendation: (b) for shares without a password and (a) with one, if the share limit is acceptable, or (a) alone.
 
 ## ✔️ Shared Definition of Done (every task)
 

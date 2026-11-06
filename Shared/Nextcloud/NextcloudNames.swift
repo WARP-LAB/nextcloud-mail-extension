@@ -2,11 +2,15 @@ import Foundation
 
 /// The names an email's folder and files get on Nextcloud (FR2, docs/ARCHITECTURE.md, "Using Nextcloud").
 enum NextcloudNames {
-    /// `<yyyy-MM-dd> <subject>`, such as `2026-11-05 Quarterly report`, with the subject cut to 60 characters. If the
-    /// folder exists, `NextcloudClient.createUniqueFolder` adds a number.
+    /// `<yyyy-MM-dd-HH-mm-ss> <subject>`, such as `2026-11-05-14-03-09 Quarterly report`, in the Mac's time zone, with
+    /// the subject cut to 60 characters. The time keeps emails with the same subject on one day apart, and has no `T`
+    /// or colons, which paths don't take well (D19). If the folder exists, `NextcloudClient.createUniqueFolder` adds
+    /// a number.
     static func folder(date: Date, subject: String?, calendar: Calendar = .current) -> String {
-        let parts = calendar.dateComponents([.year, .month, .day], from: date)
-        let day = String(format: "%04d-%02d-%02d", parts.year ?? 0, parts.month ?? 0, parts.day ?? 0)
+        let parts = calendar.dateComponents([.year, .month, .day, .hour, .minute, .second], from: date)
+        let day = String(
+            format: "%04d-%02d-%02d-%02d-%02d-%02d", parts.year ?? 0, parts.month ?? 0, parts.day ?? 0, parts.hour ?? 0,
+            parts.minute ?? 0, parts.second ?? 0)
         var name = clean(subject ?? "", trimmingDots: true)
         if name.count > 60 {
             name = clean(String(name.prefix(60)), trimmingDots: true)
