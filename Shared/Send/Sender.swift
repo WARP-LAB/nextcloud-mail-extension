@@ -107,8 +107,8 @@ actor Sender {
         .sorted()
         let settings = dependencies.settings()
         let known = Set(entry.signatureFiles)
-        let files = settings.linkPolicy.linkedFiles(in: message, signatureContentIDs: signatureIDs).filter { file in
-            !(file.contentType.hasPrefix("image/") && known.contains(UploadLedger.key(for: file.data)))
+        let files = settings.linkPolicy.linkedFiles(in: message, signatureContentIDs: signatureIDs) { file in
+            file.contentType.hasPrefix("image/") && known.contains(UploadLedger.key(for: file.data))
         }
 
         // Mail Drop: its message has the header, and the call before it has none of the files (FR10, docs/MAIL.md).

@@ -6,6 +6,8 @@ struct LinkPolicy {
         case allAttachments
         /// Only files whose decoded size is larger than this many bytes.
         case largerThan(bytes: Int)
+        /// All the files when their decoded sizes together are larger than this many bytes, else none.
+        case togetherLargerThan(bytes: Int)
     }
 
     var rule: Rule
@@ -15,21 +17,26 @@ struct LinkPolicy {
     /// The files that become links, in document order. Images in the signature never do.
     ///
     /// `signatureContentIDs` come from the first send call, because only its HTML marks the signature
-    /// (docs/MAIL.md). See `signatureContentIDs(in:)`.
-    func linkedFiles(in message: MimeMessage, signatureContentIDs: Set<String>) -> [MessageFile] {
-        message.files.filter { file in
+    /// (docs/MAIL.md). See `signatureContentIDs(in:)`. `isSignatureFile` names the signature's images that an
+    /// earlier call found, which a later call can't tell by their Content-IDs. Files that stay in the email don't
+    /// count towards `togetherLargerThan`.
+    func linkedFiles(
+        in message: MimeMessage, signatureContentIDs: Set<String>,
+        isSignatureFile: (MessageFile) -> Bool = { _ in false }
+    ) -> [MessageFile] {
+        let files = message.files.filter { file in
             if let contentID = file.contentID?.lowercased(), signatureContentIDs.contains(contentID) {
                 return false
             }
-            if !pastedImagesBecomeLinks && Self.isPastedImage(file) {
-                return false
-            }
-            switch rule {
-            case .allAttachments:
-                return true
-            case .largerThan(let bytes):
-                return file.decodedSize > bytes
-            }
+            return !isSignatureFile(file) && (pastedImagesBecomeLinks || !Self.isPastedImage(file))
+        }
+        switch rule {
+        case .allAttachments:
+            return files
+        case .largerThan(let bytes):
+            return files.filter { $0.decodedSize > bytes }
+        case .togetherLargerThan(let bytes):
+            return files.reduce(0) { $0 + $1.decodedSize } > bytes ? files : []
         }
     }
 

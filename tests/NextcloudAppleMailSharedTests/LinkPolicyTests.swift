@@ -20,6 +20,30 @@ struct LinkPolicyTests {
                 == ["dummy-10MB.png"])
     }
 
+    @Test func linksAllFilesOrNoneUnderTheTogetherRule() throws {
+        let message = try Fixture.message("t27-second")
+        let total = message.files.reduce(0) { $0 + $1.decodedSize }
+        let over = LinkPolicy(rule: .togetherLargerThan(bytes: total - 1))
+        #expect(over.linkedFiles(in: message, signatureContentIDs: []).map(\.index) == [0, 1])
+        let atTheLimit = LinkPolicy(rule: .togetherLargerThan(bytes: total))
+        #expect(atTheLimit.linkedFiles(in: message, signatureContentIDs: []).isEmpty)
+    }
+
+    @Test func countsOnlyFilesThatCanBecomeLinksTowardsTheTotal() throws {
+        let message = try Fixture.message("t30-second")
+        let signature = try Fixture.signatureContentIDs(for: "t30-second")
+        var policy = LinkPolicy(rule: .allAttachments)
+        policy.pastedImagesBecomeLinks = false
+        let candidates = policy.linkedFiles(in: message, signatureContentIDs: signature)
+        let total = candidates.reduce(0) { $0 + $1.decodedSize }
+        policy.rule = .togetherLargerThan(bytes: total)
+        #expect(policy.linkedFiles(in: message, signatureContentIDs: signature).isEmpty)
+        policy.rule = .togetherLargerThan(bytes: total - 1)
+        #expect(policy.linkedFiles(in: message, signatureContentIDs: signature).map(\.index) == candidates.map(\.index))
+        let known = policy.linkedFiles(in: message, signatureContentIDs: signature) { $0.filename == "dummy-1MB.png" }
+        #expect(known.isEmpty, "a signature image found by an earlier call doesn't count")
+    }
+
     @Test func findsSignatureImagesInTheFirstCall() throws {
         #expect(
             LinkPolicy.signatureContentIDs(in: try Fixture.message("t30-first"))

@@ -56,14 +56,27 @@ struct SettingsView: View {
                 Text("Only attachments over a size").tag(true)
             }
             if model.settings.onlyLargeFiles {
-                TextField("Larger than, in MB", value: $model.settings.sizeLimitMegabytes, format: .number)
+                DecimalField(label: "Larger than, in MB", value: $model.settings.sizeLimitMegabytes)
+                Picker("Size limit applies to", selection: $model.settings.sizeLimitScope) {
+                    Text("Each file").tag(Settings.SizeLimitScope.eachFile)
+                    Text("All files together").tag(Settings.SizeLimitScope.allFiles)
+                }
             }
             Toggle("Pasted images become links", isOn: $model.settings.pastedImagesBecomeLinks)
         } header: {
             Text("Which files become links")
         } footer: {
-            Text("Images in your signature always stay in the email.").foregroundStyle(.secondary)
+            Text(filesFooter).foregroundStyle(.secondary)
         }
+    }
+
+    private var filesFooter: String {
+        let signature = "Images in your signature always stay in the email."
+        guard model.settings.onlyLargeFiles && model.settings.sizeLimitScope == .allFiles else {
+            return signature
+        }
+        return "When the files together are larger than the limit, all of them become links, and otherwise they "
+            + "all stay attached. " + signature
     }
 
     /// FR4, FR8, FR9 and D17.
@@ -150,6 +163,37 @@ struct SettingsView: View {
             )
             .foregroundStyle(.secondary)
         }
+    }
+}
+
+/// A field for a decimal number that keeps the decimals typed, with "." or "," (`DecimalText`). Text that isn't a
+/// number leaves the value as it was, and the field shows the value again when it loses focus.
+private struct DecimalField: View {
+    let label: String
+    @Binding var value: Double
+    @State private var text = ""
+    @FocusState private var focused: Bool
+
+    var body: some View {
+        TextField(label, text: $text)
+            .focused($focused)
+            .onAppear { text = DecimalText.text(of: value) }
+            .onChange(of: text) { _, text in
+                if let typed = DecimalText.value(of: text) {
+                    value = typed
+                }
+            }
+            .onChange(of: focused) { _, focused in
+                if !focused {
+                    text = DecimalText.text(of: value)
+                }
+            }
+            .onChange(of: value) { _, value in
+                if !focused {
+                    text = DecimalText.text(of: value)
+                }
+            }
+            .onSubmit { text = DecimalText.text(of: value) }
     }
 }
 

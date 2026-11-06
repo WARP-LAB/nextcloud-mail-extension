@@ -39,12 +39,19 @@ A setting chooses one of:
 - All attachments become links. This is the default.
 - Only attachments over a set size become links. The rest stay attached, so one message can have both.
 
+The size is in decimal megabytes, as Finder shows them, and keeps the decimals typed, such as 0.2 or 10.2, with either "." or "," before them. With a size, a second setting, "Size limit applies to", chooses:
+
+- **Each file:** each file larger than the limit becomes links. This is the default.
+- **All files together:** when the files together are larger than the limit, all of them become links, and otherwise all of them stay attached. Only files that could become links count towards the total, so pasted images that stay in the email and signature images don't.
+
 A second setting, "Pasted images become links", decides whether images pasted into the body follow that rule. It is on by default. When it is off, pasted images stay in the email whatever the rule says. Images in the signature never become links.
 
 Acceptance criteria:
 
 - With "all attachments", every attached file becomes links.
-- With a size limit, only files larger than the limit become links. The others arrive attached and byte-identical, and a file exactly at the limit stays attached.
+- With a size limit for each file, only files larger than the limit become links. The others arrive attached and byte-identical, and a file exactly at the limit stays attached.
+- With a size limit for all files together, either every file becomes links or every file arrives attached and byte-identical, and files exactly at the limit together stay attached.
+- A size typed as "0.2" or "0,2" stays 0.2 MB.
 - Pasted images follow the rule while the pasted-images setting is on, and stay in the email while it's off.
 - Signature images always stay in the email.
 
