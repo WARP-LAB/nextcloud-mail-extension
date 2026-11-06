@@ -3,6 +3,7 @@
 # "Driving Mail from the command line"). Their addresses stay in .env.
 # Usage:
 #   scripts/mail.sh send <A|B> <A|B> <subject> <body> <signature|none> [file ...]   signature: NCAM_MAIL_SIGNATURE
+#   scripts/mail.sh compose ...   as send, but leaves the message's window open without sending it
 #   scripts/mail.sh fetch <inbox|sent> <subject> <output file> [seconds to wait, default 240]
 #   scripts/mail.sh respond <reply|forward> <subject> <forward to: A|B> [file ...]   for a message in the inboxes
 #   scripts/mail.sh app <option> [argument]   the installed Debug build's options, such as --settings or --debug-dumps
@@ -12,7 +13,7 @@ root="$(cd "$(dirname "$0")/.." && pwd)"
 app="${HOME}/Applications/NextcloudAppleMail.app/Contents/MacOS/NextcloudAppleMail"
 
 usage() {
-    sed -n '4,8p' "$0" | sed 's/^# //' >&2
+    sed -n '4,9p' "$0" | sed 's/^# //' >&2
     exit 2
 }
 
@@ -36,7 +37,7 @@ address() {
 command="${1:-}"
 [[ $# -gt 0 ]] && shift
 case "${command}" in
-    send)
+    send | compose)
         [[ $# -ge 5 ]] || usage
         from="$(address "$1")"
         to="$(address "$2")"
@@ -47,8 +48,8 @@ case "${command}" in
             signature="${NCAM_MAIL_SIGNATURE:?NCAM_MAIL_SIGNATURE is not set in .env}"
         fi
         shift 5
-        osascript "${root}/scripts/mail/send.applescript" "${from}" "${to}" "${subject}" "${body}" "${signature}" "$@" \
-            > /dev/null
+        osascript "${root}/scripts/mail/send.applescript" "${command}" "${from}" "${to}" "${subject}" "${body}" \
+            "${signature}" "$@" > /dev/null
         ;;
     fetch)
         [[ $# -ge 3 ]] || usage

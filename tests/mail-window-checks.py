@@ -1,0 +1,459 @@
+#!/usr/bin/env python3
+"""Runs the Mail checks that need Mail's windows, through AppleScript and System Events (docs/TESTING.md).
+
+Usage: python3 tests/mail-window-checks.py [check ...]     with no names, every check runs. --list lists them.
+
+These are T5c's checks: an upload failure's alert (t7), Undo Send (t21), Send Later (t22), a pasted image (t30),
+a reply's quote (t34), and Mail Drop's prompt with Try Sending in Email (t38) and Use Mail Drop (t39). They click
+Mail's Send button, menus and alert buttons, so the terminal's app needs Accessibility, and Mail must be the app in
+front whenever a key is pressed: each check makes sure of that first, and stops if it can't. "Don't ask again" in
+the Mail Drop prompt is never ticked (R2). Messages go between the two accounts in .env, as tests/mail-checks.py's do,
+and are saved in test-results/mail/<run>/.
+"""
+
+import importlib.util
+import os
+import pathlib
+import re
+import subprocess
+import sys
+import time
+import urllib.parse
+import zlib
+
+ROOT = pathlib.Path(__file__).resolve().parent.parent
+_spec = importlib.util.spec_from_file_location('mail_checks', ROOT / 'tests' / 'mail-checks.py')
+checks = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(checks)
+
+
+class CheckError(Exception):
+    pass
+
+
+def osa(script, *arguments, timeout=180):
+    result = subprocess.run(['osascript', '-', *arguments], input=script, capture_output=True, text=True,
+                            timeout=timeout)
+    if result.returncode:
+        raise CheckError(result.stderr.strip())
+    return result.stdout.strip()
+
+
+def in_mail(body, *arguments, timeout=180):
+    """Runs AppleScript lines inside System Events' process "Mail", with argv for the arguments."""
+    return osa('on run argv\ntell application "System Events" to tell process "Mail"\n' + body
+               + '\nend tell\nend run', *arguments, timeout=timeout)
+
+
+def mail_in_front():
+    """Brings Mail to the front, or stops: keys must never go to another app."""
+    osa('tell application "Mail" to activate')
+    for _ in range(20):
+        if osa('tell application "System Events" to get name of first process whose frontmost is true') == 'Mail':
+            return
+        time.sleep(0.25)
+    raise CheckError('Mail did not come to the front, so no key was pressed')
+
+
+def window_exists(name):
+    return in_mail('return exists window (item 1 of argv)', name) == 'true'
+
+
+def wait(condition, seconds, what):
+    end = time.time() + seconds
+    while time.time() < end:
+        if condition():
+            return
+        time.sleep(0.5)
+    raise CheckError(f'{what} after {seconds} seconds')
+
+
+def click_send(subject):
+    mail_in_front()
+    in_mail('perform action "AXRaise" of window (item 1 of argv)\n'
+            'click (first button of toolbar 1 of window (item 1 of argv) whose description is "Send")', subject)
+
+
+def sheet(subject):
+    """The texts and buttons of the sheet on a window, or None, also when the window has closed meanwhile."""
+    try:
+        if in_mail('return count of sheets of window (item 1 of argv)', subject) == '0':
+            return None
+        texts = in_mail('return value of every static text of sheet 1 of window (item 1 of argv)', subject)
+        buttons = in_mail('return name of every button of sheet 1 of window (item 1 of argv)', subject)
+    except CheckError:
+        if not window_exists(subject):
+            return None
+        raise
+    return texts, [name.strip() for name in buttons.split(',')]
+
+
+def click_sheet_button(subject, button):
+    in_mail('click button (item 2 of argv) of sheet 1 of window (item 1 of argv)', subject, button)
+
+
+def click_menu(*path):
+    """Clicks a menu item, such as ("Message", "Send Later", "Send 21:00 Tonight")."""
+    mail_in_front()
+    reference = f'menu "{path[0]}" of menu bar 1'
+    for name in path[1:-1]:
+        reference = f'menu 1 of menu item "{name}" of {reference}'
+    in_mail(f'click menu item "{path[-1]}" of {reference}')
+
+
+def menu_items(*path):
+    reference = f'menu "{path[0]}" of menu bar 1'
+    for name in path[1:]:
+        reference = f'menu 1 of menu item "{name}" of {reference}'
+    return [name.strip() for name in in_mail(f'return name of every menu item of {reference}').split(',')]
+
+
+def env():
+    values = {}
+    for line in (ROOT / '.env').read_text().splitlines():
+        line = line.strip()
+        if line and not line.startswith('#') and '=' in line:
+            key, value = line.split('=', 1)
+            values[key] = value.strip().strip('"')
+    return values
+
+
+def folders_for(subject):
+    """The names of the email folders on Nextcloud that end with the subject."""
+    values = env()
+    url = (f'{values["NCAM_TEST_SERVER_URL"]}/remote.php/dav/files/{values["NCAM_TEST_USERNAME"]}/'
+           f'{urllib.parse.quote(values["NCAM_TEST_DIRECTORY"])}/')
+    listing = subprocess.run(['curl', '-sS', '-u', f'{values["NCAM_TEST_USERNAME"]}:{values["NCAM_TEST_PASSWORD"]}',
+                              '-X', 'PROPFIND', '-H', 'Depth: 1', url], capture_output=True, text=True, check=True)
+    names = [urllib.parse.unquote(href).rstrip('/').split('/')[-1] for href in re.findall(r'<d:href>([^<]*)</d:href>',
+                                                                                         listing.stdout)]
+    return [name for name in names if name.endswith(subject)]
+
+
+def file_links(path):
+    texts, attached = checks.parts(path.read_bytes())
+    found, _, _ = checks.links('\n'.join(texts['plain']))
+    return texts, attached, found
+
+
+def downloads_match(found, name, data):
+    link = found.get(name)
+    return link is not None and checks.curl(link['download']) == data
+
+
+def png(width=64, height=48):
+    """A small PNG with a gradient, written without packages."""
+    raw = b''.join(b'\x00' + b''.join(bytes((x * 4 % 256, y * 5 % 256, (x * y) % 256)) for x in range(width))
+                   for y in range(height))
+
+    def chunk(kind, data):
+        return len(data).to_bytes(4, 'big') + kind + data + zlib.crc32(kind + data).to_bytes(4, 'big')
+    header = width.to_bytes(4, 'big') + height.to_bytes(4, 'big') + bytes((8, 2, 0, 0, 0))
+    return b'\x89PNG\r\n\x1a\n' + chunk(b'IHDR', header) + chunk(b'IDAT', zlib.compress(raw)) + chunk(b'IEND', b'')
+
+
+class Run:
+    def __init__(self):
+        self.stamp = time.strftime('%H%M%S')
+        self.folder = ROOT / 'test-results' / 'mail' / time.strftime('%Y%m%d-%H%M%S-windows')
+        self.folder.mkdir(parents=True, exist_ok=True)
+        self.original = checks.app_settings()
+        self.results = []
+
+    def expect(self, what, ok, detail=''):
+        self.results.append((what, bool(ok), detail))
+
+    def subject(self, name):
+        return f'[ncam check] {name} {self.stamp}'
+
+    def file(self, name, size):
+        path = self.folder / name
+        path.write_bytes(os.urandom(size))
+        return path
+
+    def fetch(self, subject, name, seconds=300):
+        path = self.folder / name
+        checks.mail('fetch', 'inbox', subject, str(path), str(seconds))
+        return path
+
+
+def check_t7(run):
+    """An upload failure: the alert has the server's reason, the window keeps its file, and sending again works."""
+    subject = run.subject('t7-failure')
+    data_path = run.file('t7.bin', 4000)
+    checks.app_settings(dict(checks.DEFAULTS, directory=run.original['directory'] + '/.htaccess'))
+    checks.mail('compose', 'A', 'B', subject, 'Check t7: the first send stops.', 'none', str(data_path))
+    click_send(subject)
+    wait(lambda: sheet(subject) is not None, 90, 'no alert')
+    texts, buttons = sheet(subject)
+    run.expect('the alert names the failure and the server\'s reason', 'couldn\'t' in texts and 'Nextcloud:' in texts,
+               texts)
+    click_sheet_button(subject, 'OK')
+    time.sleep(1)
+    run.expect('the window stays open', window_exists(subject))
+    checks.app_settings(dict(checks.DEFAULTS, directory=run.original['directory']))
+    click_send(subject)
+    _, attached, found = file_links(run.fetch(subject, 't7-received.eml'))
+    run.expect('sending again uploads and links the file', downloads_match(found, 't7.bin', data_path.read_bytes())
+               and not attached, f'links for: {sorted(found)}')
+
+
+def undo_send():
+    """Clicks Edit > Undo Send once Mail offers it. Opening the menu makes Mail update its items."""
+    for _ in range(16):
+        mail_in_front()
+        name = in_mail('click menu bar item "Edit" of menu bar 1\ndelay 0.3\n'
+                       'set first_ to name of menu item 1 of menu "Edit" of menu bar item "Edit" of menu bar 1\n'
+                       'if first_ starts with "Undo Send" then\n'
+                       'click menu item 1 of menu "Edit" of menu bar item "Edit" of menu bar 1\nelse\nkey code 53\n'
+                       'end if\nreturn first_')
+        if name.startswith('Undo Send'):
+            return True
+        time.sleep(0.5)
+    return False
+
+
+def check_t21(run):
+    """Undo Send: the window comes back with its file, and sending again reuses the upload."""
+    subject = run.subject('t21-undo')
+    data_path = run.file('t21.bin', 6000)
+    checks.app_settings(checks.DEFAULTS)
+    checks.mail('compose', 'A', 'B', subject, 'Check t21: undone, then sent again.', 'none', str(data_path))
+    click_send(subject)
+    wait(lambda: not window_exists(subject), 90, 'the window didn\'t close after Send')
+    undone = undo_send()
+    run.expect('Mail offered Undo Send', undone)
+    if not undone:
+        return
+    wait(lambda: window_exists(subject), 15, 'the window didn\'t come back after Undo Send')
+    run.expect('the window came back', True)
+    click_send(subject)
+    _, attached, found = file_links(run.fetch(subject, 't21-received.eml'))
+    run.expect('the email arrived once sent again, with working links',
+               downloads_match(found, 't21.bin', data_path.read_bytes()) and not attached)
+    folders = folders_for(subject)
+    run.expect('one folder on Nextcloud for both sends', len(folders) == 1, f'folders: {folders}')
+
+
+def check_t22(run):
+    """Send Later: the files are uploaded when the email is scheduled, and the scheduled copy has the links."""
+    subject = run.subject('t22-send-later')
+    data_path = run.file('t22.bin', 5000)
+    checks.app_settings(checks.DEFAULTS)
+    checks.mail('compose', 'A', 'B', subject, 'Check t22: sent later, tonight.', 'none', str(data_path))
+    mail_in_front()
+    in_mail('perform action "AXRaise" of window (item 1 of argv)', subject)
+    tonight = [item for item in menu_items('Message', 'Send Later') if 'Tonight' in item]
+    run.expect('Mail offers to send tonight', tonight, f'items: {menu_items("Message", "Send Later")}')
+    if not tonight:
+        return
+    click_menu('Message', 'Send Later', tonight[0])
+    # The first time, Mail confirms with a sheet that the message goes out at the scheduled time.
+    wait(lambda: not window_exists(subject) or sheet(subject) is not None, 90, 'nothing after Send Later')
+    confirmation = sheet(subject)
+    if confirmation and 'OK' in confirmation[1]:
+        click_sheet_button(subject, 'OK')
+    wait(lambda: not window_exists(subject), 90, 'the window didn\'t close after Send Later')
+    folders = folders_for(subject)
+    run.expect('the file was uploaded when the email was scheduled', len(folders) == 1, f'folders: {folders}')
+    source = osa('on run argv\ntell application "Mail"\nset found to (messages of mailbox "SendLater" '
+                 'whose subject is (item 1 of argv))\nif (count of found) > 0 then return source of item 1 of found\n'
+                 'return ""\nend tell\nend run', subject)
+    if source:
+        path = run.folder / 't22-scheduled.eml'
+        path.write_text(source)
+        _, attached, found = file_links(path)
+        run.expect('the scheduled copy has working links', downloads_match(found, 't22.bin', data_path.read_bytes())
+                   and not attached, f'links for: {sorted(found)}')
+    else:
+        run.expect('the scheduled copy was found in a mailbox', False, 'not found; it goes out tonight')
+
+
+FOCUS_WEB_AREA = """
+on walk(element, depth)
+    tell application "System Events"
+        set kids to {}
+        try
+            set kids to UI elements of element
+        end try
+        repeat with kid in kids
+            set r to ""
+            try
+                set r to role of kid
+            end try
+            if r is "AXWebArea" then return kid
+            if depth < 6 then
+                set found to my walk(kid, depth + 1)
+                if found is not missing value then return found
+            end if
+        end repeat
+    end tell
+    return missing value
+end walk
+
+on run argv
+    tell application "System Events" to tell process "Mail" to set target to window (item 1 of argv)
+    set area to my walk(target, 1)
+    tell application "System Events" to set value of attribute "AXFocused" of area to true
+end run
+"""
+
+
+def paste_into_body(subject, at_end):
+    """Pastes the clipboard into the message body, at its end or where the caret starts, which in a reply is above
+    the quote. A click doesn't move the keyboard focus there reliably, so Accessibility gives the body the focus."""
+    mail_in_front()
+    in_mail('perform action "AXRaise" of window (item 1 of argv)', subject)
+    osa(FOCUS_WEB_AREA, subject, timeout=300)
+    mail_in_front()
+    if at_end:
+        osa('tell application "System Events" to key code 125 using command down')
+    osa('tell application "System Events" to keystroke "v" using command down')
+    time.sleep(2)
+
+
+def close_test_windows():
+    """Closes test messages left open by an earlier check, without saving them."""
+    names = [name.strip() for name in in_mail('return name of every window').split(',')]
+    for name in names:
+        if '[ncam check]' not in name:
+            continue
+        mail_in_front()
+        try:
+            in_mail('set w to window (item 1 of argv)\nperform action "AXRaise" of w\n'
+                    'click (first button of w whose subrole is "AXCloseButton")\ndelay 1.5\n'
+                    'if (count of sheets of w) > 0 then click button "Don’t Save" of sheet 1 of w', name)
+        except CheckError:
+            continue  # gone already
+
+
+def check_t30(run):
+    """A pasted image: with the pasted-images setting on, it becomes links, named as Mail names it."""
+    subject = run.subject('t30-pasted')
+    image = run.folder / 'pasted.png'
+    image.write_bytes(png())
+    checks.app_settings(checks.DEFAULTS)
+    saved = subprocess.run(['pbpaste'], capture_output=True).stdout
+    try:
+        checks.mail('compose', 'A', 'B', subject, 'Check t30: an image pasted below.', 'none')
+        osa('on run argv\nset the clipboard to (read (POSIX file (item 1 of argv)) as «class PNGf»)\nend run',
+            str(image))
+        paste_into_body(subject, at_end=True)
+        click_send(subject)
+    finally:
+        subprocess.run(['pbcopy'], input=saved)
+    texts, attached, found = file_links(run.fetch(subject, 't30-received.eml'))
+    pasted = [name for name in found if name.startswith('PastedGraphic')]
+    run.expect('the pasted image became links', pasted and not attached,
+               f'links for: {sorted(found)}, attached: {sorted(attached)}')
+    if pasted:
+        run.expect('its link downloads a PNG', checks.curl(found[pasted[0]]['download']).startswith(b'\x89PNG'))
+
+
+def check_t34(run):
+    """A reply made in Mail's window keeps its quote, and a file added above the quote gets its links there."""
+    subject = run.subject('t34-reply')
+    checks.app_settings(checks.DEFAULTS)
+    checks.mail('send', 'A', 'B', subject, 'Check t34: the original, to be quoted.', 'none')
+    run.fetch(subject, 't34-original.eml')
+    osa('on run argv\ntell application "Mail"\nset m to first message of inbox whose subject is (item 1 of argv)\n'
+        'set selected mailboxes of message viewer 1 to {mailbox of m}\ndelay 1\n'
+        'set selected messages of message viewer 1 to {m}\nend tell\nend run', subject)
+    mail_in_front()
+    in_mail('perform action "AXRaise" of (first window whose name starts with "Inbox")')
+    click_menu('Message', 'Reply')
+    reply = 'Re: ' + subject
+    wait(lambda: window_exists(reply), 30, 'no reply window')
+    data_path = run.file('t34.bin', 7000)
+    # AppleScript can't reach a reply made in Mail's window, so the file is pasted above the quote instead.
+    saved = subprocess.run(['pbpaste'], capture_output=True).stdout
+    try:
+        osa('on run argv\nset the clipboard to (POSIX file (item 1 of argv))\nend run', str(data_path))
+        paste_into_body(reply, at_end=False)
+        click_send(reply)
+    finally:
+        subprocess.run(['pbcopy'], input=saved)
+    texts, attached, found = file_links(run.fetch(reply, 't34-received.eml'))
+    plain = '\n'.join(texts['plain'])
+    run.expect('the reply has its quote', 'Check t34: the original' in plain and '>' in plain)
+    link = plain.find('t34.bin (')
+    quote = plain.find('\n>')
+    run.expect('the links are above the quote', 0 <= link < quote, f'link at {link}, quote at {quote}')
+    run.expect('the links work', downloads_match(found, 't34.bin', data_path.read_bytes()) and not attached)
+
+
+def mail_drop(run, name, button):
+    subject = run.subject(name)
+    data_path = run.file(f'{name}.bin', 30_000_000)
+    checks.app_settings(checks.DEFAULTS)
+    checks.mail('compose', 'A', 'B', subject, f'Check {name}: over the size limit.', 'none', str(data_path))
+    click_send(subject)
+    wait(lambda: sheet(subject) is not None, 120, 'no Mail Drop prompt')
+    texts, buttons = sheet(subject)
+    run.expect('Mail asked about Mail Drop', button in buttons, f'buttons: {buttons}')
+    ticked = in_mail('return value of every checkbox of sheet 1 of window (item 1 of argv)', subject)
+    run.expect('"Don\'t ask again" is not ticked', '1' not in ticked.split(', '), f'checkboxes: {ticked}')
+    if button not in buttons or '1' in ticked.split(', '):
+        return subject, data_path, None
+    click_sheet_button(subject, button)
+    return subject, data_path, run.fetch(subject, f'{name}-received.eml', 900)
+
+
+def check_t38(run):
+    """Try Sending in Email: the extension uploads as usual, and the email is small."""
+    subject, data_path, received = mail_drop(run, 't38-try-in-email', 'Try Sending in Email')
+    if received:
+        _, attached, found = file_links(received)
+        run.expect('the 30 MB file became working links', downloads_match(found, 't38-try-in-email.bin',
+                                                                           data_path.read_bytes()) and not attached)
+        run.expect('the email is small', received.stat().st_size < 100_000, f'{received.stat().st_size} bytes')
+
+
+def check_t39(run):
+    """Use Mail Drop: the email has Mail Drop's link, and what was uploaded for it is deleted from Nextcloud."""
+    subject, _, received = mail_drop(run, 't39-mail-drop', 'Use Mail Drop')
+    if received:
+        raw = received.read_bytes()
+        server = env()['NCAM_TEST_SERVER_URL'].encode()
+        run.expect('the email has Mail Drop\'s link', b'Remote-Attachment-Url' in raw or b'icloud.com' in raw)
+        run.expect('the email has no Nextcloud links', server not in raw)
+        time.sleep(10)
+        run.expect('nothing uploaded for it is left on Nextcloud', not folders_for(subject),
+                   f'folders: {folders_for(subject)}')
+
+
+CHECKS = {'t7': check_t7, 't21': check_t21, 't22': check_t22, 't30': check_t30, 't34': check_t34,
+          't38': check_t38, 't39': check_t39}
+
+
+def main():
+    if '--list' in sys.argv:
+        print('\n'.join(CHECKS))
+        return 0
+    names = sys.argv[1:] or list(CHECKS)
+    unknown = [name for name in names if name not in CHECKS]
+    if unknown:
+        print(f'unknown checks: {", ".join(unknown)}. --list lists them.', file=sys.stderr)
+        return 2
+    run = Run()
+    failed = 0
+    try:
+        for name in names:
+            print(f'== {name}', flush=True)
+            run.results = []
+            try:
+                close_test_windows()
+                CHECKS[name](run)
+            except (CheckError, subprocess.CalledProcessError, subprocess.TimeoutExpired) as error:
+                run.expect('ran', False, str(getattr(error, 'stderr', '') or error).strip())
+            for what, ok, detail in run.results:
+                failed += not ok
+                print(f'  {"ok  " if ok else "FAIL"} {what}' + (f' ({detail})' if detail and not ok else ''), flush=True)
+    finally:
+        checks.app_settings(run.original)
+    print(f'{"all passed" if not failed else f"{failed} failed"}. Messages are in {run.folder.relative_to(ROOT)}/')
+    return 1 if failed else 0
+
+
+if __name__ == '__main__':
+    sys.exit(main())
