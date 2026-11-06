@@ -168,13 +168,10 @@ private struct PopoverView: View {
                 .help(passwordShown ? "Hide the password" : "Show the password")
                 .accessibilityLabel(passwordShown ? "Hide the password" : "Show the password")
             }
-            Text(
-                "Empty means the links need no password. The email says that they need one, but not which: give it "
-                    + "to the recipients some other way."
-            )
-            .font(.footnote)
-            .foregroundStyle(.secondary)
-            .fixedSize(horizontal: false, vertical: true)
+            Text("Empty means no password. If you set one, consider a safe way to pass it to the recipients.")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
         }
     }
 
