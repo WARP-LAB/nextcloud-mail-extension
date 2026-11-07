@@ -92,16 +92,26 @@ struct SettingsView: View {
             Text("Sharing")
         } footer: {
             if model.settings.sharing == .eachFile {
-                Label(
-                    "Nextcloud allows 20 new shares in 10 minutes, so sending many emails with many files this way "
-                        + "can reach that limit, and sending then fails until the time is up or the server's admin "
-                        + "raises the limit. See Setting up Mail.",
-                    systemImage: "exclamationmark.triangle"
-                )
+                Label {
+                    // A LocalizedStringKey, so that the Markdown link is a link.
+                    Text(LocalizedStringKey(Self.shareLimitWarning))
+                } icon: {
+                    Image(systemName: "exclamationmark.triangle")
+                }
                 .foregroundStyle(.secondary)
             }
         }
     }
+
+    /// Where Nextcloud's admin manual describes `ratelimit_overwrite`, which raises the share limit.
+    private static let rateLimitDocumentation =
+        "https://docs.nextcloud.com/server/latest/admin_manual/configuration_server/"
+        + "config_sample_php_parameters.html#ratelimit-overwrite"
+
+    private static let shareLimitWarning =
+        "Nextcloud allows 20 new shares in 10 minutes, so sending many emails with many files this way can reach "
+        + "that limit, and sending then fails until the time is up or the server's admin raises the limit. See the "
+        + "[Nextcloud server documentation](\(rateLimitDocumentation))."
 
     /// FR8 and FR9.
     private var links: some View {
