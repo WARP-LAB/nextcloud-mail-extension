@@ -20,6 +20,7 @@ import re
 import subprocess
 import sys
 import time
+import urllib.parse
 import unicodedata
 import zipfile
 from email import policy
@@ -83,6 +84,16 @@ def curl(url, *options):
 
 def status(url):
     return int(curl(url, '-o', '/dev/null', '-w', '%{http_code}'))
+
+
+def saved_name(url):
+    """The name a browser saves the download under: Content-Disposition's, else the address's last part."""
+    headers = curl(url, '-o', '/dev/null', '-D', '-', '-w', '%{url_effective}').decode(errors='replace')
+    names = re.findall(r"^content-disposition:.*?filename\*=UTF-8''([^;\r\n]+)", headers, re.I | re.M)
+    if names:
+        return nfc(urllib.parse.unquote(names[-1].strip()))
+    final = headers.rstrip().splitlines()[-1]
+    return nfc(urllib.parse.unquote(urllib.parse.urlsplit(final).path.rsplit('/', 1)[-1]))
 
 
 def folder_name(name):
@@ -201,6 +212,9 @@ def run_check(name, check, run_folder, stamp):
             continue
         got = curl(link['download'])
         expect(f'{shown} downloads the same bytes', got == data, f'{len(got)} of {len(data)} bytes')
+        # A server in debug mode leaves out the name, and a file's own share then downloads as its token.
+        name = saved_name(link['download'])
+        expect(f'{shown} downloads under its name', name == shown, f'saved as {name}')
         if 'view' in link:
             expect(f'{shown} view link opens', status(link['view']) == 200)
     if len(linked) > 1 and settings['linkStyle'] == 'viewAndDownload':
