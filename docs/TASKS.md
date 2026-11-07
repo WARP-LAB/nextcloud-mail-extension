@@ -17,6 +17,9 @@ Risk register: `docs/RISKS.md`.
 > - Write Acceptance Criteria or a explicit Definition of Done
 > - Take tasks in order unless told otherwise. Do not start the next task without being asked.
 
+- 🔄 **T18: "Place links" decides only where each file's links go.** The user's rule: "Inline, where each file was" keeps each file's links where it was, and "Below your text" lists every file, with its name, size and own links, below the user's text, for both kinds of Nextcloud share. "Show download link for file" becomes "Link types for files", offering "Download only" and "View and download", and applies everywhere. The links for all files follow the switch with inline links, and are always added for two or more files below the text, where the switch is greyed out.
+  - **Acceptance:** "Place links" is offered with either kind of share. Below the text, each file is listed with its name, size and links of the chosen types, and the links for all files follow for two or more files, also with a share for each file. Inline links are unchanged. Only the switch is ever greyed out, and only below the text. Unit tests cover both placements with both kinds of share, the Mail checks pass, including one for a share for each file below the text, and FR8, FR9 and a new decision describe it.
+
 ## ❓ Open Decisions (human to resolve)
 
 Agents: do not guess these. Record questions here and stop.
