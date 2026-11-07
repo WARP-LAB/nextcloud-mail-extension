@@ -47,6 +47,10 @@ Judgment calls and known risks are tracked separately in `docs/RISKS.md`.
 
 Set aside until the user brings a task back. Agents don't start these.
 
+- **T24: Make the app's Help menu useful.** Today the Help menu's "NextcloudMailExtension Help" is SwiftUI's default item, which shows macOS's message that help isn't available. The user's request: Help leads to the project's GitHub page, which will hold the user documentation and a link to GitHub issues, where users can ask what the documentation doesn't answer. The page doesn't exist yet. The repository is `https://github.com/WARP-LAB/nextcloud-mail-extension`, and `…/issues/new/choose` offers the issue templates in `.github/ISSUE_TEMPLATE/`.
+  - **How it would work:** replace the default Help item with `CommandGroup(replacing: .help)`, opening addresses with `openURL` or `NSWorkspace`.
+  - **Open questions for the user:** whether Help opens a small window in the app, with a short text and the links to the documentation and to issues, or opens the documentation in the browser directly, with a second item such as "Report an Issue…"; and the documentation's address once the page exists, whether the repository's page or a GitHub Pages site.
+  - **Acceptance:** to be written with the user before starting.
 - **T23: Style the links in the email's HTML.** Today the extension writes plain HTML with no styling: each file's block is `<div><a href="…">name</a> (size, link expires …): <a href="…">Overview</a> · <a href="…">Download</a></div>`, so links look as the recipient's mail client shows them, and the block inherits whatever the surrounding HTML sets. The user's request: the app's settings get a "Styling" section with a switch, off by default. When it's on, the user can set:
   - for each file's block: a background colour (transparent by default), a border colour and a corner radius;
   - for the file name's link: a text colour and a hover colour;
