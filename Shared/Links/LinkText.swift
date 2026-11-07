@@ -76,15 +76,6 @@ struct LinkText {
         }
     }
 
-    /// A file's name and details without links, for the list above the folder's links (FR8, D17).
-    func plainListing(_ file: LinkedFile) -> String {
-        "\(file.filename) (\(details(file)))"
-    }
-
-    func htmlListing(_ file: LinkedFile) -> String {
-        "<div>\(HTML.escape(file.filename)) (\(HTML.escape(details(file))))</div>"
-    }
-
     /// The links to all files and the password notice, or nil if there's neither.
     func plain(folder: FolderLinks?, passwordNotice: Bool) -> String? {
         var lines: [String] = []

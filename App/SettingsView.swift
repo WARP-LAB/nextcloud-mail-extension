@@ -113,25 +113,23 @@ struct SettingsView: View {
         + "that limit, and sending then fails until the time is up or the server's admin raises the limit. See the "
         + "[Nextcloud server documentation](\(rateLimitDocumentation))."
 
-    /// FR8 and FR9.
+    /// FR8 and FR9. "Place links" decides only where each file's links go; below the text, the links for all files
+    /// are always added for two or more files, so their switch is greyed out (D28).
     private var links: some View {
         Section {
-            if model.settings.sharing == .folder {
-                Picker("Place links", selection: $model.settings.placement) {
-                    Text("Inline, where each file was").tag(Settings.Placement.whereEachFileWas)
-                    Text("Below your text").tag(Settings.Placement.folderLinksOnly)
-                }
+            Picker("Place links", selection: $model.settings.placement) {
+                Text("Inline, where each file was").tag(Settings.Placement.whereEachFileWas)
+                Text("Below your text").tag(Settings.Placement.belowText)
             }
             Toggle(
                 "If multiple attachments, also add links for all files below your text",
                 isOn: $model.settings.folderLinks
             )
-            .disabled(model.settings.onlyFolderLinks)
-            Picker("Show download link for file", selection: $model.settings.linkStyle) {
-                Text("Together with view link").tag(LinkText.Style.viewAndDownload)
-                Text("Only").tag(LinkText.Style.downloadOnly)
+            .disabled(model.settings.linksBelowText)
+            Picker("Link types for files", selection: $model.settings.linkStyle) {
+                Text("Download only").tag(LinkText.Style.downloadOnly)
+                Text("View and download").tag(LinkText.Style.viewAndDownload)
             }
-            .disabled(model.settings.onlyFolderLinks)
         } header: {
             Text("Links")
         } footer: {
@@ -147,14 +145,15 @@ struct SettingsView: View {
     }
 
     private var linksFooter: String {
-        switch (model.settings.sharing, model.settings.placement) {
-        case (.folder, .whereEachFileWas):
-            return "Each file's view link opens the email's folder, and its download link downloads only that file."
-        case (.folder, .folderLinksOnly):
-            return "The email lists the files' names and sizes, followed by links that view and download its folder."
-        case (.eachFile, _):
-            return "Each file's view link opens the file's own page, and its download link downloads it."
+        let links =
+            model.settings.sharing == .folder
+            ? "Each file's view link opens the email's folder, and its download link downloads only that file."
+            : "Each file's view link opens the file's own page, and its download link downloads it."
+        guard model.settings.linksBelowText else {
+            return links
         }
+        return "The email lists each file with its links below your text, followed by links for all files when there "
+            + "are two or more. " + links
     }
 
     /// FR5 and FR6.

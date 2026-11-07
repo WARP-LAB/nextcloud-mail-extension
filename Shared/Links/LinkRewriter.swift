@@ -7,8 +7,8 @@ import Foundation
 /// in place where Mail left a placeholder or the file's own part, and otherwise in a list after the user's own text.
 struct LinkRewriter {
     var text = LinkText()
-    /// False when the email has only the folder's links (FR8, D17). Linked files are then removed where they were,
-    /// and listed by name and size after the user's own text, above the folder's links.
+    /// False to list each file's links after the user's own text (FR8, D28). Linked files are then removed where they
+    /// were, and listed with their links above the links to all files, as files whose place isn't found always are.
     var linksInPlace = true
 
     /// Rewrites `message` in place and returns its bytes.
@@ -182,13 +182,10 @@ private final class Rewriting {
     /// user's own text.
     private func finish(_ branch: Branch, in part: MimePart) {
         let unplaced = branch.shows.filter { !branch.placed.contains($0) }.compactMap { links[$0] }
-        var htmlItems = unplaced.map { inPlace ? text.html($0) : text.htmlListing($0) }
+        var htmlItems = unplaced.map { text.html($0) }
         var plainItems = unplaced.map { text.plain($0) }
-        if !inPlace {
-            plainItems = unplaced.isEmpty ? [] : [unplaced.map { text.plainListing($0) }.joined(separator: "\n")]
-            if !unplaced.isEmpty {
-                htmlItems.append("<div><br></div>")
-            }
+        if !inPlace && !unplaced.isEmpty {
+            htmlItems.append("<div><br></div>")
         }
         htmlItems += [text.html(folder: folder, passwordNotice: notice)].compactMap { $0 }
         plainItems += [text.plain(folder: folder, passwordNotice: notice)].compactMap { $0 }
@@ -304,7 +301,7 @@ private final class Rewriting {
 
     /// Makes a message that is only a file into a text message with the file's links.
     private func replaceRootFile(_ root: MimePart, with link: LinkedFile) {
-        let file = inPlace ? text.plain(link) : text.plainListing(link)
+        let file = text.plain(link)
         let block = [file, text.plain(folder: folder, passwordNotice: notice)].compactMap { $0 }
         for name in ["Content-Disposition", "Content-ID", "Content-Description", "Content-Type"] {
             root.removeField(name)

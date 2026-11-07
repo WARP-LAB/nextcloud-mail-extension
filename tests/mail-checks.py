@@ -20,6 +20,7 @@ import re
 import subprocess
 import sys
 import time
+import urllib.parse
 import unicodedata
 import zipfile
 from email import policy
@@ -31,8 +32,13 @@ MAIL = str(ROOT / 'scripts' / 'mail.sh')
 # whether A's signature is kept, and what the all-files links should be.
 CHECKS = {
     'folder-in-place': dict(files=[('notes.txt', 20_000), ('data.bin', 300_000)]),
-    'folder-only': dict(settings={'placement': 'folderLinksOnly'}, files=[('a.txt', 8_000), ('b.bin', 50_000)],
-                        folder_links=True),
+    # Each file's links listed below the text (D28), with the all-files links for two or more files. The placement
+    # is still stored as folderLinksOnly.
+    'below-text': dict(settings={'placement': 'folderLinksOnly'}, files=[('a.txt', 8_000), ('b.bin', 50_000)],
+                       folder_links=True),
+    'each-file-below': dict(settings={'sharing': 'eachFile', 'placement': 'folderLinksOnly'},
+                            files=[('one.bin', 20_000), ('two.bin', 30_000)], folder_links=True),
+    'below-text-one-file': dict(settings={'placement': 'folderLinksOnly'}, files=[('single.bin', 15_000)]),
     'each-file': dict(settings={'sharing': 'eachFile', 'folderLinks': True},
                       files=[('first.bin', 30_000), ('second.bin', 40_000)], folder_links=True),
     'download-only': dict(settings={'linkStyle': 'downloadOnly'}, files=[('report.bin', 25_000)]),
@@ -78,6 +84,16 @@ def curl(url, *options):
 
 def status(url):
     return int(curl(url, '-o', '/dev/null', '-w', '%{http_code}'))
+
+
+def saved_name(url):
+    """The name a browser saves the download under: Content-Disposition's, else the address's last part."""
+    headers = curl(url, '-o', '/dev/null', '-D', '-', '-w', '%{url_effective}').decode(errors='replace')
+    names = re.findall(r"^content-disposition:.*?filename\*=UTF-8''([^;\r\n]+)", headers, re.I | re.M)
+    if names:
+        return nfc(urllib.parse.unquote(names[-1].strip()))
+    final = headers.rstrip().splitlines()[-1]
+    return nfc(urllib.parse.unquote(urllib.parse.urlsplit(final).path.rsplit('/', 1)[-1]))
 
 
 def folder_name(name):
@@ -176,9 +192,9 @@ def run_check(name, check, run_folder, stamp):
     sent_texts, sent_attached = parts(sent)
     plain = '\n'.join(texts['plain'])
     file_links, listed, folder_links = links(plain)
+    expect('no file listed without its links', not listed, f'listed: {listed}')
     kept = set(check.get('kept', []))
     each_file = settings['sharing'] == 'eachFile'
-    only_folder = settings['sharing'] == 'folder' and settings['placement'] == 'folderLinksOnly'
 
     expect('arrived', True, f'{took:.0f} s after sending')
     unique = {original: path for original, path in files}
@@ -190,18 +206,18 @@ def run_check(name, check, run_folder, stamp):
     for original in linked:
         shown = original if each_file else folder_name(original)
         data = unique[original].read_bytes()
-        if only_folder:
-            expect(f'{shown} is listed without links', shown in listed and shown not in file_links, f'listed: {listed}')
-            continue
         link = file_links.get(shown)
         expect(f'{shown} has its links', link is not None, f'links for: {sorted(file_links)}')
         if not link:
             continue
         got = curl(link['download'])
         expect(f'{shown} downloads the same bytes', got == data, f'{len(got)} of {len(data)} bytes')
+        # A server in debug mode leaves out the name, and a file's own share then downloads as its token.
+        name = saved_name(link['download'])
+        expect(f'{shown} downloads under its name', name == shown, f'saved as {name}')
         if 'view' in link:
             expect(f'{shown} view link opens', status(link['view']) == 200)
-    if not only_folder and len(linked) > 1 and settings['linkStyle'] == 'viewAndDownload':
+    if len(linked) > 1 and settings['linkStyle'] == 'viewAndDownload':
         views = {file_links[name]['view'] for name in file_links}
         expect('view links: one per file' if each_file else 'view links: all the folder\'s page',
                len(views) == (len(linked) if each_file else 1), f'{len(views)} different')

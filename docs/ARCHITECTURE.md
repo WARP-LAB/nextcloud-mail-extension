@@ -72,8 +72,8 @@ If the user chooses Use Mail Drop, the first call has already uploaded the files
 - **Links in place (FR8):** in a plain message, each file part becomes the link text, merged with the text parts on either side, so the delivered message has one text part instead of several and doesn't depend on how each mail client shows a run of text parts (R16). In the structure with a signature or pasted image, replace each `<img src="cid:…">` with the links and remove its part. Also replace the matching U+FFFC in the plain text, since they come in the same order as the images in the HTML (t30). Each file's links get lines of their own there, since files next to each other have touching placeholders. In the forward structure, replace U+FFFC in the plain text and the file part in the HTML. In the first call's structure, replace each `cid:` placeholder, which matters for FR6. In `multipart/mixed`, a file's own part marks where it was. Elsewhere, such as in `multipart/related`, a file whose placeholder isn't found goes in the fallback list. Each alternative of a `multipart/alternative` shows every linked file, in place or in its list.
 - **Fallback list (FR8):** if a file's position can't be found, for example in a structure the tests haven't shown yet, its links go in a list at the end of the user's own text, never at the top.
 - **End of the user's own text:** in HTML, this is before `<div class="AppleOriginalContents">` or the first `<blockquote type="cite">`, leaving out the blockquote of shared content inside `Apple-Mail-URLShareWrapperClass`. In plain text, it's before the first line starting with `>` (t20, t34). If no quote is found, it's the end of the message.
-- **Folder links (FR9):** add them at the end of the user's own text, after any fallback list. The send flow passes them to the rewriter when FR9's setting is on and two or more files became links, or always when FR8's setting gives only the folder's links.
-- **Below your text, with only the folder's links (FR8):** each linked file is removed as if it went to the fallback list, and the list names each file with its size, without links, above the folder links.
+- **Folder links (FR9):** add them at the end of the user's own text, after any fallback list. The send flow passes them to the rewriter when two or more files became links and FR9's setting is on or FR8's links go below the text (`Settings.addsAllFilesLinks`).
+- **Below your text (FR8, D28):** with either kind of share, each linked file is removed as if it went to the fallback list, which lists it with its links above the folder links.
 - **No text to add to:** a branch with no text part, which no test has shown, gets a new `text/plain` part with the links, so links are never lost.
 - **Non-ASCII names:** every text part the rewriter changes is written as quoted-printable UTF-8, and the charset in the HTML's `<meta>` tags is changed to match. The probe replaced non-ASCII characters with `?`.
 - **Message that is only a file:** its root becomes `text/plain` with the file's links, keeping the message's headers. Mail hasn't been seen to produce this.
@@ -96,11 +96,16 @@ View: https://cloud.example.com/s/abc
 Download: https://cloud.example.com/s/abc/download
 ```
 
-With only the folder's links, the files are listed above them:
+With the links below the text, each file is listed with its links, above the links to all files:
 
 ```text
 report.pdf (12 MB, link expires 12 Dec 2026)
+View: https://cloud.example.com/s/xyz
+Download: https://cloud.example.com/s/xyz/download?files=report.pdf
+
 photo.jpg (2 MB, link expires 12 Dec 2026)
+View: https://cloud.example.com/s/xyz
+Download: https://cloud.example.com/s/xyz/download?files=photo.jpg
 
 View all files in email: https://cloud.example.com/s/xyz
 Download all files in email: https://cloud.example.com/s/xyz/download

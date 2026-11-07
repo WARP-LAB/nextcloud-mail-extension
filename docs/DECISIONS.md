@@ -103,7 +103,7 @@ Settled decisions, and why they were made. The current design is in [ARCHITECTUR
 ## D17: Share the email's folder, or each file (2026-11-06)
 
 - **Decision:** a setting chooses how an email's files are shared, which resolves OD9:
-  - **One share for all files in the email,** the default: one public share per email, of its folder. Each file's view link is the folder's page and its download link is the folder share's `/download?files=<name>`. A second setting chooses whether each file's links stay where the file was, the default, or the email has only the folder's links after the user's own text, with the files' names and sizes listed above them.
+  - **One share for all files in the email,** the default: one public share per email, of its folder. Each file's view link is the folder's page and its download link is the folder share's `/download?files=<name>`. A second setting chooses where each file's links go, which D28 extends to both kinds of share.
   - **Separate share for each file in the email:** a share per file, plus one for the folder when FR9's setting is on.
 - **Why:** the user's choice. Nextcloud allows each user 20 new shares in 10 minutes (R21). One share per email allows 20 emails in that time, however many files they have, and FR9's links need no extra share. A share per file gives each file a page of its own, for servers whose admin has raised the limit.
 
@@ -160,3 +160,8 @@ Settled decisions, and why they were made. The current design is in [ARCHITECTUR
 
 - **Decision:** neither the app's nor the extension's `Info.plist` has `NSLocalNetworkUsageDescription`. The popover checks the connection quietly as it opens, and shows only a problem, in red: the Local Network refusal, or the server's error. The setup help tells users to open the toolbar button once and allow the extension when macOS asks.
 - **Why:** with the key, macOS made the app a Local Network rule at install and refused the extension's requests even with the app allowed, without asking. Without it, macOS asks for the app and for the extension separately, and both work (T14, [MAIL.md](MAIL.md#network)). A send never makes macOS ask, so the popover's check is how the extension gets asked. The user chose the design: no button, nothing shown when the check passes.
+
+## D28: "Place links" decides only where each file's links go (2026-11-07)
+
+- **Decision:** with either kind of Nextcloud share, "Place links" puts each file's links where the file was, or lists each file with its name, size and links below the user's text. "Link types for files", which was "Show download link for file", offers "Download only" and "View and download" and applies to both. The links for all files are added for two or more files, when their switch is on or the links go below the text, where the switch is greyed out; for one file they're never added. The placement is still stored as `folderLinksOnly`, so stored settings keep it. This replaces D17's "only the folder's links", and D21's listing of names and sizes without links.
+- **Why:** the user's rule, so that each setting does one thing and only the switch is ever greyed out. The list below the text helps a reader find every file, and each listed file's own links make the links for all files unnecessary for one file.
