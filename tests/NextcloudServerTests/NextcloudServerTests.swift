@@ -98,6 +98,17 @@ struct NextcloudServerTests {
         }
     }
 
+    @Test func checksAndGeneratesPasswordsWithThePasswordPolicy() async throws {
+        let client = try await NextcloudClient.connect(try await TestServer.account())
+        let problem = try await client.passwordProblem("short")
+        #expect(problem?.contains("at least") == true, "the server says why")
+        let generated = try await client.generatedPassword()
+        #expect(!generated.isEmpty)
+        #expect(try await client.passwordProblem(generated) == nil, "the server accepts its own password")
+        let local = PasswordAdvice.local()
+        #expect(try await client.passwordProblem(local) == nil, "and a local one")
+    }
+
     @Test func startsTheBrowserLogin() async throws {
         let server = try TestServer.server()
         let flow = try await NextcloudClient.startLogin(server: server)

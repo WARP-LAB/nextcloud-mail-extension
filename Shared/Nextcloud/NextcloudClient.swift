@@ -91,6 +91,22 @@ struct NextcloudClient {
         return data.limits
     }
 
+    // MARK: - Password policy (T16)
+
+    /// The server's reason for refusing `password` as a link password, or nil when its password policy accepts it.
+    /// Throws when the server can't check it, such as without the password policy app (docs/NEXTCLOUD.md).
+    func passwordProblem(_ password: String) async throws -> String? {
+        let data: PasswordCheckData = try await ocs(
+            "POST", "apps/password_policy/api/v1/validate", form: [("password", password)])
+        return data.passed ? nil : (data.reason ?? "Nextcloud's password policy doesn't accept this password.")
+    }
+
+    /// A password that the server's password policy accepts. Throws when the server can't make one.
+    func generatedPassword() async throws -> String {
+        let data: GeneratedPasswordData = try await ocs("GET", "apps/password_policy/api/v1/generate")
+        return data.password
+    }
+
     // MARK: - Folders and files
 
     func createFolder(_ path: String) async throws {

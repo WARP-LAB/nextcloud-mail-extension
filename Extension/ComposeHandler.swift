@@ -89,7 +89,6 @@ private struct PopoverView: View {
     private let settings: Settings
     @State private var choice: LinkChoice
     @State private var password: String
-    @State private var passwordShown = false
     @State private var ownExpiry: Bool
     @State private var expiry: LinkExpiry
     /// The connection check's problem, or nil while it runs and when it passes.
@@ -118,7 +117,7 @@ private struct PopoverView: View {
             linksSection
             Divider()
             Group {
-                passwordSection
+                PasswordSection(context: context, password: $password)
                 Divider()
                 expirySection
             }
@@ -165,37 +164,6 @@ private struct PopoverView: View {
         .pickerStyle(.menu)
         .onChange(of: choice) { _, value in
             MessageValues.linkChoices.set(value == .useSettings ? "" : value.rawValue, context: context)
-        }
-    }
-
-    private var passwordSection: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack(spacing: 6) {
-                Group {
-                    if passwordShown {
-                        TextField("Password for this email's links", text: $password)
-                    } else {
-                        SecureField("Password for this email's links", text: $password)
-                    }
-                }
-                .textFieldStyle(.roundedBorder)
-                // Saved at every change, because the popover can close without the field ending its editing.
-                .onChange(of: password) { _, value in
-                    MessageValues.passwords.set(value, context: context)
-                }
-                Button {
-                    passwordShown.toggle()
-                } label: {
-                    Image(systemName: passwordShown ? "eye.slash" : "eye")
-                }
-                .buttonStyle(.borderless)
-                .help(passwordShown ? "Hide the password" : "Show the password")
-                .accessibilityLabel(passwordShown ? "Hide the password" : "Show the password")
-            }
-            Text("Empty means no password. If you set one, consider a safe way to pass it to the recipients.")
-                .font(.footnote)
-                .foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
         }
     }
 

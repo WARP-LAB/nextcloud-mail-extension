@@ -17,6 +17,9 @@ Risk register: `docs/RISKS.md`.
 > - Write Acceptance Criteria or a explicit Definition of Done
 > - Take tasks in order unless told otherwise. Do not start the next task without being asked.
 
+- 🔄 **T16: Check, generate and copy the email's password in the popover.** Nextcloud's password policy app applies to link passwords; the test server asks for 10 characters and rejects common passwords and ones in Have I Been Pwned. The server's `validate` and `generate` APIs (`/ocs/v2.php/apps/password_policy/api/v1/…`) need the login. The user asked for a Generate and a Copy button, as icons with tooltips if Apple's guidelines allow.
+  - **Acceptance:** a moment after the user stops typing, the popover shows the server's reason in red under the password when the policy refuses it, and nothing when it passes, is empty, or the server can't check. Generate, an SF Symbol button with a tooltip, fills in a password the server makes, or a local one when it can't, and shows it. Copy, with `doc.on.doc` and a tooltip, copies the password, marked as concealed, and is disabled when the field is empty. Unit tests cover the advice with a fake server and the local generator; server tests cover both APIs; the popover is checked in Mail once the user has finished testing the current build.
+
 ## ❓ Open Decisions (human to resolve)
 
 Agents: do not guess these. Record questions here and stop.
@@ -40,10 +43,11 @@ Judgment calls and known risks are tracked separately in `docs/RISKS.md`.
 
 - **T19: Keep uploads working after an update.** With a server on the local network, an update locks the extension out until the Mac restarts, because macOS keeps the old build's ID for the extension's Local Network entry, while it refreshes the app's (`docs/MAIL.md`, R18). Options: tell users to restart after updating, in the setup help and the error; find something short of a restart that refreshes the entry; or let the app, whose entry stays valid, do the uploads for the extension.
   - **Acceptance:** to be written with the user before starting.
-- **T16: Check the email's password in the popover.** Nextcloud's password policy app applies to link passwords; the test server asks for 10 characters and rejects common passwords and ones in Have I Been Pwned. Today a weak password shows only at send, when the server refuses it. The server advertises its rules and a `validate` API in its capabilities (`password_policy`), which the popover could call after the user stops typing. A `generate` API could also back a button that suggests a password; whether to have one is the user's call.
-  - **Acceptance:** to be written with the user before starting.
-- **T17: Show the extension as NextcloudMail.** macOS cuts the extension's name in its Local Network prompt to “NextcloudMailEx”, 15 characters. Set the extension's shown name, `CFBundleName`, to NextcloudMail, without renaming its files, since a new path makes macOS ask again and leaves the old entry stuck in the Local Network list. Update the texts that quote the prompt or the list: the setup help, the offline error, `docs/MAIL.md` and TESTING.
-  - **Acceptance:** after a fresh install on a clean state (uninstall, restart), macOS asks for “NextcloudMail”, System Settings lists the extension's entry under a name the texts give, and they match.
+- **T17: Show the extension as NextcloudMail.** macOS's Local Network prompt names the extension “NextcloudMailEx”: most likely the process name, which macOS cuts to 15 characters (`pgrep -l` showed the old app as "NextcloudAppleM"), taken from the executable `NextcloudMailExtensionPlugIn`. So set the extension's executable name to `NextcloudMail`, keeping its bundle ID and possibly its `.appex` name, rather than only `CFBundleName`, which the executable doesn't use. The executable's path is what the Local Network rule is tied to, so macOS asks again, and the "NextcloudMailExtensionPlugIn" entry stays in the list for good. Which name the list shows, the executable's, the bundle's or the `.appex`'s, is unknown today, because all three match.
+  - **Acceptance:** after a fresh install on a clean state (uninstall, restart, reinstall), macOS asks for “NextcloudMail”, what the Local Network list shows is recorded in `docs/MAIL.md`, and the setup help, the offline error, `docs/MAIL.md` and TESTING quote the names macOS shows.
+
+- **T20: A "See how to set up" button for new users.** When nobody is logged in, as when the app opens for the first time, the settings window shows a centered "See how to set up" button above the "Nextcloud account" section. Clicking it scrolls the window to "Setting up Mail".
+  - **Acceptance:** the button shows only while nobody is logged in, centered above "Nextcloud account", and goes once the user logs in. Clicking it scrolls so that "Setting up Mail" is in view. Checked in the settings window, logged in and logged out.
 
 ## 🧊 Icebox (Parked)
 
