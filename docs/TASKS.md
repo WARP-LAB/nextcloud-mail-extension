@@ -17,10 +17,6 @@ Risk register: `docs/RISKS.md`.
 > - Write Acceptance Criteria or a explicit Definition of Done
 > - Take tasks in order unless told otherwise. Do not start the next task without being asked.
 
-- 🔄 **T20: A "See how to set up" button for new users.** When nobody is logged in, as when the app opens for the first time, the settings window shows a centered "See how to set up" button above the "Nextcloud account" section. Clicking it scrolls the window to "Setting up Mail".
-  - **Acceptance:** the button shows only while nobody is logged in, centered above "Nextcloud account", and goes once the user logs in. Clicking it scrolls so that "Setting up Mail" is in view. Checked in the settings window, logged in and logged out.
-  - Verified so far: lint and the build pass; drawn with `--render-window --logged-out`, the button is centered above "Nextcloud account", and drawn logged in, it's gone. Left: the scroll, in the real window.
-
 ## ❓ Open Decisions (human to resolve)
 
 Agents: do not guess these. Record questions here and stop.
@@ -56,6 +52,7 @@ Set aside until the user brings a task back. Agents don't start these.
 
 ## ✅ Completed Tasks (Done)
 
+- **T20: A "See how to set up" button for new users (2026-11-07).** While nobody is logged in, a centered button above "Nextcloud account" scrolls the settings window to "Setting up Mail". Verified: drawn logged out and logged in with `--render-window [--logged-out]`, and in the real window the user logged out, saw the button, and it scrolled; logged in again, it's gone.
 - **T16: Check, generate and copy the email's password in the popover (2026-11-07).** A moment after typing stops, the popover shows the server's password policy's reason in red; icon buttons with tooltips, as Apple's guidelines ask, show, generate (`dice`) and copy (`doc.on.doc`) the password, copied as concealed. Verified: 153 unit tests and the new server test pass, and in Mail `password-advice`, `t36` and `password-refused` pass, after a restart. Done together: each file's link to a shared folder is called "Overview" (D20), checked in `folder-in-place` and `each-file`, which now also check each download's name.
 - **T18: "Place links" decides only where each file's links go (2026-11-07).** The user's rule (D28): both kinds of share offer "Inline, where each file was" and "Below your text", which lists each file with its name, size and links; "Link types for files" applies everywhere; only the all-files switch is greyed out, below the text. Verified: 147 unit tests pass, lint and the build pass, the settings window shows both kinds of share below the text, and in Mail `below-text`, `each-file-below`, `below-text-one-file`, `folder-in-place`, `each-file` and `download-only` pass, after a restart, which T18 found an update needs (T19).
 - **T15: Setup texts (2026-11-07).** The user's corrections: the setup help says macOS asks for the local network only for a server on it, and names the app and the extension in the steps where each is asked; it says to choose the extension in the "Message security extension" popup only if Mail shows one; and it says the extension doesn't sign anything but needs Sign to see the outgoing email. Verified: lint and the build pass. T17 will change the quoted “NextcloudMailEx”.
