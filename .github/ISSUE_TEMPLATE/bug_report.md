@@ -1,8 +1,8 @@
 ---
 name: Bug report
-about: Create a report to help us improve
+about: Create a bug report
 title: ''
-labels: bug, 0. Needs triage
+labels: bug, needs-triage
 assignees: ''
 
 ---
@@ -13,22 +13,11 @@ assignees: ''
 
 ## To Reproduce
 
-Steps to reproduce the behavior:
-
-1. Go to '...'
-2. Click on '....'
-3. Scroll down to '....'
-4. See error
+<!-- Steps to reproduce the behavior. -->
 
 ## Expected behavior
 
 <!-- A clear and concise description of what you expected to happen. -->
-
-## I have checked that the files are not corrupted
-
-<!-- You must have tried opening it in a desktop app. Which and what is the result there? E.g., "When I import the file in question in Blender everything is fine". -->
-
-Yes, using `<name it>`.
 
 ## Screenshots
 
