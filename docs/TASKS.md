@@ -17,6 +17,10 @@ Risk register: `docs/RISKS.md`.
 > - Write Acceptance Criteria or a explicit Definition of Done
 > - Take tasks in order unless told otherwise. Do not start the next task without being asked.
 
+- 🔄 **T20: A "See how to set up" button for new users.** When nobody is logged in, as when the app opens for the first time, the settings window shows a centered "See how to set up" button above the "Nextcloud account" section. Clicking it scrolls the window to "Setting up Mail".
+  - **Acceptance:** the button shows only while nobody is logged in, centered above "Nextcloud account", and goes once the user logs in. Clicking it scrolls so that "Setting up Mail" is in view. Checked in the settings window, logged in and logged out.
+  - Verified so far: lint and the build pass; drawn with `--render-window --logged-out`, the button is centered above "Nextcloud account", and drawn logged in, it's gone. Left: the scroll, in the real window.
+
 - 🔄 **T16: Check, generate and copy the email's password in the popover.** Nextcloud's password policy app applies to link passwords; the test server asks for 10 characters and rejects common passwords and ones in Have I Been Pwned. The server's `validate` and `generate` APIs (`/ocs/v2.php/apps/password_policy/api/v1/…`) need the login. The user asked for a Generate and a Copy button, as icons with tooltips if Apple's guidelines allow.
   - **Acceptance:** a moment after the user stops typing, the popover shows the server's reason in red under the password when the policy refuses it, and nothing when it passes, is empty, or the server can't check. Generate, an SF Symbol button with a tooltip, fills in a password the server makes, or a local one when it can't, and shows it. Copy, with `doc.on.doc` and a tooltip, copies the password, marked as concealed, and is disabled when the field is empty. Unit tests cover the advice with a fake server and the local generator; server tests cover both APIs; the popover is checked in Mail once the user has finished testing the current build.
 
@@ -45,9 +49,6 @@ Judgment calls and known risks are tracked separately in `docs/RISKS.md`.
   - **Acceptance:** to be written with the user before starting.
 - **T17: Show the extension as NextcloudMail.** macOS's Local Network prompt names the extension “NextcloudMailEx”: most likely the process name, which macOS cuts to 15 characters (`pgrep -l` showed the old app as "NextcloudAppleM"), taken from the executable `NextcloudMailExtensionPlugIn`. So set the extension's executable name to `NextcloudMail`, keeping its bundle ID and possibly its `.appex` name, rather than only `CFBundleName`, which the executable doesn't use. The executable's path is what the Local Network rule is tied to, so macOS asks again, and the "NextcloudMailExtensionPlugIn" entry stays in the list for good. Which name the list shows, the executable's, the bundle's or the `.appex`'s, is unknown today, because all three match.
   - **Acceptance:** after a fresh install on a clean state (uninstall, restart, reinstall), macOS asks for “NextcloudMail”, what the Local Network list shows is recorded in `docs/MAIL.md`, and the setup help, the offline error, `docs/MAIL.md` and TESTING quote the names macOS shows.
-
-- **T20: A "See how to set up" button for new users.** When nobody is logged in, as when the app opens for the first time, the settings window shows a centered "See how to set up" button above the "Nextcloud account" section. Clicking it scrolls the window to "Setting up Mail".
-  - **Acceptance:** the button shows only while nobody is logged in, centered above "Nextcloud account", and goes once the user logs in. Clicking it scrolls so that "Setting up Mail" is in view. Checked in the settings window, logged in and logged out.
 
 ## 🧊 Icebox (Parked)
 

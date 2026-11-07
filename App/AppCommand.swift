@@ -10,7 +10,8 @@ import Foundation
 /// - `--log-out`, debug builds only: revokes the stored app password and deletes it.
 /// - `--settings [<json>]`, debug builds only: prints the settings as JSON, after changing those in `<json>`.
 /// - `--notification-status`, debug builds only: whether macOS lets the app post notifications.
-/// - `--render-window`, debug builds only: the settings window drawn off screen, as a PNG in base64.
+/// - `--render-window [--logged-out]`, debug builds only: the settings window drawn off screen, as a PNG in base64,
+///   and with `--logged-out` as before logging in.
 /// - `--debug-dumps on|off|take`, debug builds only: the copies of test messages that Mail passes the extension
 ///   (`DebugDumps`). `take` prints each as its name, a tab and the message in base64, and deletes them.
 ///
@@ -23,7 +24,7 @@ enum AppCommand {
     case logOut
     case settings(String?)
     case debugDumps(String)
-    case renderWindow
+    case renderWindow(loggedOut: Bool)
     case notificationStatus
 
     init?(arguments: [String]) {
@@ -40,7 +41,7 @@ enum AppCommand {
         } else if Self.debug && arguments.contains("--notification-status") {
             self = .notificationStatus
         } else if Self.debug && arguments.contains("--render-window") {
-            self = .renderWindow
+            self = .renderWindow(loggedOut: arguments.contains("--logged-out"))
         } else if Self.debug, let index = arguments.firstIndex(of: "--settings") {
             self = .settings(arguments.indices.contains(index + 1) ? arguments[index + 1] : nil)
         } else if Self.debug, let index = arguments.firstIndex(of: "--debug-dumps"),
@@ -61,9 +62,9 @@ enum AppCommand {
     }
 
     func runAndExit() -> Never {
-        if case .renderWindow = self {
+        if case .renderWindow(let loggedOut) = self {
             // AppKit needs the main thread, which dispatchMain below gives up to the main queue's workers.
-            exit(MainActor.assumeIsolated { DebugCommands.renderWindow() } ? 0 : 1)
+            exit(MainActor.assumeIsolated { DebugCommands.renderWindow(loggedOut: loggedOut) } ? 0 : 1)
         }
         Task {
             let passed: Bool
