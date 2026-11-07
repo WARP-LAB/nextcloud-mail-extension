@@ -10,6 +10,7 @@ struct SettingsView: View {
                 AccountSection(model: model)
                 uploads
                 files
+                sharing
                 links
                 expiration
                 warnings
@@ -80,13 +81,31 @@ struct SettingsView: View {
             + "all stay attached. " + signature
     }
 
-    /// FR8, FR9 and D17.
-    private var links: some View {
+    /// D17: what Nextcloud shares. With a share for each file, the footer warns about Nextcloud's share limit.
+    private var sharing: some View {
         Section {
-            Picker("Create share as", selection: $model.settings.sharing) {
+            Picker("Nextcloud shares", selection: $model.settings.sharing) {
                 Text("One share for all files in the email").tag(Settings.Sharing.folder)
                 Text("Separate share for each file in the email").tag(Settings.Sharing.eachFile)
             }
+        } header: {
+            Text("Sharing")
+        } footer: {
+            if model.settings.sharing == .eachFile {
+                Label(
+                    "Nextcloud allows 20 new shares in 10 minutes, so sending many emails with many files this way "
+                        + "can reach that limit, and sending then fails until the time is up or the server's admin "
+                        + "raises the limit. See Setting up Mail.",
+                    systemImage: "exclamationmark.triangle"
+                )
+                .foregroundStyle(.secondary)
+            }
+        }
+    }
+
+    /// FR8 and FR9.
+    private var links: some View {
+        Section {
             if model.settings.sharing == .folder {
                 Picker("Place links", selection: $model.settings.placement) {
                     Text("Inline, where each file was").tag(Settings.Placement.whereEachFileWas)
@@ -124,8 +143,7 @@ struct SettingsView: View {
         case (.folder, .folderLinksOnly):
             return "The email lists the files' names and sizes, followed by links that view and download its folder."
         case (.eachFile, _):
-            return "Nextcloud allows 20 new shares in 10 minutes, so an email with many files can fail to send until "
-                + "the server's admin raises that limit. See Setting up Mail."
+            return "Each file's view link opens the file's own page, and its download link downloads it."
         }
     }
 
