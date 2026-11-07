@@ -163,7 +163,7 @@ What could go wrong, how we'd notice, and what's being done about it. Each entry
 
 - **Risk:** Nextcloud allows each user 20 share creations in 10 minutes, refused attempts included ([NEXTCLOUD.md](NEXTCLOUD.md#rate-limit)). With one share per file and one per folder, an email with 20 files, or a few emails in a row, fails to send.
 - **Signal:** sends stop with the rate-limit error, `NextcloudError.rateLimited`.
-- **Mitigation:** one share for all files in the email, the default, uses one share per email (D17). With a separate share for each file, the setup help tells admins how to raise the limit.
+- **Mitigation:** one share for all files in the email, the default, uses one share per email (D17). With a separate share for each file, the settings warn about the limit, and link to Nextcloud's documentation of `ratelimit_overwrite`, which raises it.
 - **Judgment call:** an agent may change how the shares are made within D17. Changing what the links point to, or the default, is the user's call.
 
 ## Tooling

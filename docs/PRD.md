@@ -139,7 +139,7 @@ Acceptance criteria:
 A setting, "Nextcloud shares", chooses what Nextcloud shares (D17):
 
 - **One share for all files in the email:** one share per email, of its folder (FR2). This is the default. Each file's view link opens the folder's page, which lists the email's files, and its download link downloads only that file.
-- **Separate share for each file in the email:** one share per file, and each file's view link opens that file's own page. Nextcloud allows each user only 20 new shares in 10 minutes, so an email with many files, or several emails in a row, can fail to send until the server's admin raises that limit. The setup help says how.
+- **Separate share for each file in the email:** one share per file, and each file's view link opens that file's own page. Nextcloud allows each user only 20 new shares in 10 minutes, so an email with many files, or several emails in a row, can fail to send until the server's admin raises that limit. The settings warn about it, and link to Nextcloud's documentation of the setting that raises it.
 
 With one share for all files in the email, a second setting, "Place links", chooses:
 
