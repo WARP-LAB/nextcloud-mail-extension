@@ -11,6 +11,7 @@ struct SettingsView: View {
                 uploads
                 files
                 links
+                expiration
                 warnings
                 check
                 SetupHelp()
@@ -79,7 +80,7 @@ struct SettingsView: View {
             + "all stay attached. " + signature
     }
 
-    /// FR4, FR8, FR9 and D17.
+    /// FR8, FR9 and D17.
     private var links: some View {
         Section {
             Picker("Share files as", selection: $model.settings.sharing) {
@@ -92,21 +93,27 @@ struct SettingsView: View {
                     Text("Below your text").tag(Settings.Placement.folderLinksOnly)
                 }
             }
-            Picker("Show download link for file", selection: $model.settings.linkStyle) {
-                Text("Together with view link").tag(LinkText.Style.viewAndDownload)
-                Text("Only").tag(LinkText.Style.downloadOnly)
-            }
-            .disabled(model.settings.onlyFolderLinks)
             Toggle(
                 "If multiple attachments, add view and download links at the bottom",
                 isOn: $model.settings.folderLinks
             )
             .disabled(model.settings.onlyFolderLinks)
-            ExpiryPicker(expiry: $model.settings.expiry)
+            Picker("Show download link for file", selection: $model.settings.linkStyle) {
+                Text("Together with view link").tag(LinkText.Style.viewAndDownload)
+                Text("Only").tag(LinkText.Style.downloadOnly)
+            }
+            .disabled(model.settings.onlyFolderLinks)
         } header: {
             Text("Links")
         } footer: {
             Text(linksFooter).foregroundStyle(.secondary)
+        }
+    }
+
+    /// FR4.
+    private var expiration: some View {
+        Section("Link expiration") {
+            ExpiryPicker(expiry: $model.settings.expiry)
         }
     }
 
