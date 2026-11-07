@@ -138,7 +138,7 @@ Settled decisions, and why they were made. The current design is in [ARCHITECTUR
 
 ## D23: The settings' wording (2026-11-06)
 
-- **Decision:** the user chose these labels: "Share files as" offers "One link for all files in the email" and "A link for each file". With one link, "Place links" offers "Inline, where each file was" and "Below your text". FR6's field is "Warn if the email's text includes a phrase but there's no attachment". The UI and docs keep the word "folder" for a folder on Nextcloud, and "directory" for the upload directory that holds each email's folder.
+- **Decision:** the user chose these labels: "Share files as" offers "One link for all files in the email" and "A link for each file". With one link, "Place links" offers "Inline, where each file was" and "Below your text". FR6's field is "Warn if the email's text includes a phrase but there's no attachment". FR9's switch is "If multiple attachments, add links for all files below your text" (2026-11-07): it adds two links, one viewing and one downloading all files, and they go above any quoted message, not at the very bottom. The UI and docs keep the word "folder" for a folder on Nextcloud, and "directory" for the upload directory that holds each email's folder.
 - **Why:** the user's choice. "Folder" is the word macOS, Apple's Human Interface Guidelines and Nextcloud's own interface use. "Below your text" fits replies and forwards too, where the links go above the quoted message rather than at the bottom.
 
 ## D24: Each email chooses which files become links (2026-11-06)

@@ -163,7 +163,7 @@ Acceptance criteria:
 
 ## FR9: Links for all files
 
-A setting, "If multiple attachments, add view and download links at the bottom", is off by default. When it is on and two or more files in an email became links, two more links are added after the user's own text. They go below any list from FR8 and above any quoted messages in a reply or forward:
+A setting, "If multiple attachments, add links for all files below your text", is off by default. When it is on and two or more files in an email became links, two more links are added after the user's own text. They go below any list from FR8 and above any quoted messages in a reply or forward:
 
 - **View all files in email:** opens the email's folder (FR2) in Nextcloud.
 - **Download all files in email:** downloads that folder as one zip file.

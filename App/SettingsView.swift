@@ -94,7 +94,7 @@ struct SettingsView: View {
                 }
             }
             Toggle(
-                "If multiple attachments, add view and download links at the bottom",
+                "If multiple attachments, add links for all files below your text",
                 isOn: $model.settings.folderLinks
             )
             .disabled(model.settings.onlyFolderLinks)
