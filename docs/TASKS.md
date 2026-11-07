@@ -7,7 +7,9 @@ Risk register: `docs/RISKS.md`.
 
 ## 🎯 Current Sprint / Milestone
 
-**M1: a first real link.** The host app has settings and a Nextcloud login, and a file in a real email is replaced by a working Nextcloud link. Tasks T1–T5.
+**M1: a first real link**, reached 2026-11-06 (T1–T5).
+
+**M2: a first release others can install.** Uploads keep working after an update (T19), the distribution is decided and set up (OD3), the non-functional requirements are confirmed (OD5), and the release is tagged, such as `v0.2.0`.
 
 ## ⏳ Active Tasks (In Progress)
 
