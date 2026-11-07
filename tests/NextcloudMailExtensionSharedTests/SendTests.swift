@@ -74,7 +74,7 @@ struct SendFlowTests {
         let call = FakeNextcloud.ShareCall(path: "Mail/2026-11-06-12-00-00 [probe ff] t29", expireDate: "2026-11-13")
         #expect(nextcloud.shares == [call])
         let text = try #require(output.root.text)
-        #expect(text.contains("View: https://cloud.example.test/s/share1\n"))
+        #expect(text.contains("Overview: https://cloud.example.test/s/share1\n"), "the folder's page")
         #expect(text.contains("Download: https://cloud.example.test/s/share1/download?files=dummy-1MB.pdf\n"))
         #expect(text.contains("link expires 13 Nov 2026"))
         #expect(!text.contains("View all files in email"))
@@ -112,7 +112,7 @@ struct SendFlowTests {
         let text = try #require(output.root.text)
         let fileLink = try #require(
             text.range(of: "Download: https://cloud.example.test/s/share1/download?files=dummy-1MB.pdf\n"))
-        #expect(text.contains("View: https://cloud.example.test/s/share1\n"))
+        #expect(text.contains("Overview: https://cloud.example.test/s/share1\n"), "the folder's page")
         let allFiles = try #require(text.range(of: "View all files in email: https://cloud.example.test/s/share1\n"))
         #expect(fileLink.upperBound <= allFiles.lowerBound, "the files' links come first")
         #expect(text.contains("Download all files in email: https://cloud.example.test/s/share1/download\n"))

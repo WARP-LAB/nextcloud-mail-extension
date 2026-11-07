@@ -31,6 +31,13 @@ struct LinkTextTests {
                 """)
     }
 
+    @Test func callsTheViewLinkOverviewWhenItOpensTheFolder() throws {
+        var text = LinkText()
+        text.viewLabel = LinkText.folderViewLabel
+        #expect(text.plain(try file()).contains("\nOverview: https://cloud.example.test/s/abc\n"))
+        #expect(text.html(try file()).contains(#"<a href="https://cloud.example.test/s/abc">Overview</a> · "#))
+    }
+
     @Test func writesDownloadLinksOnly() throws {
         let text = LinkText(style: .downloadOnly)
         #expect(

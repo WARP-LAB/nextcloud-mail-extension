@@ -80,11 +80,11 @@ If the user chooses Use Mail Drop, the first call has already uploaded the files
 
 ### Link text
 
-Each file shows its name on Nextcloud, its size and the expiry date the server returned. With the default settings, one share for all files in the email and both links for each file, the view link is the folder's page and the download link fetches just that file (D17):
+Each file shows its name on Nextcloud, its size and the expiry date the server returned. With the default settings, one share for all files in the email and both links for each file, the view link, called Overview, is the folder's page, and the download link fetches just that file (D17, D20):
 
 ```text
 report.pdf (12 MB, link expires 12 Dec 2026)
-View: https://cloud.example.com/s/xyz
+Overview: https://cloud.example.com/s/xyz
 Download: https://cloud.example.com/s/xyz/download?files=report.pdf
 ```
 
@@ -100,11 +100,11 @@ With the links below the text, each file is listed with its links, above the lin
 
 ```text
 report.pdf (12 MB, link expires 12 Dec 2026)
-View: https://cloud.example.com/s/xyz
+Overview: https://cloud.example.com/s/xyz
 Download: https://cloud.example.com/s/xyz/download?files=report.pdf
 
 photo.jpg (2 MB, link expires 12 Dec 2026)
-View: https://cloud.example.com/s/xyz
+Overview: https://cloud.example.com/s/xyz
 Download: https://cloud.example.com/s/xyz/download?files=photo.jpg
 
 View all files in email: https://cloud.example.com/s/xyz

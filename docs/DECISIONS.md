@@ -123,8 +123,9 @@ Settled decisions, and why they were made. The current design is in [ARCHITECTUR
 - **Decision:** with one share for all files in the email (D17), each file's View link opens the folder's page, where the recipient clicks the file. This resolves OD10, and may be revisited.
 - **Why:** the user's choice. Nextcloud 35 can't open one file of a folder share in its viewer from a link: the public page opens the viewer only for a share of a single file, and takes no file from the URL (`apps/files_sharing/src/init-public.ts`). The rejected options, recorded for a later look:
   - A share of its own for each file that Nextcloud can show, used only for View. It opens the viewer, but costs a share each, which brings back the limit of 20 new shares in 10 minutes (R21).
-  - View showing the file itself from the folder share's WebDAV address, which Nextcloud serves without forcing a download. That's the browser's display, not Nextcloud's viewer, and with a password the browser asks for the user name "anonymous" and the password.
+  - View showing the file itself from the folder share's WebDAV address. That's the browser's display, not Nextcloud's viewer, and with a password the browser asks for the user name "anonymous" and the password. It only seemed to work because the test server ran in debug mode; without it Nextcloud sends `Content-Disposition: attachment`, so the file downloads.
 - **Revisit when:** a Nextcloud version lets a link open one file of a folder share, or recipients find the folder page confusing.
+- **Rechecked** (2026-11-07, Nextcloud 35, debug mode off): the public page's router has only `/s/:token`, so no address names a file of a folder share. So that it doesn't promise the file, the email calls this link "Overview", and keeps "View" for a file's own share (the user's choice).
 
 ## D21: The defaults (2026-11-06)
 

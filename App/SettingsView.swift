@@ -147,8 +147,8 @@ struct SettingsView: View {
     private var linksFooter: String {
         let links =
             model.settings.sharing == .folder
-            ? "Each file's view link opens the email's folder, and its download link downloads only that file."
-            : "Each file's view link opens the file's own page, and its download link downloads it."
+            ? "Each file's Overview link opens the email's folder, and its Download link downloads only that file."
+            : "Each file's View link opens the file's own page, and its Download link downloads it."
         guard model.settings.linksBelowText else {
             return links
         }

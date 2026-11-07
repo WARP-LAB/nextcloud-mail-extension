@@ -115,7 +115,11 @@ struct SendFlow {
             allFilesLinks ? folderShare.map { FolderLinks(viewURL: $0.url, downloadURL: $0.downloadURL) } : nil
         record.entry.passwordProtected = password != nil
         record.entry.expireDate = expireDate
-        var rewriter = LinkRewriter(text: LinkText(style: settings.linkStyle))
+        var text = LinkText(style: settings.linkStyle)
+        if !eachFile {
+            text.viewLabel = LinkText.folderViewLabel
+        }
+        var rewriter = LinkRewriter(text: text)
         rewriter.linksInPlace = !settings.linksBelowText
         return rewriter.rewrite(message, links: links, folder: folderLinks, passwordNotice: password != nil)
     }
