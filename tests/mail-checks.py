@@ -142,7 +142,8 @@ def links(plain):
     """Each file's links in the plain text, the files listed without links, and the all-files links."""
     plain = nfc(plain)
     found = {}
-    for match in re.finditer(r'^([^\n]+) \([^()\n]*\)\nView: (https://\S+)\nDownload: (https://\S+)$', plain, re.M):
+    for match in re.finditer(r'^([^\n]+) \([^()\n]*\)\n(?:View|Overview): (https://\S+)\nDownload: (https://\S+)$', plain,
+                             re.M):
         found[match[1]] = {'view': match[2], 'download': match[3]}
     for match in re.finditer(r'^([^\n]+) \([^()\n]*\): (https://\S+)$', plain, re.M):
         found[match[1]] = {'download': match[2]}

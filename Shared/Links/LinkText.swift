@@ -52,11 +52,16 @@ struct LinkText {
     static let passwordNotice = "The links need a password, which the sender will give you separately."
 
     var style: Style = .viewAndDownload
+    /// What the view link is called. With one share for all files in the email it opens the email's folder, because
+    /// Nextcloud can't open one file of a folder share from a link, so it's `folderViewLabel` there (D20).
+    var viewLabel = "View"
+
+    static let folderViewLabel = "Overview"
 
     func plain(_ file: LinkedFile) -> String {
         switch style {
         case .viewAndDownload:
-            return "\(file.filename) (\(details(file)))\nView: \(file.viewURL.absoluteString)\n"
+            return "\(file.filename) (\(details(file)))\n\(viewLabel): \(file.viewURL.absoluteString)\n"
                 + "Download: \(file.downloadURL.absoluteString)"
         case .downloadOnly:
             return "\(file.filename) (\(details(file))): \(file.downloadURL.absoluteString)"
@@ -70,7 +75,7 @@ struct LinkText {
         switch style {
         case .viewAndDownload:
             return "<div><a href=\"\(view)\">\(name)</a> (\(HTML.escape(details(file)))): "
-                + "<a href=\"\(view)\">View</a> · <a href=\"\(download)\">Download</a></div>"
+                + "<a href=\"\(view)\">\(HTML.escape(viewLabel))</a> · <a href=\"\(download)\">Download</a></div>"
         case .downloadOnly:
             return "<div><a href=\"\(download)\">\(name)</a> (\(HTML.escape(details(file))))</div>"
         }
