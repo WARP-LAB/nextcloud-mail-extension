@@ -46,6 +46,9 @@ Judgment calls and known risks are tracked separately in `docs/RISKS.md`.
 - **T17: Show the extension as NextcloudMail.** macOS's Local Network prompt names the extension “NextcloudMailEx”: most likely the process name, which macOS cuts to 15 characters (`pgrep -l` showed the old app as "NextcloudAppleM"), taken from the executable `NextcloudMailExtensionPlugIn`. So set the extension's executable name to `NextcloudMail`, keeping its bundle ID and possibly its `.appex` name, rather than only `CFBundleName`, which the executable doesn't use. The executable's path is what the Local Network rule is tied to, so macOS asks again, and the "NextcloudMailExtensionPlugIn" entry stays in the list for good. Which name the list shows, the executable's, the bundle's or the `.appex`'s, is unknown today, because all three match.
   - **Acceptance:** after a fresh install on a clean state (uninstall, restart, reinstall), macOS asks for “NextcloudMail”, what the Local Network list shows is recorded in `docs/MAIL.md`, and the setup help, the offline error, `docs/MAIL.md` and TESTING quote the names macOS shows.
 
+- **T20: A "See how to set up" button for new users.** When nobody is logged in, as when the app opens for the first time, the settings window shows a centered "See how to set up" button above the "Nextcloud account" section. Clicking it scrolls the window to "Setting up Mail".
+  - **Acceptance:** the button shows only while nobody is logged in, centered above "Nextcloud account", and goes once the user logs in. Clicking it scrolls so that "Setting up Mail" is in view. Checked in the settings window, logged in and logged out.
+
 ## 🧊 Icebox (Parked)
 
 Set aside until the user brings a task back. Agents don't start these.
