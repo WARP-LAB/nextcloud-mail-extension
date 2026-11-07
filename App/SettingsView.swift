@@ -257,12 +257,14 @@ private struct CheckResultView: View {
 /// How to set up Mail, and the limits worth knowing (FR5, FR10, R12, R13, R15, R21).
 private struct SetupHelp: View {
     private let steps = [
-        "Log in above. If macOS asks whether NextcloudMailExtension may find devices on your local network, allow it.",
-        "In Mail, open Settings > Extensions, turn on NextcloudMailExtension, and choose it in the message security "
-            + "popup. Then quit and reopen Mail.",
+        "Log in above. If macOS asks whether NextcloudMailExtension may find devices on your local network, allow it. "
+            + "macOS asks only when your Nextcloud server is on your local network.",
+        "In Mail, open Settings > Extensions and turn on NextcloudMailExtension. If the Extensions tab shows a "
+            + "“Message security extension” popup at the bottom, choose NextcloudMailExtension there. Then quit and "
+            + "reopen Mail.",
         "Open a new message and click the toolbar button with Nextcloud's logo. If macOS asks whether "
-            + "“NextcloudMailEx” may find devices on your local network, allow it: the extension in Mail needs its own "
-            + "permission, which System Settings lists as NextcloudMailExtensionPlugIn.",
+            + "“NextcloudMailEx” may find devices on your local network, allow it too. That's the extension in Mail, "
+            + "which needs a permission of its own, listed in System Settings as NextcloudMailExtensionPlugIn.",
         "In each message window, turn on Sign, the badge button at the right of the subject line. Files become "
             + "links only while it's on, and it stays on for later messages.",
         "If Mail asks about Mail Drop for a large email, choose Try Sending in Email and tick “Don't ask again for "
@@ -275,7 +277,10 @@ private struct SetupHelp: View {
             + "its notifications when macOS asks, or in System Settings > Notifications.",
         "Send Later uploads the files when you schedule the email, so the links' expiry starts then.",
         "Your Sent mailbox keeps the links, not the files, so once a link expires the file is only on Nextcloud.",
-        "While NextcloudMailExtension is chosen for message security, Mail can't sign or encrypt with certificates.",
+        "While NextcloudMailExtension is chosen for message security, Mail can't sign or encrypt with certificates. "
+            + "NextcloudMailExtension doesn't sign anything: it offers Mail's Sign button only because a message "
+            + "security extension is the only kind of Mail extension that can change an outgoing email, and Sign is "
+            + "what makes Mail hand the email to it.",
         "With a link for each file, an admin can raise Nextcloud's limit of 20 new links in 10 minutes in "
             + "config.php: 'ratelimit_overwrite' => ['files_sharing.shareapi.createshare' => ['user' => "
             + "['limit' => 200, 'period' => 600]]].",

@@ -71,7 +71,7 @@ What could go wrong, how we'd notice, and what's being done about it. Each entry
 
 - **Risk:** the send check would still run, but Sign wouldn't reach the extension, so FR5's advice to turn on Sign wouldn't help.
 - **Signal:** users see the FR5 warning even with Sign on.
-- **Mitigation:** test it, and have the host app check the setup.
+- **Mitigation:** test it, and have the host app check the setup. Mail shows the "Message security extension" popup only when there's a choice, so the setup help says to choose it there only if it's shown ([MAIL.md](MAIL.md#the-sign-button)).
 - **Judgment call:** an agent may word the warnings and the setup check.
 
 ### R11: Other mail providers
