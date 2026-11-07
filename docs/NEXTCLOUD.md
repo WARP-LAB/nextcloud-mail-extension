@@ -67,6 +67,14 @@ What the client gets when the server or the network is unavailable, with each se
 - **Where it shows:** every request goes through `NextcloudClient+Network.swift`, so the app's Test connection, the popover's red text and Mail's send alert give the same text. The send's alert adds how to send anyway: turn off Sign, and the files go attached.
 - **Not tried live:** no network, and a failing DNS, which would cut this Mac off; the unit tests cover them with the errors URLSession reports.
 
+## Share labels and tags
+
+Ways to make an email's files findable on the server later, read from Nextcloud 35's source and tried on the test server with a throwaway file on 2026-11-08 (T22):
+
+- **Share label:** a link share takes `label`, up to 255 characters, when it's created (`POST …/shares` with `label`) or later (`PUT …/shares/<id>` with `label`), and returns it. The Files app shows it as the link's name in the share's entry in the sidebar (`SharingEntryLink.vue`). The sharing views, such as "Shared by link", neither show it nor filter or search by it (`apps/files_sharing/src/files_views/shares.ts`), so it tells this extension's links apart on an item, but doesn't help find files.
+- **Collaborative tags:** `POST /remote.php/dav/systemtags/` with `{"name", "userVisible": true, "userAssignable": true}` creates a tag, whose ID ends the `Content-Location` header. `PUT /remote.php/dav/systemtags-relations/files/<file ID>/<tag ID>` assigns it, 201. An upload's `OC-FileId` header gives the file ID. A `REPORT` with `oc:filter-files` and `oc:systemtag` finds the tagged files, as the Files app's Tags view does (`apps/systemtags/src/files_views/systemtagsView.ts`).
+- **Who may tag:** any user may create tags, unless an admin has set the `systemtags` app's `restrict_creation_to_admin` (off by default). Tags that are visible and assignable to users can be assigned by anyone. Tags are server-wide: one tag name is shared by every user, and each user sees only the files they can access.
+
 ## Rate limit
 
 Nextcloud 34 and 35 allow each user 20 share creations in 10 minutes: `createShare` has `#[UserRateLimit(limit: 20, period: 600)]`. Refused attempts count too. The 21st gets HTTP 429 "Too Many Requests", seen when the server tests ran twice in a row. Uploads, folders and password changes aren't limited this way.
