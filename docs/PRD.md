@@ -127,10 +127,13 @@ In the message window, the user can set a password for that email's links, using
 - The email says that the links need a password, but doesn't contain it. The user gives it to recipients some other way.
 - If Nextcloud rejects the password, for example because it's shorter than the server's password policy allows, the send stops with the server's reason and the message window stays open.
 - If the server requires passwords on links and none is set, the send stops with an alert asking for one.
+- A moment after the user stops typing, the toolbar button's popover asks the server's password policy, and shows its reason in red when it refuses the password. It shows nothing when the password passes, is empty, or the server can't check (T16).
+- Beside the field, icon buttons with tooltips show the password, generate one, and copy it. Generate fills in a password the server's policy makes, or a random one when it can't. Copy marks the password as concealed, so that clipboard managers following that convention don't keep it.
 
 Acceptance criteria:
 
 - Every link of an email with a password asks for that password, and the email doesn't contain it.
+- A password the server's policy refuses shows the server's reason in the popover before sending, and a generated one passes.
 - The password survives closing and reopening the draft.
 - The two failure cases stop the send with the alerts described.
 

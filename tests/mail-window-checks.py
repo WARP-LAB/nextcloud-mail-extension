@@ -958,6 +958,38 @@ def check_all_files(run):
     run.expect('nothing attached', not attached, f'attached: {sorted(attached)}')
 
 
+def check_password_advice(run):
+    """The popover gives the server's reason for a weak password, generates one it accepts, and copies it (T16)."""
+    subject = run.subject('password-advice')
+    checks.mail('compose', 'A', 'B', subject, 'Check: the password buttons.', 'none')
+    open_popover(subject)
+    field = f'text field 1 of {POPOVER}'
+    wait(lambda: in_mail(f'return exists {field}', subject) == 'true', 15, 'no password field in the popover')
+    in_mail(f'set value of attribute "AXFocused" of {field} to true', subject)
+    mail_in_front()
+    osa('tell application "System Events" to keystroke "short"')
+
+    def texts():
+        return in_mail(f'return value of every static text of {POPOVER}', subject)
+
+    wait(lambda: 'at least' in texts(), 15, 'no reason for the short password')
+    run.expect('a short password shows the server\'s reason', True)
+    # The buttons have no names, only their tooltips (T16).
+    in_mail(f'click (first button of {POPOVER} whose help is "Generate a password that Nextcloud accepts")',
+            subject)
+    wait(lambda: 'at least' not in texts(), 15, 'the reason stayed after generating')
+    generated = in_mail(f'return value of {field}', subject)
+    run.expect('Generate fills in a password the server accepts', len(generated) >= 10, f'{len(generated)} characters')
+    in_mail(f'click (first button of {POPOVER} whose help is "Copy the password to give to the recipients")',
+            subject)
+    time.sleep(0.5)
+    copied = subprocess.run(['pbpaste'], capture_output=True, text=True).stdout
+    run.expect('Copy puts it on the clipboard', copied == generated)
+    mail_in_front()
+    osa('tell application "System Events" to key code 53')
+    close_test_windows()
+
+
 def check_open_settings(run):
     """The popover's Settings… button opens the NextcloudMailExtension app."""
     osa('tell application id "lv.warp.nextcloudmailextension" to if it is running then quit')
@@ -980,7 +1012,8 @@ CHECKS = {'t7': check_t7, 't21': check_t21, 't22': check_t22, 't30': check_t30, 
           'password-required': check_password_required, 't33': check_t33, 't23': check_t23,
           't34-phrase': check_t34_phrase, 't35-phrase': check_t35_phrase, 'phrase-elsewhere': check_phrase_elsewhere,
           't8': check_t8, 'own-expiry': check_own_expiry, 'open-settings': check_open_settings,
-          'keep-attached': check_keep_attached, 'all-files': check_all_files}
+          'keep-attached': check_keep_attached, 'all-files': check_all_files,
+          'password-advice': check_password_advice}
 
 
 def main():

@@ -115,6 +115,17 @@ struct CapabilitiesData: Decodable {
     }
 }
 
+/// The password policy app's answer to `validate`: `passed`, and the reason when it didn't.
+struct PasswordCheckData: Decodable {
+    let passed: Bool
+    let reason: String?
+}
+
+/// The password policy app's answer to `generate`.
+struct GeneratedPasswordData: Decodable {
+    let password: String
+}
+
 struct LoginFlowData: Decodable {
     struct Poll: Decodable {
         let token: String
