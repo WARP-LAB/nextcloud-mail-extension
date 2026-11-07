@@ -17,8 +17,10 @@ enum Launcher {
 struct NextcloudMailExtensionApp: App {
     @StateObject private var model = AppModel()
 
+    /// One window, the settings: a `Window` scene has no "New Window", and the Window menu brings it back once it's
+    /// closed.
     var body: some Scene {
-        WindowGroup {
+        Window("NextcloudMailExtension", id: "settings") {
             SettingsView(model: model)
         }
         .windowResizability(.contentMinSize)
