@@ -104,7 +104,7 @@ struct SettingsView: View {
     }
 
     /// Where Nextcloud's admin manual describes `ratelimit_overwrite`, which raises the share limit.
-    private static let rateLimitDocumentation =
+    fileprivate static let rateLimitDocumentation =
         "https://docs.nextcloud.com/server/latest/admin_manual/configuration_server/"
         + "config_sample_php_parameters.html#ratelimit-overwrite"
 
@@ -316,9 +316,8 @@ private struct SetupHelp: View {
             + "NextcloudMailExtension doesn't sign anything: it offers Mail's Sign button only because a message "
             + "security extension is the only kind of Mail extension that can change an outgoing email, and Sign is "
             + "what makes Mail hand the email to it.",
-        "With a separate share for each file, an admin can raise Nextcloud's limit of 20 new shares in 10 minutes in "
-            + "config.php: 'ratelimit_overwrite' => ['files_sharing.shareapi.createshare' => ['user' => "
-            + "['limit' => 200, 'period' => 600]]].",
+        "With a separate share for each file, an admin can raise Nextcloud's limit of 20 new shares in 10 minutes. "
+            + "See the [Nextcloud server documentation](\(SettingsView.rateLimitDocumentation)).",
     ]
 
     var body: some View {
@@ -327,7 +326,8 @@ private struct SetupHelp: View {
                 Text("\(index + 1). \(step)")
             }
             ForEach(notes, id: \.self) { note in
-                Text(note).foregroundStyle(.secondary)
+                // A LocalizedStringKey, so that a Markdown link is a link.
+                Text(LocalizedStringKey(note)).foregroundStyle(.secondary)
             }
         }
     }
