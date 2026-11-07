@@ -7,7 +7,7 @@ struct UploadLedger: Codable, Equatable {
     struct StoredFile: Codable, Equatable {
         /// The file's path on Nextcloud, whose last name is the file's name there.
         var path: String
-        /// The file's own share, with a link for each file (D17).
+        /// The file's own share, with a separate share for each file (D17).
         var share: Share?
 
         var name: String {

@@ -10,7 +10,9 @@ struct SettingsView: View {
                 AccountSection(model: model)
                 uploads
                 files
+                sharing
                 links
+                expiration
                 warnings
                 check
                 SetupHelp()
@@ -79,34 +81,68 @@ struct SettingsView: View {
             + "all stay attached. " + signature
     }
 
-    /// FR4, FR8, FR9 and D17.
+    /// D17: what Nextcloud shares. With a share for each file, the footer warns about Nextcloud's share limit.
+    private var sharing: some View {
+        Section {
+            Picker("Nextcloud shares", selection: $model.settings.sharing) {
+                Text("One share for all files in the email").tag(Settings.Sharing.folder)
+                Text("Separate share for each file in the email").tag(Settings.Sharing.eachFile)
+            }
+        } header: {
+            Text("Sharing")
+        } footer: {
+            if model.settings.sharing == .eachFile {
+                Label {
+                    // A LocalizedStringKey, so that the Markdown link is a link.
+                    Text(LocalizedStringKey(Self.shareLimitWarning))
+                } icon: {
+                    Image(systemName: "exclamationmark.triangle")
+                }
+                .foregroundStyle(.secondary)
+            }
+        }
+    }
+
+    /// Where Nextcloud's admin manual describes `ratelimit_overwrite`, which raises the share limit.
+    fileprivate static let rateLimitDocumentation =
+        "https://docs.nextcloud.com/server/latest/admin_manual/configuration_server/"
+        + "config_sample_php_parameters.html#ratelimit-overwrite"
+
+    private static let shareLimitWarning =
+        "Nextcloud allows 20 new shares in 10 minutes, so sending many emails with many files this way can reach "
+        + "that limit, and sending then fails until the time is up or the server's admin raises the limit. See the "
+        + "[Nextcloud server documentation](\(rateLimitDocumentation))."
+
+    /// FR8 and FR9.
     private var links: some View {
         Section {
-            Picker("Share files as", selection: $model.settings.sharing) {
-                Text("One link for all files in the email").tag(Settings.Sharing.folder)
-                Text("A link for each file").tag(Settings.Sharing.eachFile)
-            }
             if model.settings.sharing == .folder {
                 Picker("Place links", selection: $model.settings.placement) {
                     Text("Inline, where each file was").tag(Settings.Placement.whereEachFileWas)
                     Text("Below your text").tag(Settings.Placement.folderLinksOnly)
                 }
             }
+            Toggle(
+                "If multiple attachments, also add links for all files below your text",
+                isOn: $model.settings.folderLinks
+            )
+            .disabled(model.settings.onlyFolderLinks)
             Picker("Show download link for file", selection: $model.settings.linkStyle) {
                 Text("Together with view link").tag(LinkText.Style.viewAndDownload)
                 Text("Only").tag(LinkText.Style.downloadOnly)
             }
             .disabled(model.settings.onlyFolderLinks)
-            Toggle(
-                "If multiple attachments, add view and download links at the bottom",
-                isOn: $model.settings.folderLinks
-            )
-            .disabled(model.settings.onlyFolderLinks)
-            ExpiryPicker(expiry: $model.settings.expiry)
         } header: {
             Text("Links")
         } footer: {
             Text(linksFooter).foregroundStyle(.secondary)
+        }
+    }
+
+    /// FR4.
+    private var expiration: some View {
+        Section("Link expiration") {
+            ExpiryPicker(expiry: $model.settings.expiry)
         }
     }
 
@@ -117,8 +153,7 @@ struct SettingsView: View {
         case (.folder, .folderLinksOnly):
             return "The email lists the files' names and sizes, followed by links that view and download its folder."
         case (.eachFile, _):
-            return "Nextcloud allows 20 new links in 10 minutes, so an email with many files can fail to send until "
-                + "the server's admin raises that limit. See Setting up Mail."
+            return "Each file's view link opens the file's own page, and its download link downloads it."
         }
     }
 
@@ -281,9 +316,8 @@ private struct SetupHelp: View {
             + "NextcloudMailExtension doesn't sign anything: it offers Mail's Sign button only because a message "
             + "security extension is the only kind of Mail extension that can change an outgoing email, and Sign is "
             + "what makes Mail hand the email to it.",
-        "With a link for each file, an admin can raise Nextcloud's limit of 20 new links in 10 minutes in "
-            + "config.php: 'ratelimit_overwrite' => ['files_sharing.shareapi.createshare' => ['user' => "
-            + "['limit' => 200, 'period' => 600]]].",
+        "With a separate share for each file, an admin can raise Nextcloud's limit of 20 new shares in 10 minutes. "
+            + "See the [Nextcloud server documentation](\(SettingsView.rateLimitDocumentation)).",
     ]
 
     var body: some View {
@@ -292,7 +326,8 @@ private struct SetupHelp: View {
                 Text("\(index + 1). \(step)")
             }
             ForEach(notes, id: \.self) { note in
-                Text(note).foregroundStyle(.secondary)
+                // A LocalizedStringKey, so that a Markdown link is a link.
+                Text(LocalizedStringKey(note)).foregroundStyle(.secondary)
             }
         }
     }
