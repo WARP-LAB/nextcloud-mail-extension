@@ -17,9 +17,6 @@ Risk register: `docs/RISKS.md`.
 > - Write Acceptance Criteria or a explicit Definition of Done
 > - Take tasks in order unless told otherwise. Do not start the next task without being asked.
 
-- 🔄 **T21: Tell the user when the server is unavailable.** The user's request: simulate the test server in maintenance mode, with PHP-FPM down but nginx running, with the site off in nginx, and with no network or DNS, record what the client gets, then say so clearly in the app's Test connection, in the popover's red text, and in the send's alert. The `NCSERVER_*` keys in `.env` give SSH access to switch each state on and off.
-  - **Acceptance:** a script switches each server state on and off and always restores it; `docs/NEXTCLOUD.md` records what each state returns; each state gives its own clear message in all three places, with unit tests for the mapping and checks in Mail; `.env.example` has the new keys without values.
-
 ## ❓ Open Decisions (human to resolve)
 
 Agents: do not guess these. Record questions here and stop.
@@ -55,6 +52,7 @@ Set aside until the user brings a task back. Agents don't start these.
 
 ## ✅ Completed Tasks (Done)
 
+- **T21: Tell the user when the server is unavailable (2026-11-07).** `scripts/server-state.sh` takes the test server into maintenance mode, takes PHP-FPM down or switches the site off in nginx, and always restores it (D29); `docs/NEXTCLOUD.md` records what each state and each network failure returns. The client turns them into errors that say what's wrong, tells no network from Local Network privacy, and the send's alert says how to send with the files attached. Verified: 160 unit tests pass, and in Mail `server-down` passes in all three server states for the app's check, the popover and the send's alert, with the server restored each time; `folder-in-place` passes afterwards. No network and a failing DNS are covered by unit tests only.
 - **T20: A "See how to set up" button for new users (2026-11-07).** While nobody is logged in, a centered button above "Nextcloud account" scrolls the settings window to "Setting up Mail". Verified: drawn logged out and logged in with `--render-window [--logged-out]`, and in the real window the user logged out, saw the button, and it scrolled; logged in again, it's gone.
 - **T16: Check, generate and copy the email's password in the popover (2026-11-07).** A moment after typing stops, the popover shows the server's password policy's reason in red; icon buttons with tooltips, as Apple's guidelines ask, show, generate (`dice`) and copy (`doc.on.doc`) the password, copied as concealed. Verified: 153 unit tests and the new server test pass, and in Mail `password-advice`, `t36` and `password-refused` pass, after a restart. Done together: each file's link to a shared folder is called "Overview" (D20), checked in `folder-in-place` and `each-file`, which now also check each download's name.
 - **T18: "Place links" decides only where each file's links go (2026-11-07).** The user's rule (D28): both kinds of share offer "Inline, where each file was" and "Below your text", which lists each file with its name, size and links; "Link types for files" applies everywhere; only the all-files switch is greyed out, below the text. Verified: 147 unit tests pass, lint and the build pass, the settings window shows both kinds of share below the text, and in Mail `below-text`, `each-file-below`, `below-text-one-file`, `folder-in-place`, `each-file` and `download-only` pass, after a restart, which T18 found an update needs (T19).
