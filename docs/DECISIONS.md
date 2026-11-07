@@ -166,3 +166,8 @@ Settled decisions, and why they were made. The current design is in [ARCHITECTUR
 
 - **Decision:** with either kind of Nextcloud share, "Place links" puts each file's links where the file was, or lists each file with its name, size and links below the user's text. "Link types for files", which was "Show download link for file", offers "Download only" and "View and download" and applies to both. The links for all files are added for two or more files, when their switch is on or the links go below the text, where the switch is greyed out; for one file they're never added. The placement is still stored as `folderLinksOnly`, so stored settings keep it. This replaces D17's "only the folder's links", and D21's listing of names and sizes without links.
 - **Why:** the user's rule, so that each setting does one thing and only the switch is ever greyed out. The list below the text helps a reader find every file, and each listed file's own links make the links for all files unnecessary for one file.
+
+## D29: Tests may take the test server down, and always bring it back (2026-11-07)
+
+- **Decision:** `scripts/server-state.sh` may switch the test server into maintenance mode, take its PHP-FPM pool down, or switch its site off in nginx, over SSH with the `NCSERVER_*` keys in `.env`. Its `with <state> -- <command>` restores everything afterwards, also when the command fails or is interrupted, PHP-FPM first. Restarting PHP-FPM restarts every pool of that PHP version on the server, and reloading nginx reloads every site.
+- **Why:** the user's request, to see what users get when the server is unavailable (T21). The user set up the SSH access for it.

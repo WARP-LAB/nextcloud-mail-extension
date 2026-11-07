@@ -91,7 +91,7 @@ actor Sender {
             }
             return .rewritten(data)
         } catch {
-            let text = error.localizedDescription
+            let text = Self.alertText(for: error)
             failures[messageID] = Failure(text: text, date: dependencies.now())
             return .failed(text)
         }
@@ -168,6 +168,15 @@ actor Sender {
             applied[messageID] = nil
         }
         store(nil, for: messageID)
+    }
+
+    /// What Mail's alert says: the error, and how to send anyway when the server or the network is unavailable (T21).
+    static func alertText(for error: Error) -> String {
+        let text = error.localizedDescription
+        guard (error as? NextcloudError)?.serverUnavailable == true else {
+            return text
+        }
+        return text + " " + SendError.sendAttachedHint
     }
 
     /// How many files the send calls turned into links for the message, for FR6's check.

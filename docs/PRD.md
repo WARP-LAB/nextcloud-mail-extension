@@ -201,7 +201,7 @@ NFR1 is decided (D12). The others are proposed (OD5).
 - **NFR1, platforms:** macOS 27 or later, on Apple silicon only, and Nextcloud 34 or later. How the app is distributed is still open (OD3).
 - **NFR2, privacy:** no telemetry. Files go only to the configured server. Message contents, addresses and passwords are never logged. Credentials are kept only in the Keychain.
 - **NFR3, security:** server URLs are `https://` only. The extension uses an app password from Nextcloud's browser login, never the user's own password. An upload never overwrites an existing file.
-- **NFR4, reliability:** an email is never sent with links to files that failed to upload. Every file selected for a link either arrives as a working link, or the send stops with the file still in the window.
+- **NFR4, reliability:** an email is never sent with links to files that failed to upload. Every file selected for a link either arrives as a working link, or the send stops with the file still in the window. When the server or the network is unavailable, as in maintenance mode, with the server failing, or without a network, the app's Test connection, the popover and the send's alert say what's wrong, and the alert says how to send with the files attached instead (T21).
 
 ## Out of scope
 

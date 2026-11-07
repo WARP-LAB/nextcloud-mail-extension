@@ -990,6 +990,42 @@ def check_password_advice(run):
     close_test_windows()
 
 
+# What the app, the popover and the send say in each state scripts/server-state.sh can set (T21).
+SERVER_DOWN = {'maintenance': 'maintenance mode', 'php': "isn't working at the moment (HTTP 502)",
+               'site': "didn't answer as Nextcloud (HTTP 404)"}
+APP = pathlib.Path.home() / 'Applications/NextcloudMailExtension.app/Contents/MacOS/NextcloudMailExtension'
+
+
+def check_server_down(run):
+    """With the test server down as scripts/server-state.sh set it, the app's check, the popover and the send say
+    what's wrong, and the send stops with the window open (T21)."""
+    state = os.environ.get('NCME_SERVER_STATE', '')
+    if state not in SERVER_DOWN:
+        raise CheckError('run it as: scripts/server-state.sh with maintenance|php|site -- '
+                         'python3 tests/mail-window-checks.py server-down')
+    expected = SERVER_DOWN[state]
+    app = subprocess.run([str(APP), '--check-connection'], capture_output=True, text=True).stdout.strip()
+    run.expect(f"the app's check says {expected!r}", expected in app, app.splitlines()[-1:])
+    subject = run.subject(f'server-down {state}')
+    data_path = run.file('server-down.bin', 4000)
+    checks.app_settings(checks.DEFAULTS)
+    checks.mail('compose', 'A', 'B', subject, 'Check: the server is unavailable.', 'none', str(data_path))
+    open_popover(subject)
+    wait(lambda: expected in in_mail(f'return value of every static text of {POPOVER}', subject), 60,
+         'the popover didn\'t say what\'s wrong')
+    run.expect('the popover says so in red', True)
+    mail_in_front()
+    osa('tell application "System Events" to key code 53')
+    click_send(subject)
+    wait(lambda: sheet(subject) is not None, 120, 'no alert')
+    texts, _ = sheet(subject)
+    run.expect('the alert says so, and how to send anyway', expected in texts and 'turn off Sign' in texts, texts)
+    click_sheet_button(subject, 'OK')
+    time.sleep(1)
+    run.expect('the window stays open', window_exists(subject))
+    close_test_windows()
+
+
 def check_open_settings(run):
     """The popover's Settings… button opens the NextcloudMailExtension app."""
     osa('tell application id "lv.warp.nextcloudmailextension" to if it is running then quit')
@@ -1013,7 +1049,7 @@ CHECKS = {'t7': check_t7, 't21': check_t21, 't22': check_t22, 't30': check_t30, 
           't34-phrase': check_t34_phrase, 't35-phrase': check_t35_phrase, 'phrase-elsewhere': check_phrase_elsewhere,
           't8': check_t8, 'own-expiry': check_own_expiry, 'open-settings': check_open_settings,
           'keep-attached': check_keep_attached, 'all-files': check_all_files,
-          'password-advice': check_password_advice}
+          'password-advice': check_password_advice, 'server-down': check_server_down}
 
 
 def main():
