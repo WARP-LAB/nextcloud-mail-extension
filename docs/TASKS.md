@@ -17,6 +17,9 @@ Risk register: `docs/RISKS.md`.
 > - Write Acceptance Criteria or a explicit Definition of Done
 > - Take tasks in order unless told otherwise. Do not start the next task without being asked.
 
+- 🔄 **T21: Tell the user when the server is unavailable.** The user's request: simulate the test server in maintenance mode, with PHP-FPM down but nginx running, with the site off in nginx, and with no network or DNS, record what the client gets, then say so clearly in the app's Test connection, in the popover's red text, and in the send's alert. The `NCSERVER_*` keys in `.env` give SSH access to switch each state on and off.
+  - **Acceptance:** a script switches each server state on and off and always restores it; `docs/NEXTCLOUD.md` records what each state returns; each state gives its own clear message in all three places, with unit tests for the mapping and checks in Mail; `.env.example` has the new keys without values.
+
 ## ❓ Open Decisions (human to resolve)
 
 Agents: do not guess these. Record questions here and stop.
