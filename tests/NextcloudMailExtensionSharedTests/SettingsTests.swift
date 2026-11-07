@@ -22,7 +22,7 @@ struct SettingsTests {
         #expect(settings.placement == .whereEachFileWas)
         #expect(settings.linkStyle == .viewAndDownload)
         #expect(!settings.folderLinks)
-        #expect(!settings.onlyFolderLinks)
+        #expect(!settings.linksBelowText)
     }
 
     @Test func roundTrips() throws {
@@ -37,7 +37,7 @@ struct SettingsTests {
         settings.warnIfSignOff = false
         settings.warningPhrases = ["attach", "pielikum"]
         settings.sharing = .eachFile
-        settings.placement = .folderLinksOnly
+        settings.placement = .belowText
         settings.linkStyle = .downloadOnly
         settings.folderLinks = true
         #expect(try JSONDecoder().decode(Settings.self, from: JSONEncoder().encode(settings)) == settings)
@@ -124,12 +124,27 @@ struct SettingsTests {
         #expect(DecimalText.text(of: 1_000_000, separator: ",") == "1000000")
     }
 
-    @Test func hasOnlyFolderLinksOnlyWhenTheFolderIsShared() {
-        var settings = Settings()
-        settings.placement = .folderLinksOnly
-        #expect(settings.onlyFolderLinks)
-        settings.sharing = .eachFile
-        #expect(!settings.onlyFolderLinks)
+    @Test func addsTheLinksForAllFilesForTwoOrMoreWithTheSwitchOrBelowTheText() {
+        for sharing in Settings.Sharing.allCases {
+            var settings = Settings()
+            settings.sharing = sharing
+            #expect(!settings.addsAllFilesLinks(fileCount: 2), "inline, the switch off")
+            settings.folderLinks = true
+            #expect(settings.addsAllFilesLinks(fileCount: 2))
+            #expect(!settings.addsAllFilesLinks(fileCount: 1), "one file's own links are enough")
+            settings.folderLinks = false
+            settings.placement = .belowText
+            #expect(settings.linksBelowText)
+            #expect(settings.addsAllFilesLinks(fileCount: 2), "below the text, whatever the switch")
+            #expect(!settings.addsAllFilesLinks(fileCount: 1))
+        }
+    }
+
+    @Test func keepsTheStoredBelowTheTextPlacement() throws {
+        // Stored as "folderLinksOnly" when the setting meant only the folder's links (D28).
+        #expect(try decode(#"{"placement":"folderLinksOnly"}"#).placement == .belowText)
+        let stored = String(bytes: try JSONEncoder().encode(Settings.Placement.belowText), encoding: .utf8)
+        #expect(stored == #""folderLinksOnly""#)
     }
 }
 

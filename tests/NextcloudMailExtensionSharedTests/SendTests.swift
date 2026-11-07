@@ -104,16 +104,50 @@ struct SendFlowTests {
         #expect(output.root.text?.contains("View all files in email: https://cloud.example.test/s/share3") == true)
     }
 
-    @Test func givesOnlyTheFolderLinksWhenSetTo() async throws {
+    @Test func listsEachFilesLinksBelowTheTextWhenSetTo() async throws {
         let nextcloud = FakeNextcloud()
-        let settings = SendFixtures.settings { $0.placement = .folderLinksOnly }
+        let settings = SendFixtures.settings { $0.placement = .belowText }
         let (output, _) = try await run("t29-second", settings: settings, nextcloud: nextcloud)
         #expect(nextcloud.shares.count == 1)
         let text = try #require(output.root.text)
-        #expect(text.contains("dummy-1MB.pdf (1 KB, link expires 13 Nov 2026)\n"))
-        #expect(text.contains("View all files in email: https://cloud.example.test/s/share1\n"))
+        let fileLink = try #require(
+            text.range(of: "Download: https://cloud.example.test/s/share1/download?files=dummy-1MB.pdf\n"))
+        #expect(text.contains("View: https://cloud.example.test/s/share1\n"))
+        let allFiles = try #require(text.range(of: "View all files in email: https://cloud.example.test/s/share1\n"))
+        #expect(fileLink.upperBound <= allFiles.lowerBound, "the files' links come first")
         #expect(text.contains("Download all files in email: https://cloud.example.test/s/share1/download\n"))
-        #expect(!text.contains("?files="))
+        #expect(output.files.isEmpty)
+    }
+
+    @Test func listsEachFilesOwnLinksBelowTheTextWithAShareForEachFile() async throws {
+        let nextcloud = FakeNextcloud()
+        let settings = SendFixtures.settings {
+            $0.sharing = .eachFile
+            $0.placement = .belowText
+        }
+        let (output, _) = try await run("t29-second", settings: settings, nextcloud: nextcloud)
+        #expect(nextcloud.shares.count == 3, "a share for each file, and one for the links for all files")
+        let text = try #require(output.root.text)
+        #expect(text.contains("Download: https://cloud.example.test/s/share1/download\n"))
+        #expect(text.contains("View: https://cloud.example.test/s/share2\n"))
+        #expect(text.contains("View all files in email: https://cloud.example.test/s/share3\n"))
+    }
+
+    @Test func addsNoLinksForAllFilesForOneFileBelowTheText() async throws {
+        for sharing in Settings.Sharing.allCases {
+            let nextcloud = FakeNextcloud()
+            let settings = SendFixtures.settings {
+                $0.sharing = sharing
+                $0.placement = .belowText
+            }
+            let message = try Fixture.message("t20-second")
+            #expect(settings.linkPolicy.linkedFiles(in: message, signatureContentIDs: []).count == 1)
+            let (output, _) = try await run("t20-second", settings: settings, nextcloud: nextcloud)
+            #expect(nextcloud.shares.count == 1)
+            let text = output.text("plain").joined()
+            #expect(text.contains("Download: https://cloud.example.test/s/share1/download"))
+            #expect(!text.contains("View all files in email"))
+        }
     }
 
     @Test func reusesWhatTheRecordHas() async throws {

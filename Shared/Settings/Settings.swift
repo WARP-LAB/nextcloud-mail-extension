@@ -11,12 +11,13 @@ struct Settings: Equatable {
         case eachFile
     }
 
-    /// Where the links go when the email's folder is shared (FR8, D17).
+    /// Where each file's links go, with either kind of share (FR8, D28).
     enum Placement: String, Codable, CaseIterable {
         /// Each file's links where the file was. The default.
         case whereEachFileWas
-        /// Only the folder's links, after the user's own text, with the files' names listed above them.
-        case folderLinksOnly
+        /// Each file listed with its links after the user's own text. Stored as "folderLinksOnly", its name when it
+        /// meant only the folder's links, so that stored settings keep it.
+        case belowText = "folderLinksOnly"
     }
 
     /// What FR3's size limit is compared with.
@@ -88,9 +89,15 @@ struct Settings: Equatable {
         }
     }
 
-    /// Whether the email has only the folder's links (FR8, D17).
-    var onlyFolderLinks: Bool {
-        sharing == .folder && placement == .folderLinksOnly
+    /// Whether each file's links are listed below the user's text (FR8, D28).
+    var linksBelowText: Bool {
+        placement == .belowText
+    }
+
+    /// Whether the email gets the links for all files (FR9): for two or more files, when the switch is on or the
+    /// files' links are listed below the text anyway (D28).
+    func addsAllFilesLinks(fileCount: Int) -> Bool {
+        fileCount >= 2 && (folderLinks || linksBelowText)
     }
 }
 

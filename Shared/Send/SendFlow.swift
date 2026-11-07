@@ -102,7 +102,7 @@ struct SendFlow {
         let folder = try await folder(for: message, record)
         let eachFile = settings.sharing == .eachFile
         let stored = try await putAll(files, in: folder, share: eachFile ? options : nil, record)
-        let allFilesLinks = settings.onlyFolderLinks || (settings.folderLinks && files.count >= 2)
+        let allFilesLinks = settings.addsAllFilesLinks(fileCount: files.count)
         let folderShare = !eachFile || allFilesLinks ? try await share(folder, options, record) : nil
         var links: [Int: LinkedFile] = [:]
         for file in files {
@@ -116,7 +116,7 @@ struct SendFlow {
         record.entry.passwordProtected = password != nil
         record.entry.expireDate = expireDate
         var rewriter = LinkRewriter(text: LinkText(style: settings.linkStyle))
-        rewriter.linksInPlace = !settings.onlyFolderLinks
+        rewriter.linksInPlace = !settings.linksBelowText
         return rewriter.rewrite(message, links: links, folder: folderLinks, passwordNotice: password != nil)
     }
 

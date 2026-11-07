@@ -141,24 +141,24 @@ A setting, "Nextcloud shares", chooses what Nextcloud shares (D17):
 - **One share for all files in the email:** one share per email, of its folder (FR2). This is the default. Each file's view link opens the folder's page, which lists the email's files, and its download link downloads only that file.
 - **Separate share for each file in the email:** one share per file, and each file's view link opens that file's own page. Nextcloud allows each user only 20 new shares in 10 minutes, so an email with many files, or several emails in a row, can fail to send until the server's admin raises that limit. The settings warn about it, and link to Nextcloud's documentation of the setting that raises it.
 
-With one share for all files in the email, a second setting, "Place links", chooses:
+With either kind of share, a second setting, "Place links", chooses only where each file's links go (D28):
 
-- **Inline, where each file was:** each file gets its links as described below. This is the default.
-- **Below your text:** the files are removed from where they were. After the user's own text, the email lists each file's name and size, followed by FR9's two links, whatever FR9's setting and however many files became links.
+- **Inline, where each file was:** each file that becomes a link is replaced by its links where the file was dropped in the message, which may be between paragraphs of text. This is the default.
+- **Below your text:** the files are removed from where they were, and the email lists each file, with its name, size and links, after the user's own text. FR9's links follow for two or more files.
 
-Each file that becomes a link is replaced by its links where the file was dropped in the message, which may be between paragraphs of text. If the extension can't tell where a file was, its links go in a list after the user's own text, above any quoted messages in a reply or forward. They never go at the top.
+If the extension can't tell where a file was, its links go in that list too. The list goes after the user's own text, above any quoted messages in a reply or forward, never at the top.
 
-A setting, "Show download link for file", chooses how many links each file gets:
+A setting, "Link types for files", chooses which links each file gets, wherever they go:
 
-- **Together with view link:** two links, one that opens the file in Nextcloud and one that downloads it. This is the default.
-- **Only:** one link, which downloads the file.
+- **View and download:** two links, one that opens the file in Nextcloud and one that downloads it. This is the default.
+- **Download only:** one link, which downloads the file.
 
 Acceptance criteria:
 
 - Each file's links are where the file was, or in the list described above, and never at the top.
 - The setting gives two links or one link per file, as described.
 - With one share for all files in the email, the email's files use one share, each view link opens the folder's page, and each download link downloads only its file. With a separate share for each file, each file has its own share and page.
-- With only the folder's links, the email lists every linked file's name and size, followed by FR9's two links, and has no other links.
+- With the links below the text, the email lists every linked file with its name, size and links, followed by FR9's two links for two or more files, with either kind of share.
 - The links show correctly in Apple Mail, Gmail on the web and Outlook.
 
 ## FR9: Links for all files
@@ -168,13 +168,13 @@ A setting, "If multiple attachments, also add links for all files below your tex
 - **View all files in email:** opens the email's folder (FR2) in Nextcloud.
 - **Download all files in email:** downloads that folder as one zip file.
 
-With a separate share for each file (FR8), these links need one more share, for the folder. With only the folder's links (FR8), they are always added, even for one file, and this setting doesn't apply.
+With a separate share for each file (FR8), these links need one more share, for the folder. With FR8's links below the text, they are always added for two or more files, and this setting is greyed out.
 
 These links follow FR4 (expiry) and FR7 (password). The folder holds only the files that became links, so files that stayed attached under FR3 aren't included.
 
 Acceptance criteria:
 
-- With the setting on and two or more linked files, both links appear in the place described. With one linked file, or the setting off, they don't, unless FR8's setting gives only the folder's links.
+- With the setting on and two or more linked files, both links appear in the place described. With one linked file they never do, and with the setting off they don't, unless FR8's links go below the text.
 - The zip holds exactly the email's linked files.
 - Both links follow FR4 and FR7.
 
