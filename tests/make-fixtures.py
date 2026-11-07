@@ -28,7 +28,7 @@ import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 RESULTS = ROOT / 'probe' / 'test-results'
-OUTPUT = ROOT / 'tests' / 'NextcloudAppleMailSharedTests' / 'Fixtures'
+OUTPUT = ROOT / 'tests' / 'NextcloudMailExtensionSharedTests' / 'Fixtures'
 
 # Fixture name: the probe's saved message (see probe/docs/TESTS.md), or with a path starting with test-results/, a
 # message the Mail checks saved (docs/TESTING.md). Both folders are git-ignored.

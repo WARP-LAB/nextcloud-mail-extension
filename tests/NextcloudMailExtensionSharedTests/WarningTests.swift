@@ -1,7 +1,7 @@
 import Foundation
 import Testing
 
-@testable import NextcloudAppleMailShared
+@testable import NextcloudMailExtensionShared
 
 /// The send check's warnings (FR5, FR6) and the text they look at.
 struct SendWarningTests {

@@ -24,26 +24,26 @@ struct SendError: Error, Equatable, LocalizedError {
     }
 
     static let notSetUp = SendError(
-        "NextcloudAppleMail isn't set up, so the files can't become links. Log in to Nextcloud in the "
-            + "NextcloudAppleMail app, or turn off Sign to send the files attached.")
+        "NextcloudMailExtension isn't set up, so the files can't become links. Log in to Nextcloud in the "
+            + "NextcloudMailExtension app, or turn off Sign to send the files attached.")
     static let passwordRequired = SendError(
-        "Your Nextcloud server requires a password on links. Set one with NextcloudAppleMail's button in the "
+        "Your Nextcloud server requires a password on links. Set one with NextcloudMailExtension's button in the "
             + "message window's toolbar, then send again.")
 
     static func file(_ name: String, _ error: Error) -> SendError {
-        SendError("NextcloudAppleMail couldn't upload or share “\(name)”. \(error.localizedDescription)")
+        SendError("NextcloudMailExtension couldn't upload or share “\(name)”. \(error.localizedDescription)")
     }
 
     static func folder(_ error: Error) -> SendError {
-        SendError("NextcloudAppleMail couldn't create or share the email's folder. \(error.localizedDescription)")
+        SendError("NextcloudMailExtension couldn't create or share the email's folder. \(error.localizedDescription)")
     }
 
     static func expiry(_ error: Error) -> SendError {
-        SendError("NextcloudAppleMail couldn't change when the links expire. \(error.localizedDescription)")
+        SendError("NextcloudMailExtension couldn't change when the links expire. \(error.localizedDescription)")
     }
 
     static func password(_ error: Error) -> SendError {
-        SendError("NextcloudAppleMail couldn't change the links' password. \(error.localizedDescription)")
+        SendError("NextcloudMailExtension couldn't change the links' password. \(error.localizedDescription)")
     }
 }
 
@@ -250,7 +250,7 @@ struct SendFlow {
 
     /// Uploads from a temporary file (R5), as `name (2)` and so on if the name is taken, and returns the path.
     private func upload(_ data: Data, named name: String, in folder: String) async throws -> String {
-        let temporary = temporaryDirectory.appendingPathComponent("ncam-\(UUID().uuidString)")
+        let temporary = temporaryDirectory.appendingPathComponent("ncme-\(UUID().uuidString)")
         try data.write(to: temporary)
         defer {
             try? FileManager.default.removeItem(at: temporary)

@@ -21,7 +21,7 @@ enum ConnectionCheck {
 
     static func run(settings: Settings, account: NextcloudAccount?) async -> Report {
         guard let account else {
-            return .failed("Not logged in to Nextcloud. Log in in NextcloudAppleMail.")
+            return .failed("Not logged in to Nextcloud. Log in in NextcloudMailExtension.")
         }
         var lines: [String] = []
         do {
@@ -32,7 +32,7 @@ enum ConnectionCheck {
             var passed = true
             if let major = Int(limits.version.prefix { $0 != "." }), major < oldestVersion {
                 lines.append(
-                    "Nextcloud \(limits.version). NextcloudAppleMail needs Nextcloud \(oldestVersion) or later.")
+                    "Nextcloud \(limits.version). NextcloudMailExtension needs Nextcloud \(oldestVersion) or later.")
                 passed = false
             } else {
                 lines.append("Nextcloud \(limits.version).")

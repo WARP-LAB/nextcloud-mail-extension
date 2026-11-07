@@ -8,7 +8,7 @@ DEVELOPMENT_TEAM =
 
 // The app's icon, App/AppIcon.icon, made with Icon Composer. Looked up by bundle ID, so that only the app target names
 // an icon, and this file stays the one place outside the project file for build settings both targets share.
-APP_ICON_lv_warp_nextcloudapplemail = AppIcon
+APP_ICON_lv_warp_nextcloudmailextension = AppIcon
 ASSETCATALOG_COMPILER_APPICON_NAME = $(APP_ICON_$(PRODUCT_BUNDLE_IDENTIFIER:identifier))
 
 #include? "Local.xcconfig"

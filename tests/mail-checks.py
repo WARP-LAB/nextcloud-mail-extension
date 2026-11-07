@@ -149,7 +149,7 @@ def run_check(name, check, run_folder, stamp):
     folder = run_folder / name
     settings = dict(DEFAULTS, **check.get('settings', {}))
     files = make_files(folder / 'files', check['files'])
-    subject = f'[ncam check] {name} {stamp}'
+    subject = f'[ncme check] {name} {stamp}'
     respond = check.get('respond')
     if respond:
         # The original: with the forward's file attached, kept by its own settings, and none for a reply.

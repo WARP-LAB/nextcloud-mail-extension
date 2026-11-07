@@ -1,7 +1,7 @@
 import Foundation
 import Testing
 
-@testable import NextcloudAppleMailShared
+@testable import NextcloudMailExtensionShared
 
 /// The email's password from the toolbar popover (FR7, R8).
 struct MessageValuesTests {

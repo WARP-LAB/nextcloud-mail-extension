@@ -2,7 +2,7 @@
 # Drives Apple Mail with AppleScript for the Mail checks, between the two accounts in .env (docs/TESTING.md,
 # "Driving Mail from the command line"). Their addresses stay in .env.
 # Usage:
-#   scripts/mail.sh send <A|B> <A|B> <subject> <body> <signature|none> [file ...]   signature: NCAM_MAIL_SIGNATURE
+#   scripts/mail.sh send <A|B> <A|B> <subject> <body> <signature|none> [file ...]   signature: NCME_MAIL_SIGNATURE
 #   scripts/mail.sh compose ...   as send, but leaves the message's window open without sending it
 #   scripts/mail.sh fetch <inbox|sent> <subject> <output file> [seconds to wait, default 240]
 #   scripts/mail.sh respond <reply|forward> <subject> <forward to: A|B> [file ...]   for a message in the inboxes
@@ -10,7 +10,7 @@
 # macOS only. The terminal's app needs the permissions listed in docs/TESTING.md.
 set -euo pipefail
 root="$(cd "$(dirname "$0")/.." && pwd)"
-app="${HOME}/Applications/NextcloudAppleMail.app/Contents/MacOS/NextcloudAppleMail"
+app="${HOME}/Applications/NextcloudMailExtension.app/Contents/MacOS/NextcloudMailExtension"
 
 usage() {
     sed -n '4,9p' "$0" | sed 's/^# //' >&2
@@ -28,8 +28,8 @@ set +a
 
 address() {
     case "$1" in
-        A) printf '%s' "${NCAM_MAIL_A_ADDRESS:?NCAM_MAIL_A_ADDRESS is not set in .env}" ;;
-        B) printf '%s' "${NCAM_MAIL_B_ADDRESS:?NCAM_MAIL_B_ADDRESS is not set in .env}" ;;
+        A) printf '%s' "${NCME_MAIL_A_ADDRESS:?NCME_MAIL_A_ADDRESS is not set in .env}" ;;
+        B) printf '%s' "${NCME_MAIL_B_ADDRESS:?NCME_MAIL_B_ADDRESS is not set in .env}" ;;
         *) usage ;;
     esac
 }
@@ -45,7 +45,7 @@ case "${command}" in
         body="$4"
         signature="none"
         if [[ "$5" == "signature" ]]; then
-            signature="${NCAM_MAIL_SIGNATURE:?NCAM_MAIL_SIGNATURE is not set in .env}"
+            signature="${NCME_MAIL_SIGNATURE:?NCME_MAIL_SIGNATURE is not set in .env}"
         fi
         shift 5
         osascript "${root}/scripts/mail/send.applescript" "${command}" "${from}" "${to}" "${subject}" "${body}" \

@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # Logs the installed app in to the test server in .env with a new app password, instead of the browser login, and
-# sets the upload directory to NCAM_TEST_DIRECTORY, so that the extension in Mail uploads there (D14).
+# sets the upload directory to NCME_TEST_DIRECTORY, so that the extension in Mail uploads there (D14).
 # Usage: scripts/use-test-account.sh [--log-out]. --log-out revokes the app password and deletes it again.
 # Needs a Debug build installed by scripts/install.sh, since Release builds leave these options out. macOS only.
 set -euo pipefail
 root="$(cd "$(dirname "$0")/.." && pwd)"
-app="${HOME}/Applications/NextcloudAppleMail.app/Contents/MacOS/NextcloudAppleMail"
+app="${HOME}/Applications/NextcloudMailExtension.app/Contents/MacOS/NextcloudMailExtension"
 
 case "${1:-}" in
     "") option=--use-test-account ;;

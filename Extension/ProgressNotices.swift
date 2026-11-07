@@ -9,7 +9,7 @@ final class ProgressNotices: @unchecked Sendable {
     static let delay: TimeInterval = 2
 
     private let center = UNUserNotificationCenter.current()
-    private let queue = DispatchQueue(label: "lv.warp.nextcloudapplemail.progress")
+    private let queue = DispatchQueue(label: "lv.warp.nextcloudmailextension.progress")
     private var waiting: [String: DispatchWorkItem] = [:]
     private var shown = Set<String>()
     private var started: [String: Date] = [:]
@@ -49,7 +49,7 @@ final class ProgressNotices: @unchecked Sendable {
         center.getNotificationSettings { [center] settings in
             let send = {
                 let content = UNMutableNotificationContent()
-                content.title = "NextcloudAppleMail"
+                content.title = "NextcloudMailExtension"
                 content.body = text
                 center.add(UNNotificationRequest(identifier: identifier, content: content, trigger: nil))
             }

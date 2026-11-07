@@ -63,12 +63,14 @@ enum NextcloudError: Error, Equatable, LocalizedError {
         case .notFound(let what):
             return "\(what) wasn't found on Nextcloud."
         case .unauthorized:
-            return "Nextcloud didn't accept the app password. Log in again in NextcloudAppleMail."
+            return "Nextcloud didn't accept the app password. Log in again in NextcloudMailExtension."
         case .rateLimited:
             return "Nextcloud allows only a limited number of new links in a few minutes. Try again in 10 minutes."
         case .offline:
             return "This Mac couldn't reach Nextcloud. If the server is on your local network, turn on "
-                + "NextcloudAppleMail in System Settings > Privacy & Security > Local Network."
+                + "NextcloudMailExtension and NextcloudMailExtensionPlugIn in System Settings > Privacy & Security > "
+                + "Local Network. If NextcloudMailExtensionPlugIn isn't listed, open the toolbar button in a message "
+                + "window, and allow it when macOS asks."
         case .server(let status, let reason):
             return reason.isEmpty ? "Nextcloud refused the request (HTTP \(status))." : "Nextcloud: \(reason)"
         case .invalidResponse(let what):

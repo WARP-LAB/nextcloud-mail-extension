@@ -193,7 +193,7 @@ actor Sender {
         do {
             return try await dependencies.connect()
         } catch let error as KeychainError {
-            throw SendError("NextcloudAppleMail couldn't read its app password. \(error.localizedDescription)")
+            throw SendError("NextcloudMailExtension couldn't read its app password. \(error.localizedDescription)")
         }
     }
 

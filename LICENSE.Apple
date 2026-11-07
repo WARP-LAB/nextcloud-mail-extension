@@ -1,6 +1,6 @@
-Apple's names in NextcloudAppleMail
+Apple's names in NextcloudMailExtension
 
-NextcloudAppleMail is an extension for Mail, the email app in Apple's macOS,
+NextcloudMailExtension is an extension for Mail, the email app in Apple's macOS,
 built with Apple's MailKit framework. This repository contains no code, artwork,
 icons or other files of Apple's, so this repository's MIT licence (LICENSE)
 covers only the project's own work. The symbols the app shows, such as the eye
@@ -10,7 +10,7 @@ Apple, AppleScript, Finder, iCloud, Keychain, Mac, macOS, Mail Drop, SF Symbols,
 Spotlight, Swift, SwiftUI and Xcode are trademarks of Apple Inc., registered in
 the U.S. and other countries and regions.
 
-NextcloudAppleMail is not made, endorsed or supported by Apple Inc.
+NextcloudMailExtension is not made, endorsed or supported by Apple Inc.
 
 
 Mail and the tools
@@ -36,5 +36,6 @@ Apple's guidelines allow naming Apple's products to say what a product works
 with, in phrases such as "for use with" or "compatible with", as long as Apple's
 name isn't part of the product's name. They also say: "You may not use or
 register, in whole or in part, Apple, ... or any other Apple trademark" as, or as
-part of, a company, product or service name. This project has Apple in its name,
-NextcloudAppleMail, which goes beyond that.
+part of, a company, product or service name. The project's name,
+NextcloudMailExtension, contains no Apple trademark, and the project names Apple's
+products only to say what it works with.

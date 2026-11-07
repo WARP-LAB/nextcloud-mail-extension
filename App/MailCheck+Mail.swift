@@ -26,5 +26,5 @@ extension MailCheck {
 
     static let noAnswer =
         "The extension didn't answer within a minute. Check that a new message window opened in Mail, and that "
-        + "NextcloudAppleMail is turned on in Mail's Settings > Extensions."
+        + "NextcloudMailExtension is turned on in Mail's Settings > Extensions."
 }

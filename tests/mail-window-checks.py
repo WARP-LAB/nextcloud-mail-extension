@@ -123,9 +123,9 @@ def env():
 def folders_for(subject):
     """The names of the email folders on Nextcloud that end with the subject."""
     values = env()
-    url = (f'{values["NCAM_TEST_SERVER_URL"]}/remote.php/dav/files/{values["NCAM_TEST_USERNAME"]}/'
-           f'{urllib.parse.quote(values["NCAM_TEST_DIRECTORY"])}/')
-    listing = subprocess.run(['curl', '-sS', '-u', f'{values["NCAM_TEST_USERNAME"]}:{values["NCAM_TEST_PASSWORD"]}',
+    url = (f'{values["NCME_TEST_SERVER_URL"]}/remote.php/dav/files/{values["NCME_TEST_USERNAME"]}/'
+           f'{urllib.parse.quote(values["NCME_TEST_DIRECTORY"])}/')
+    listing = subprocess.run(['curl', '-sS', '-u', f'{values["NCME_TEST_USERNAME"]}:{values["NCME_TEST_PASSWORD"]}',
                               '-X', 'PROPFIND', '-H', 'Depth: 1', url], capture_output=True, text=True, check=True)
     names = [urllib.parse.unquote(href).rstrip('/').split('/')[-1] for href in re.findall(r'<d:href>([^<]*)</d:href>',
                                                                                          listing.stdout)]
@@ -166,7 +166,7 @@ class Run:
         self.results.append((what, bool(ok), detail))
 
     def subject(self, name):
-        return f'[ncam check] {name} {self.stamp}'
+        return f'[ncme check] {name} {self.stamp}'
 
     def file(self, name, size):
         path = self.folder / name
@@ -318,7 +318,7 @@ def close_test_windows():
     """Closes test messages left open by an earlier check, without saving them."""
     names = [name.strip() for name in in_mail('return name of every window').split(',')]
     for name in names:
-        if '[ncam check]' not in name:
+        if '[ncme check]' not in name:
             continue
         mail_in_front()
         try:
@@ -416,7 +416,7 @@ def check_t39(run):
     subject, _, received = mail_drop(run, 't39-mail-drop', 'Use Mail Drop')
     if received:
         raw = received.read_bytes()
-        server = env()['NCAM_TEST_SERVER_URL'].encode()
+        server = env()['NCME_TEST_SERVER_URL'].encode()
         run.expect('the email has Mail Drop\'s link', b'Remote-Attachment-Url' in raw or b'icloud.com' in raw)
         run.expect('the email has no Nextcloud links', server not in raw)
         time.sleep(10)
@@ -429,10 +429,10 @@ def check_t39(run):
 def type_password(subject, password):
     """Types the email's password in the toolbar popover, replacing what's there, and closes the popover."""
     mail_in_front()
-    in_mail('click (first button of toolbar 1 of window (item 1 of argv) whose description is "NextcloudAppleMail")',
+    in_mail('click (first button of toolbar 1 of window (item 1 of argv) whose description is "NextcloudMailExtension")',
             subject)
     field = ('text field 1 of group 1 of pop over 1 of (first button of toolbar 1 of window (item 1 of argv) '
-             'whose description is "NextcloudAppleMail")')
+             'whose description is "NextcloudMailExtension")')
     wait(lambda: in_mail(f'return exists {field}', subject) == 'true', 15, 'no password field in the popover')
     in_mail(f'set value of attribute "AXFocused" of {field} to true', subject)
     mail_in_front()
@@ -453,7 +453,7 @@ def password_protected(received, name, data, password):
         return False, f'links for: {sorted(found)}, attached: {sorted(attached)}'
     page = checks.curl(link['download'])
     token = re.search(r'/s/([^/?]+)', link['download'])[1]
-    server = env()['NCAM_TEST_SERVER_URL']
+    server = env()['NCME_TEST_SERVER_URL']
     dav = f'{server}/public.php/dav/files/{token}/{urllib.parse.quote(name)}'
     if '?files=' not in link['download']:
         dav = f'{server}/public.php/dav/files/{token}'
@@ -465,7 +465,7 @@ def password_protected(received, name, data, password):
 def check_t36(run):
     """A password typed in the popover protects every link, and the email doesn't contain it (t36)."""
     subject = run.subject('t36-password')
-    password = 'ncam-' + os.urandom(6).hex()
+    password = 'ncme-' + os.urandom(6).hex()
     data_path = run.file('t36.bin', 5000)
     checks.app_settings(dict(checks.DEFAULTS, folderLinks=True))
     second = run.file('t36-second.bin', 3000)
@@ -570,7 +570,7 @@ def check_t37_restart(run):
 def check_t37(run, restart=False):
     """The password survives closing and reopening the draft (t37)."""
     subject = run.subject('t37-restart' if restart else 't37-draft-password')
-    password = 'ncam-' + os.urandom(6).hex()
+    password = 'ncme-' + os.urandom(6).hex()
     data_path = run.file('t37.bin', 5000)
     checks.app_settings(checks.DEFAULTS)
     checks.mail('compose', 'A', 'B', subject, 'Check t37: a password kept through the draft.', 'none',
@@ -585,7 +585,7 @@ def check_t37(run, restart=False):
     time.sleep(5)
     if restart:
         restart_mail()
-    reopen_draft(subject, env()['NCAM_MAIL_A_ACCOUNT'])
+    reopen_draft(subject, env()['NCME_MAIL_A_ACCOUNT'])
     run.expect('the draft opened again', True)
     click_send(subject)
     ok, detail = password_protected(run.fetch(subject, 't37-received.eml'), 't37.bin', data_path.read_bytes(),
@@ -607,7 +607,7 @@ def check_password_refused(run):
     click_sheet_button(subject, 'OK')
     time.sleep(1)
     run.expect('the window stays open', window_exists(subject))
-    password = 'ncam-' + os.urandom(6).hex()
+    password = 'ncme-' + os.urandom(6).hex()
     type_password(subject, password)
     click_send(subject)
     ok, detail = password_protected(run.fetch(subject, 't6-policy-received.eml'), 't6-policy.bin',
@@ -618,8 +618,8 @@ def check_password_refused(run):
 def server_setting(key, value):
     """Sets or, with None, deletes a key of the test server's core app config (D18)."""
     values = env()
-    url = f'{values["NCAM_TEST_SERVER_URL"]}/ocs/v2.php/apps/provisioning_api/api/v1/config/apps/core/{key}'
-    command = ['curl', '-sS', '-u', f'{values["NCAM_TEST_USERNAME"]}:{values["NCAM_TEST_PASSWORD"]}',
+    url = f'{values["NCME_TEST_SERVER_URL"]}/ocs/v2.php/apps/provisioning_api/api/v1/config/apps/core/{key}'
+    command = ['curl', '-sS', '-u', f'{values["NCME_TEST_USERNAME"]}:{values["NCME_TEST_PASSWORD"]}',
                '-H', 'OCS-APIRequest: true', '-H', 'Accept: application/json']
     if value is None:
         command += ['-X', 'DELETE', url]
@@ -645,7 +645,7 @@ def check_password_required(run):
         run.expect('the alert asks for a password', 'requires a password' in texts, texts)
         click_sheet_button(subject, 'OK')
         time.sleep(1)
-        password = 'ncam-' + os.urandom(6).hex()
+        password = 'ncme-' + os.urandom(6).hex()
         type_password(subject, password)
         click_send(subject)
         received = run.fetch(subject, 't6-required-received.eml')
@@ -676,7 +676,7 @@ def set_sign(subject, on):
 
 def restore_sign():
     """Turns Sign back on for later messages, through a window that's closed again without saving."""
-    subject = '[ncam check] restoring Sign ' + time.strftime('%H%M%S')
+    subject = '[ncme check] restoring Sign ' + time.strftime('%H%M%S')
     checks.mail('compose', 'A', 'B', subject, 'Restoring Sign.', 'none')
     try:
         set_sign(subject, True)
@@ -839,7 +839,7 @@ def notification_texts():
 
 
 def notifications_allowed():
-    """Whether macOS lets NextcloudAppleMail notify, as the installed Debug build reports it."""
+    """Whether macOS lets NextcloudMailExtension notify, as the installed Debug build reports it."""
     return checks.mail('app', '--notification-status', capture=True).strip() == 'allowed'
 
 
@@ -847,7 +847,7 @@ def notifications_allowed():
 def check_t8(run):
     """A slow upload shows a notification while it runs, and another when it's done (R3)."""
     if not notifications_allowed():
-        raise CheckError('NextcloudAppleMail may not notify yet: allow it when macOS asks')
+        raise CheckError('NextcloudMailExtension may not notify yet: allow it when macOS asks')
     subject = run.subject('t8-progress')
     data_path = run.file('t8.bin', 30_000_000)
     checks.app_settings(checks.DEFAULTS)
@@ -878,12 +878,12 @@ def check_t8(run):
 # MARK: The popover's link choice, expiry and settings button
 
 POPOVER = ('group 1 of pop over 1 of (first button of toolbar 1 of window (item 1 of argv) '
-           'whose description is "NextcloudAppleMail")')
+           'whose description is "NextcloudMailExtension")')
 
 
 def open_popover(subject):
     mail_in_front()
-    in_mail('click (first button of toolbar 1 of window (item 1 of argv) whose description is "NextcloudAppleMail")',
+    in_mail('click (first button of toolbar 1 of window (item 1 of argv) whose description is "NextcloudMailExtension")',
             subject)
     wait(lambda: in_mail(f'return exists {POPOVER}', subject) == 'true', 15, 'the popover didn\'t open')
 
@@ -959,17 +959,17 @@ def check_all_files(run):
 
 
 def check_open_settings(run):
-    """The popover's Settings… button opens the NextcloudAppleMail app."""
-    osa('tell application id "lv.warp.nextcloudapplemail" to if it is running then quit')
-    wait(lambda: subprocess.run(['pgrep', '-f', 'NextcloudAppleMail.app/Contents/MacOS/NextcloudAppleMail$'],
+    """The popover's Settings… button opens the NextcloudMailExtension app."""
+    osa('tell application id "lv.warp.nextcloudmailextension" to if it is running then quit')
+    wait(lambda: subprocess.run(['pgrep', '-f', 'NextcloudMailExtension.app/Contents/MacOS/NextcloudMailExtension$'],
                                 capture_output=True).returncode != 0, 30, 'the app didn\'t quit')
     subject = run.subject('open-settings')
     checks.mail('compose', 'A', 'B', subject, 'Check: the Settings button.', 'none')
     open_popover(subject)
     # The button has no name here, only its tooltip.
-    in_mail(f'click (first button of {POPOVER} whose help is "Open NextcloudAppleMail\'s settings")', subject)
+    in_mail(f'click (first button of {POPOVER} whose help is "Open NextcloudMailExtension\'s settings")', subject)
     wait(lambda: osa('tell application "System Events" to return exists (first process whose bundle identifier '
-                     'is "lv.warp.nextcloudapplemail")') == 'true', 30, 'the app didn\'t open')
+                     'is "lv.warp.nextcloudmailextension")') == 'true', 30, 'the app didn\'t open')
     run.expect('the app opened', True)
     close_test_windows()
 

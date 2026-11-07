@@ -1,7 +1,7 @@
 import Foundation
 import Testing
 
-@testable import NextcloudAppleMailShared
+@testable import NextcloudMailExtensionShared
 
 /// The rewriter when the email has only the folder's links (FR8, D17).
 struct LinkListingTests {

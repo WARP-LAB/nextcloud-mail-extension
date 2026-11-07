@@ -78,6 +78,10 @@ private final class PasswordPopover: MEExtensionViewController {
 
 /// Which of the email's files become links (FR3), its password (FR7), its own link expiry if it should differ from
 /// the settings' (FR4), and a way to the app's settings.
+///
+/// It checks the connection quietly as it opens, and shows only a problem. A request from the open popover is also
+/// what makes macOS ask whether the extension may use the local network, which a send in the background never does
+/// (docs/MAIL.md).
 private struct PopoverView: View {
     let context: UUID
     /// Told the view's size whenever it changes.
@@ -88,6 +92,8 @@ private struct PopoverView: View {
     @State private var passwordShown = false
     @State private var ownExpiry: Bool
     @State private var expiry: LinkExpiry
+    /// The connection check's problem, or nil while it runs and when it passes.
+    @State private var problem: String?
 
     init(context: UUID, resized: @escaping (CGSize) -> Void) {
         self.context = context
@@ -107,7 +113,7 @@ private struct PopoverView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("NextcloudAppleMail").font(.headline)
+            Text("NextcloudMailExtension").font(.headline)
             Divider()
             linksSection
             Divider()
@@ -124,11 +130,29 @@ private struct PopoverView: View {
                 Button("Settings…", action: Self.openApp)
                     .help(Self.settingsHelp)
             }
+            if let problem {
+                Text(problem)
+                    .font(.footnote)
+                    .foregroundStyle(.red)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .textSelection(.enabled)
+            }
         }
         .padding(16)
         .frame(width: 400, alignment: .topLeading)
         .fixedSize(horizontal: false, vertical: true)
         .onGeometryChange(for: CGSize.self, of: \.size) { resized($0) }
+        .task { await checkConnection() }
+    }
+
+    /// Runs the connection check when someone is logged in; the account line says when nobody is. On a failure the
+    /// report's last line says what went wrong, such as the local network being refused or the server's error.
+    private func checkConnection() async {
+        guard Self.loggedIn else {
+            return
+        }
+        let report = await ConnectionCheck.runWithSharedStorage()
+        problem = report.passed ? nil : report.lines.last
     }
 
     /// FR3, for this email.
@@ -200,13 +224,20 @@ private struct PopoverView: View {
     }
 
     /// The Settings… button's tooltip, which the Mail checks also find it by.
-    static let settingsHelp = "Open NextcloudAppleMail's settings"
+    static let settingsHelp = "Open NextcloudMailExtension's settings"
 
-    /// Opens the app the extension is in, `NextcloudAppleMail.app`, three folders up from the extension.
+    /// Opens the app the extension is in, `NextcloudMailExtension.app`, three folders up from the extension.
     private static func openApp() {
         let app = Bundle.main.bundleURL.deletingLastPathComponent().deletingLastPathComponent()
             .deletingLastPathComponent()
         NSWorkspace.shared.openApplication(at: app, configuration: NSWorkspace.OpenConfiguration())
+    }
+
+    private static var loggedIn: Bool {
+        guard let group = SharedStorage.appGroupIdentifier else {
+            return false
+        }
+        return (try? Credentials(group: group).load()) != nil
     }
 
     private static var account: String {
@@ -215,7 +246,7 @@ private struct PopoverView: View {
         }
         do {
             guard let account = try Credentials(group: group).load() else {
-                return "Not logged in. Log in in the NextcloudAppleMail app."
+                return "Not logged in. Log in in the NextcloudMailExtension app."
             }
             return "\(account.loginName) on \(account.server.host ?? account.server.absoluteString)"
         } catch {

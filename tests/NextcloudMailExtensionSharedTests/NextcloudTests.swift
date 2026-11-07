@@ -1,7 +1,7 @@
 import Foundation
 import Testing
 
-@testable import NextcloudAppleMailShared
+@testable import NextcloudMailExtensionShared
 
 /// The Nextcloud client's parsing and URLs, without a server. The server tests are in tests/NextcloudServerTests.
 struct NextcloudClientTests {

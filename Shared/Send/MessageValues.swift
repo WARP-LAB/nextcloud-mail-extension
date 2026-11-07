@@ -41,11 +41,11 @@ struct KeychainVault: MessageVault {
 /// the message ID, and the value is also kept in the Keychain under the message ID, which survives Mail restarting
 /// (R8, docs/MAIL.md). A password is never logged, and never written anywhere else.
 final class MessageValues: @unchecked Sendable {
-    static let passwords = MessageValues(service: "lv.warp.nextcloudapplemail.message-password")
+    static let passwords = MessageValues(service: "lv.warp.nextcloudmailextension.message-password")
     /// Each email's own link expiry, as `LinkExpiry` JSON. Not secret, but kept the same way.
-    static let expiries = MessageValues(service: "lv.warp.nextcloudapplemail.message-expiry")
+    static let expiries = MessageValues(service: "lv.warp.nextcloudmailextension.message-expiry")
     /// Each email's `LinkChoice`, as its raw value, when it isn't `useSettings`. Not secret either.
-    static let linkChoices = MessageValues(service: "lv.warp.nextcloudapplemail.message-links")
+    static let linkChoices = MessageValues(service: "lv.warp.nextcloudmailextension.message-links")
 
     private let lock = NSLock()
     private let vault: MessageVault?

@@ -1,7 +1,7 @@
 import Foundation
 import Testing
 
-@testable import NextcloudAppleMailShared
+@testable import NextcloudMailExtensionShared
 
 /// The settings' defaults and storage, and the server address check (T2).
 struct SettingsTests {
@@ -60,7 +60,7 @@ struct SettingsTests {
     }
 
     @Test func storesInDefaults() throws {
-        let suite = "lv.warp.nextcloudapplemail.tests.\(UUID().uuidString)"
+        let suite = "lv.warp.nextcloudmailextension.tests.\(UUID().uuidString)"
         let defaults = try #require(UserDefaults(suiteName: suite))
         defer {
             defaults.removePersistentDomain(forName: suite)

@@ -1,7 +1,7 @@
 import Foundation
 import Testing
 
-@testable import NextcloudAppleMailShared
+@testable import NextcloudMailExtensionShared
 
 /// The anonymised messages from the probe in Fixtures/, made by tests/make-fixtures.py. Files in them are shrunk to
 /// 1/1000 of their size, so "dummy-10MB.bin" has 10,000 bytes.

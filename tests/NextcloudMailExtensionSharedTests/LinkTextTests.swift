@@ -1,7 +1,7 @@
 import Foundation
 import Testing
 
-@testable import NextcloudAppleMailShared
+@testable import NextcloudMailExtensionShared
 
 struct LinkTextTests {
     func file(expiry: ExpiryDate? = Links.expiry) throws -> LinkedFile {

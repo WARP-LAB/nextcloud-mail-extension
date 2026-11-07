@@ -1,25 +1,25 @@
 import Foundation
 import Testing
 
-@testable import NextcloudAppleMailShared
+@testable import NextcloudMailExtensionShared
 
 /// The test server in .env (D14). These tests run only from scripts/test-nextcloud.sh, which loads it. Each test
-/// works on its own app password and in its own folder inside `NCAM_TEST_DIRECTORY`, and deletes both.
+/// works on its own app password and in its own folder inside `NCME_TEST_DIRECTORY`, and deletes both.
 enum TestServer {
     static let environment = ProcessInfo.processInfo.environment
-    static let configured = environment["NCAM_TEST_SERVER_URL"] != nil
+    static let configured = environment["NCME_TEST_SERVER_URL"] != nil
 
     static var directory: String {
-        environment["NCAM_TEST_DIRECTORY"] ?? "NextcloudAppleMailTests"
+        environment["NCME_TEST_DIRECTORY"] ?? "NextcloudMailExtensionTests"
     }
 
     static func server() throws -> URL {
-        try #require(environment["NCAM_TEST_SERVER_URL"].flatMap { URL(string: $0) })
+        try #require(environment["NCME_TEST_SERVER_URL"].flatMap { URL(string: $0) })
     }
 
     static func account() async throws -> NextcloudAccount {
-        let login = try #require(environment["NCAM_TEST_USERNAME"])
-        let password = try #require(environment["NCAM_TEST_PASSWORD"])
+        let login = try #require(environment["NCME_TEST_USERNAME"])
+        let password = try #require(environment["NCME_TEST_PASSWORD"])
         return try await NextcloudClient.appPassword(server: try server(), loginName: login, password: password)
     }
 
@@ -80,7 +80,7 @@ enum TestServer {
     }
 
     static func newPassword() -> String {
-        "ncam-" + UUID().uuidString.prefix(13)
+        "ncme-" + UUID().uuidString.prefix(13)
     }
 }
 
@@ -155,7 +155,7 @@ struct NextcloudServerTests {
     @Test func sharesAFileWithLinksThatWork() async throws {
         try await TestServer.withFolder("share") { client, folder in
             let contents = Data("Pārskats\n".utf8)
-            let file = FileManager.default.temporaryDirectory.appendingPathComponent("ncam-\(UUID().uuidString).txt")
+            let file = FileManager.default.temporaryDirectory.appendingPathComponent("ncme-\(UUID().uuidString).txt")
             try contents.write(to: file)
             defer {
                 try? FileManager.default.removeItem(at: file)

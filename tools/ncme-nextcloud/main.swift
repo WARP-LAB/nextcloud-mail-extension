@@ -1,6 +1,6 @@
 import Foundation
 
-@testable import NextcloudAppleMailShared
+@testable import NextcloudMailExtensionShared
 
 // Runs the Nextcloud client's requests by hand, against the test server in .env (D14, docs/TESTING.md). Start it
 // with scripts/nextcloud.sh, which loads .env. Each run uses a new app password and revokes it at the end.
@@ -15,7 +15,7 @@ let usage = """
       unshare <share-id>                      delete a share
       rm <path>                               delete a file, or a folder with everything in it
       login                                   try the browser login, then revoke the app password it gave
-    Paths are relative to the account's files, such as NextcloudAppleMailDir001/test/a.txt.
+    Paths are relative to the account's files, such as NextcloudMailExtensionDir001/test/a.txt.
     """
 
 struct ToolError: LocalizedError {
@@ -86,15 +86,15 @@ func run(_ arguments: [String]) async throws {
         print(usage)
         return
     }
-    guard let server = URL(string: try setting("NCAM_TEST_SERVER_URL")) else {
-        throw ToolError("NCAM_TEST_SERVER_URL isn't a URL.")
+    guard let server = URL(string: try setting("NCME_TEST_SERVER_URL")) else {
+        throw ToolError("NCME_TEST_SERVER_URL isn't a URL.")
     }
     if command == "login" {
         try await login(server)
         return
     }
     let account = try await NextcloudClient.appPassword(
-        server: server, loginName: try setting("NCAM_TEST_USERNAME"), password: try setting("NCAM_TEST_PASSWORD"))
+        server: server, loginName: try setting("NCME_TEST_USERNAME"), password: try setting("NCME_TEST_PASSWORD"))
     let client = try await NextcloudClient.connect(account)
     do {
         try await perform(command, Array(arguments.dropFirst()), client)

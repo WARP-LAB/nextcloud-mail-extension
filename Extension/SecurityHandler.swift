@@ -89,7 +89,7 @@ final class SecurityHandler: NSObject, MEMessageSecurityHandler {
             return MEMessageEncodingResult(encodedMessage: message, signingError: nil, encryptionError: nil)
         case .failed(let text):
             let error = NSError(
-                domain: "lv.warp.nextcloudapplemail", code: 1, userInfo: [NSLocalizedDescriptionKey: text])
+                domain: "lv.warp.nextcloudmailextension", code: 1, userInfo: [NSLocalizedDescriptionKey: text])
             return MEMessageEncodingResult(encodedMessage: nil, signingError: error, encryptionError: nil)
         }
     }
