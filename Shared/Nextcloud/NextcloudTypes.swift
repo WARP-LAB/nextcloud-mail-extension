@@ -47,12 +47,38 @@ enum NextcloudError: Error, Equatable, LocalizedError {
     case unauthorized
     /// Too many requests: Nextcloud allows each user 20 new shares in 10 minutes by default (docs/NEXTCLOUD.md).
     case rateLimited
-    /// The server couldn't be reached. macOS also reports this when Local Network privacy blocks a server on the
-    /// local network (docs/MAIL.md).
+    /// The server couldn't be reached although the Mac has a network: what macOS also reports when Local Network
+    /// privacy blocks a server on the local network (docs/MAIL.md).
     case offline
+    /// The Mac has no network at all (T21).
+    case noNetwork
+    /// The server's name doesn't resolve (T21).
+    case cannotFindServer
+    /// Nothing accepts connections at the server's address, as when its web server is stopped (T21).
+    case cannotConnect
+    /// The server didn't answer in time (T21).
+    case timedOut
+    /// Nextcloud is in maintenance mode: 503 with `X-Nextcloud-Maintenance-Mode: 1`, or WebDAV's
+    /// `ServerMaintenanceMode` (T21, docs/NEXTCLOUD.md).
+    case maintenance
+    /// A gateway error, 502, 503 or 504, as when the web server runs but PHP doesn't (T21).
+    case unavailable(status: Int)
+    /// An answer that isn't Nextcloud's, such as a web server's own error page when the site is switched off (T21).
+    case notNextcloud(status: Int)
     /// Any other refusal, with the server's reason.
     case server(status: Int, reason: String)
     case invalidResponse(String)
+
+    /// Whether the server or the network is unavailable, rather than refusing this request (T21).
+    var serverUnavailable: Bool {
+        switch self {
+        case .offline, .noNetwork, .cannotFindServer, .cannotConnect, .timedOut, .maintenance, .unavailable,
+            .notNextcloud:
+            return true
+        default:
+            return false
+        }
+    }
 
     var errorDescription: String? {
         switch self {
@@ -71,6 +97,23 @@ enum NextcloudError: Error, Equatable, LocalizedError {
                 + "NextcloudMailExtension and NextcloudMailExtensionPlugIn in System Settings > Privacy & Security > "
                 + "Local Network. If NextcloudMailExtensionPlugIn isn't listed, open the toolbar button in a message "
                 + "window, and allow it when macOS asks."
+        case .noNetwork:
+            return "This Mac isn't connected to a network, so files can't become links."
+        case .cannotFindServer:
+            return "This Mac couldn't find the Nextcloud server. Check the network, or the server's address in "
+                + "NextcloudMailExtension."
+        case .cannotConnect:
+            return "The Nextcloud server doesn't accept connections at the moment, so it may be down. Try again later."
+        case .timedOut:
+            return "The Nextcloud server didn't answer in time. It may be down, or the network may be slow."
+        case .maintenance:
+            return "Nextcloud is in maintenance mode, so files can't become links until it's back. Try again later."
+        case .unavailable(let status):
+            return "The Nextcloud server isn't working at the moment (HTTP \(status)), so files can't become links. "
+                + "Try again later, or tell the server's admin."
+        case .notNextcloud(let status):
+            return "The server didn't answer as Nextcloud (HTTP \(status)). It may be down, or its address may have "
+                + "changed: check it in NextcloudMailExtension."
         case .server(let status, let reason):
             return reason.isEmpty ? "Nextcloud refused the request (HTTP \(status))." : "Nextcloud: \(reason)"
         case .invalidResponse(let what):

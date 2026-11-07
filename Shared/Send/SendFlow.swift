@@ -30,6 +30,9 @@ struct SendError: Error, Equatable, LocalizedError {
         "Your Nextcloud server requires a password on links. Set one with NextcloudMailExtension's button in the "
             + "message window's toolbar, then send again.")
 
+    /// How to send anyway while the server or the network is unavailable (T21).
+    static let sendAttachedHint = "To send the email now with its files attached, turn off Sign and send again."
+
     static func file(_ name: String, _ error: Error) -> SendError {
         SendError("NextcloudMailExtension couldn't upload or share “\(name)”. \(error.localizedDescription)")
     }

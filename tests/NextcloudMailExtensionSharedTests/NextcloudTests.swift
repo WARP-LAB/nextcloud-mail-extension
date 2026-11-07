@@ -86,10 +86,9 @@ struct NextcloudClientTests {
 
     @Test func saysWhereToAllowAServerThatCantBeReached() async {
         await #expect(throws: NextcloudError.offline) {
-            try await NextcloudClient.reaching(retryDelay: 0) { throw URLError(.notConnectedToInternet) }
-        }
-        await #expect(throws: URLError(.timedOut)) {
-            try await NextcloudClient.reaching(retryDelay: 0) { throw URLError(.timedOut) }
+            try await NextcloudClient.reaching(retryDelay: 0, hasNetwork: ServerUnavailableTests.online) {
+                throw URLError(.notConnectedToInternet)
+            }
         }
         #expect(NextcloudError.offline.localizedDescription.contains("Local Network"))
     }

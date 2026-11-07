@@ -265,43 +265,11 @@ struct NextcloudClient {
 
     private static func send(_ request: URLRequest, _ session: URLSession) async throws -> (Data, Int) {
         let (data, response) = try await reaching { try await session.data(for: request) }
-        return (data, try status(of: response))
-    }
-
-    /// Runs a request, turning "offline", which is also what a server blocked by Local Network privacy gives, into
-    /// `NextcloudError.offline`, which says where to allow it. "Offline" is retried once after `retryDelay`: macOS
-    /// refuses the first request a new build makes to the local network even when it's allowed, then lets the next
-    /// one through (docs/MAIL.md, "Network").
-    static func reaching<T>(retryDelay: UInt64 = 1_000_000_000, _ request: () async throws -> T) async throws -> T {
-        do {
-            return try await request()
-        } catch let error as URLError where error.code == .notConnectedToInternet {
-            try await Task.sleep(nanoseconds: retryDelay)
-            do {
-                return try await request()
-            } catch let error as URLError where error.code == .notConnectedToInternet {
-                throw NextcloudError.offline
-            }
-        }
-    }
-
-    /// The response's status, after throwing for the ones every request treats the same.
-    static func status(of response: URLResponse) throws -> Int {
-        guard let http = response as? HTTPURLResponse else {
-            throw NextcloudError.invalidResponse("a request")
-        }
-        switch http.statusCode {
-        case 401:
-            throw NextcloudError.unauthorized
-        case 429:
-            throw NextcloudError.rateLimited
-        default:
-            return http.statusCode
-        }
+        return (data, try status(of: response, data: data))
     }
 
     private static func checkUpload(_ data: Data, _ response: URLResponse, _ path: String) throws {
-        let status = try status(of: response)
+        let status = try status(of: response, data: data)
         switch status {
         case 200, 201, 204:
             return
@@ -352,6 +320,10 @@ extension NextcloudClient {
         let decoder = JSONDecoder()
         decoder.keyDecodingStrategy = .convertFromSnakeCase
         guard let meta = try? decoder.decode(OCSEnvelope<Ignored>.self, from: data).ocs.meta else {
+            if (400...499).contains(status) {
+                // Not Nextcloud answering, such as the web server's own page with the site switched off (T21).
+                throw NextcloudError.notNextcloud(status: status)
+            }
             throw NextcloudError.server(status: status, reason: HTTPURLResponse.localizedString(forStatusCode: status))
         }
         guard (200...299).contains(status), meta.statuscode == 100 || meta.statuscode == 200 else {

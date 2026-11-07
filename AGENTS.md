@@ -42,6 +42,7 @@ swift test                  # unit tests of Shared/, from tests/
 tests/make-fixtures.py      # remake the anonymised test messages from probe/test-results/ (local only)
 scripts/test-nextcloud.sh   # the server tests, against the test server in .env; --server-settings for the enforced ones
 scripts/nextcloud.sh        # run single Nextcloud requests by hand, with no arguments for the list
+scripts/server-state.sh     # take the test server down (maintenance, php, site) and back, over SSH (D29)
 scripts/lint.sh [--fix]     # all linters on every file git doesn't ignore, with --fix applying automatic fixes first
 scripts/install.sh          # copy the build to ~/Applications and register the extension (see Boundaries)
 scripts/use-test-account.sh # log the installed Debug build in to the test server in .env, or --log-out
@@ -90,7 +91,7 @@ Only what isn't obvious from directory names:
 - Send test emails only to the user's own addresses.
 - Installing, uninstalling or registering Mail extensions needs the user's permission. The user can allow it explicitly for a stretch of work, and withdraw it again. Without a permission that is still current, ask first.
 - Changing Mail's own settings, such as enabling an extension or choosing it for message security, is left to the user. Never tick "Don't ask again" in Mail's prompts.
-- Use only the Nextcloud test server.
+- Use only the Nextcloud test server. Take it down only with `scripts/server-state.sh`, whose `with` always brings it back (D29).
 
 ## Common mistakes by agents or HITL
 

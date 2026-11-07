@@ -50,6 +50,23 @@ Changing or deleting a key asks for the password to be confirmed. An app passwor
 
 The test server has no default expiry and no enforced password. Its password policy asks for 10 characters, and rejects common passwords and ones found in Have I Been Pwned.
 
+## Unavailable
+
+What the client gets when the server or the network is unavailable, with each server state set by `scripts/server-state.sh` on the test server (T21, 2026-11-07), and the `NextcloudError` it becomes:
+
+| State | What the requests get | Error |
+| --- | --- | --- |
+| Maintenance mode (`occ maintenance:mode --on`) | OCS: 503 with `X-Nextcloud-Maintenance-Mode: 1` and "Service unavailable". WebDAV: 503 with `ServerMaintenanceMode`, "System is in maintenance mode." `status.php`: 200 with `"maintenance": true` | `maintenance` |
+| PHP-FPM down, nginx running | Every request: nginx's 502 Bad Gateway page | `unavailable(status: 502)` |
+| The site switched off in nginx | The server's default site: OCS 404 and WebDAV 405, as HTML pages. `status.php` still answered, from another site | `notNextcloud(status: 404)` |
+| A name that doesn't resolve | URLSession -1003, "A server with the specified hostname could not be found." | `cannotFindServer` |
+| Nothing listening at the address | -1004, "Could not connect to the server." | `cannotConnect` |
+| No answer | -1001, "The request timed out.", after up to 60 seconds | `timedOut` |
+| No network | -1009, like a request Local Network privacy blocks. The client asks `NWPathMonitor` whether the Mac has a network at all | `noNetwork`, else `offline` |
+
+- **Where it shows:** every request goes through `NextcloudClient+Network.swift`, so the app's Test connection, the popover's red text and Mail's send alert give the same text. The send's alert adds how to send anyway: turn off Sign, and the files go attached.
+- **Not tried live:** no network, and a failing DNS, which would cut this Mac off; the unit tests cover them with the errors URLSession reports.
+
 ## Rate limit
 
 Nextcloud 34 and 35 allow each user 20 share creations in 10 minutes: `createShare` has `#[UserRateLimit(limit: 20, period: 600)]`. Refused attempts count too. The 21st gets HTTP 429 "Too Many Requests", seen when the server tests ran twice in a row. Uploads, folders and password changes aren't limited this way.
