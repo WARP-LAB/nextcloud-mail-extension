@@ -65,9 +65,13 @@ enum DebugCommands {
     /// Draws the settings window off screen and prints it as a PNG in base64, so that its layout can be checked
     /// without a screen or Screen Recording.
     @MainActor
-    static func renderWindow() -> Bool {
+    static func renderWindow(loggedOut: Bool) -> Bool {
         _ = NSApplication.shared
-        let view = NSHostingView(rootView: SettingsView(model: AppModel()))
+        let model = AppModel()
+        if loggedOut {
+            model.showLoggedOutForDrawing()
+        }
+        let view = NSHostingView(rootView: SettingsView(model: model))
         view.frame = NSRect(x: 0, y: 0, width: 640, height: 2000)
         let window = NSWindow(contentRect: view.frame, styleMask: [.titled], backing: .buffered, defer: false)
         window.contentView = view

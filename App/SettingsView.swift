@@ -6,18 +6,25 @@ struct SettingsView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            Form {
-                AccountSection(model: model)
-                uploads
-                files
-                sharing
-                links
-                expiration
-                warnings
-                check
-                SetupHelp()
+            ScrollViewReader { scroller in
+                Form {
+                    if model.account == nil {
+                        setupButton {
+                            withAnimation { scroller.scrollTo(SetupHelp.id, anchor: .top) }
+                        }
+                    }
+                    AccountSection(model: model)
+                    uploads
+                    files
+                    sharing
+                    links
+                    expiration
+                    warnings
+                    check
+                    SetupHelp().id(SetupHelp.id)
+                }
+                .formStyle(.grouped)
             }
-            .formStyle(.grouped)
             Text(Self.version)
                 .font(.caption)
                 .foregroundStyle(.secondary)
@@ -25,6 +32,19 @@ struct SettingsView: View {
                 .padding(.vertical, 6)
         }
         .frame(minWidth: 560, idealWidth: 640, minHeight: 600, idealHeight: 860)
+    }
+
+    /// T20: for someone who hasn't logged in yet, as on the first start, a way to the setup steps at the bottom.
+    private func setupButton(_ action: @escaping () -> Void) -> some View {
+        Section {
+            HStack {
+                Spacer()
+                Button("See how to set up", action: action)
+                    .controlSize(.large)
+                Spacer()
+            }
+        }
+        .listRowBackground(Color.clear)
     }
 
     /// Such as "Version 0.1.0 (1)": the version and the build number (D22).
@@ -290,6 +310,9 @@ private struct CheckResultView: View {
 
 /// How to set up Mail, and the limits worth knowing (FR5, FR10, R12, R13, R15, R21).
 private struct SetupHelp: View {
+    /// What "See how to set up" scrolls to (T20).
+    static let id = "setup-help"
+
     private let steps = [
         "Log in above. If macOS asks whether NextcloudMailExtension may find devices on your local network, allow it. "
             + "macOS asks only when your Nextcloud server is on your local network.",

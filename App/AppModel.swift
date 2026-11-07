@@ -58,6 +58,13 @@ final class AppModel: ObservableObject {
     // MARK: - Logging in and out
 
     /// Opens Nextcloud's login page in the browser, and waits for the user to log in there (FR2).
+    #if DEBUG
+        /// Shows the window as before logging in, for `--render-window --logged-out` (T20). Stores and revokes nothing.
+        func showLoggedOutForDrawing() {
+            account = nil
+        }
+    #endif
+
     func logIn() {
         accountProblem = nil
         let server: URL
