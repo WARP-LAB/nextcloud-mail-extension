@@ -103,8 +103,8 @@ Settled decisions, and why they were made. The current design is in [ARCHITECTUR
 ## D17: Share the email's folder, or each file (2026-11-06)
 
 - **Decision:** a setting chooses how an email's files are shared, which resolves OD9:
-  - **One link for the email's folder,** the default: one public share per email, of its folder. Each file's view link is the folder's page and its download link is the folder share's `/download?files=<name>`. A second setting chooses whether each file's links stay where the file was, the default, or the email has only the folder's links after the user's own text, with the files' names and sizes listed above them.
-  - **A link for each file:** a share per file, plus one for the folder when FR9's setting is on.
+  - **One share for all files in the email,** the default: one public share per email, of its folder. Each file's view link is the folder's page and its download link is the folder share's `/download?files=<name>`. A second setting chooses whether each file's links stay where the file was, the default, or the email has only the folder's links after the user's own text, with the files' names and sizes listed above them.
+  - **Separate share for each file in the email:** a share per file, plus one for the folder when FR9's setting is on.
 - **Why:** the user's choice. Nextcloud allows each user 20 new shares in 10 minutes (R21). One share per email allows 20 emails in that time, however many files they have, and FR9's links need no extra share. A share per file gives each file a page of its own, for servers whose admin has raised the limit.
 
 ## D18: Tests may change the test server's sharing settings (2026-11-06)
@@ -120,7 +120,7 @@ Settled decisions, and why they were made. The current design is in [ARCHITECTUR
 
 ## D20: View links in a shared folder open the folder (2026-11-06)
 
-- **Decision:** with one link for the email's folder (D17), each file's View link opens the folder's page, where the recipient clicks the file. This resolves OD10, and may be revisited.
+- **Decision:** with one share for all files in the email (D17), each file's View link opens the folder's page, where the recipient clicks the file. This resolves OD10, and may be revisited.
 - **Why:** the user's choice. Nextcloud 35 can't open one file of a folder share in its viewer from a link: the public page opens the viewer only for a share of a single file, and takes no file from the URL (`apps/files_sharing/src/init-public.ts`). The rejected options, recorded for a later look:
   - A share of its own for each file that Nextcloud can show, used only for View. It opens the viewer, but costs a share each, which brings back the limit of 20 new shares in 10 minutes (R21).
   - View showing the file itself from the folder share's WebDAV address, which Nextcloud serves without forcing a download. That's the browser's display, not Nextcloud's viewer, and with a password the browser asks for the user name "anonymous" and the password.
@@ -138,7 +138,7 @@ Settled decisions, and why they were made. The current design is in [ARCHITECTUR
 
 ## D23: The settings' wording (2026-11-06)
 
-- **Decision:** the user chose these labels: "Share files as" offers "One link for all files in the email" and "A link for each file". With one link, "Place links" offers "Inline, where each file was" and "Below your text". FR6's field is "Warn if the email's text includes a phrase but there's no attachment". FR9's switch is "If multiple attachments, add links for all files below your text" (2026-11-07): it adds two links, one viewing and one downloading all files, and they go above any quoted message, not at the very bottom. The UI and docs keep the word "folder" for a folder on Nextcloud, and "directory" for the upload directory that holds each email's folder.
+- **Decision:** the user chose these labels: "Create share as" offers "One share for all files in the email" and "Separate share for each file in the email", renamed by the user on 2026-11-07 from "Share files as", "One link for all files in the email" and "A link for each file", because one share can still give each file its own links. With one share, "Place links" offers "Inline, where each file was" and "Below your text". FR6's field is "Warn if the email's text includes a phrase but there's no attachment". FR9's switch is "If multiple attachments, add links for all files below your text" (2026-11-07): it adds two links, one viewing and one downloading all files, and they go above any quoted message, not at the very bottom. The UI and docs keep the word "folder" for a folder on Nextcloud, and "directory" for the upload directory that holds each email's folder.
 - **Why:** the user's choice. "Folder" is the word macOS, Apple's Human Interface Guidelines and Nextcloud's own interface use. "Below your text" fits replies and forwards too, where the links go above the quoted message rather than at the bottom.
 
 ## D24: Each email chooses which files become links (2026-11-06)

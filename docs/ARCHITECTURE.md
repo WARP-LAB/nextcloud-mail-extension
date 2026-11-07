@@ -42,7 +42,7 @@ The extension keeps both capabilities in its `Info.plist`: `MEMessageSecurityHan
 1. If the message is an auto-save (`state` 1), link its `contextID` to its message ID (see [Passwords](#passwords-in-the-message-window-fr7)) and return nil. The draft keeps its files (t17).
 2. Parse the message and let `LinkPolicy` pick the files, leaving out the signature images that the first call's HTML marked. If there are none, return nil, and Mail sends the message normally (t18). If nobody is logged in, stop the send with an error saying so.
 3. Read the server's limits, and stop the send if it requires a password and there's none. Look up each file in the ledger. For any file not found, create the message's folder if needed, decode the file to a temporary file, upload it, create its share with the message's password if each file gets its own link, and add it to the ledger (R5). A name that's taken in the folder gets a number. The same file attached twice is uploaded once, and both get its links.
-4. With one link for the email's folder, or when FR9 applies, share the folder once for the message (D17).
+4. With one share for all files in the email, or when FR9 applies, share the folder once for the message (D17).
 5. Replace each file with its links (FR8), add the folder links after the user's own text (FR9), and return `MEEncodedOutgoingMessage(rawData:, isSigned: false, isEncrypted: false)`. Keep all other headers, including `Bcc:`, which Mail removes itself (t19).
 6. If anything failed, return a `signingError` naming the file and the server's message.
 
@@ -80,7 +80,7 @@ If the user chooses Use Mail Drop, the first call has already uploaded the files
 
 ### Link text
 
-Each file shows its name on Nextcloud, its size and the expiry date the server returned. With the default settings, one link for the email's folder and both links for each file, the view link is the folder's page and the download link fetches just that file (D17):
+Each file shows its name on Nextcloud, its size and the expiry date the server returned. With the default settings, one share for all files in the email and both links for each file, the view link is the folder's page and the download link fetches just that file (D17):
 
 ```text
 report.pdf (12 MB, link expires 12 Dec 2026)
@@ -88,7 +88,7 @@ View: https://cloud.example.com/s/xyz
 Download: https://cloud.example.com/s/xyz/download?files=report.pdf
 ```
 
-With a link for each file, the file has a share of its own:
+With a separate share for each file, the file has a share of its own:
 
 ```text
 report.pdf (12 MB, link expires 12 Dec 2026)
@@ -128,7 +128,7 @@ The requests are in [NEXTCLOUD.md](NEXTCLOUD.md).
 
 - **Folders (FR2):** name each message's folder `<yyyy-MM-dd-HH-mm-ss> <subject>`, the time of the first send call in the Mac's time zone, inside the settings' directory (D19). Shorten the subject to 60 characters, replace `/` and `\`, and trim spaces and dots from the ends. Use `Email` if there's no subject. If the folder exists, add a number, as in `2026-11-05-14-03-09 Report (2)`. Recipients see this name on the folder's page, and probably as the zip's name. Two different files with the same name in one message get an index.
 - **Uploads:** always upload with `If-None-Match: *`, so a file that older links point to is never overwritten.
-- **Shares (FR8, FR9, D17):** with one link for the email's folder, the default, share the folder once, and give each file the folder share's page as its view link and `/s/<token>/download?files=<name>` as its download link. A folder share has no view page for a single file. Files in a shared folder get `#`, `%` and `?` in their names replaced with `_`, because Nextcloud's redirect for one file doesn't encode them ([NEXTCLOUD.md](NEXTCLOUD.md#share-links)). With a link for each file, create a share per file, plus one for the folder when FR9 applies. Nextcloud allows each user 20 new shares in 10 minutes, which a share per file reaches with one email of 20 files (R21).
+- **Shares (FR8, FR9, D17):** with one share for all files in the email, the default, share the folder once, and give each file the folder share's page as its view link and `/s/<token>/download?files=<name>` as its download link. A folder share has no view page for a single file. Files in a shared folder get `#`, `%` and `?` in their names replaced with `_`, because Nextcloud's redirect for one file doesn't encode them ([NEXTCLOUD.md](NEXTCLOUD.md#share-links)). With a link for each file, create a share per file, plus one for the folder when FR9 applies. Nextcloud allows each user 20 new shares in 10 minutes, which a share per file reaches with one email of 20 files (R21).
 - **Requests:** every request sends Basic auth with the app password, and the client keeps no cookies, because Nextcloud's session cookie is tied to the app password that made it ([NEXTCLOUD.md](NEXTCLOUD.md#requests)). A 401 means the app password no longer works, a 429 that the share limit was reached, and "offline" may mean that Local Network privacy blocked the server ([MAIL.md](MAIL.md#network)). Each stops the send with its own message.
 - **Expiry (FR4):** send every share an explicit `expireDate`. For a week, month, year, or a custom period of years, months, days and hours, use the time of sending plus that period by calendar, and send the date it reaches. For never, send an empty string. Read the server's limits first, and shorten the date to the maximum when one is enforced. Show the `expiration` the server returns next to each link, never the requested date. The folder share gets the same date as the file shares.
 - **Passwords (FR7):** send the email's password with every share. If the server enforces passwords and there's none, stop the send with an alert asking for one. If the password policy rejects the password, stop the send with the server's reason.

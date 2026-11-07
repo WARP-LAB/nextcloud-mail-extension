@@ -136,12 +136,12 @@ Acceptance criteria:
 
 ## FR8: Links for each file
 
-A setting, "Share files as", chooses what Nextcloud shares (D17):
+A setting, "Create share as", chooses what Nextcloud shares (D17):
 
-- **One link for all files in the email:** one share per email, of its folder (FR2). This is the default. Each file's view link opens the folder's page, which lists the email's files, and its download link downloads only that file.
-- **A link for each file:** one share per file, and each file's view link opens that file's own page. Nextcloud allows each user only 20 new shares in 10 minutes, so an email with many files, or several emails in a row, can fail to send until the server's admin raises that limit. The setup help says how.
+- **One share for all files in the email:** one share per email, of its folder (FR2). This is the default. Each file's view link opens the folder's page, which lists the email's files, and its download link downloads only that file.
+- **Separate share for each file in the email:** one share per file, and each file's view link opens that file's own page. Nextcloud allows each user only 20 new shares in 10 minutes, so an email with many files, or several emails in a row, can fail to send until the server's admin raises that limit. The setup help says how.
 
-With one link for all files in the email, a second setting, "Place links", chooses:
+With one share for all files in the email, a second setting, "Place links", chooses:
 
 - **Inline, where each file was:** each file gets its links as described below. This is the default.
 - **Below your text:** the files are removed from where they were. After the user's own text, the email lists each file's name and size, followed by FR9's two links, whatever FR9's setting and however many files became links.
@@ -157,7 +157,7 @@ Acceptance criteria:
 
 - Each file's links are where the file was, or in the list described above, and never at the top.
 - The setting gives two links or one link per file, as described.
-- With one link for the email's folder, the email's files use one share, each view link opens the folder's page, and each download link downloads only its file. With a link for each file, each file has its own share and page.
+- With one share for all files in the email, the email's files use one share, each view link opens the folder's page, and each download link downloads only its file. With a separate share for each file, each file has its own share and page.
 - With only the folder's links, the email lists every linked file's name and size, followed by FR9's two links, and has no other links.
 - The links show correctly in Apple Mail, Gmail on the web and Outlook.
 
@@ -168,7 +168,7 @@ A setting, "If multiple attachments, add links for all files below your text", i
 - **View all files in email:** opens the email's folder (FR2) in Nextcloud.
 - **Download all files in email:** downloads that folder as one zip file.
 
-With a link for each file (FR8), these links need one more share, for the folder. With only the folder's links (FR8), they are always added, even for one file, and this setting doesn't apply.
+With a separate share for each file (FR8), these links need one more share, for the folder. With only the folder's links (FR8), they are always added, even for one file, and this setting doesn't apply.
 
 These links follow FR4 (expiry) and FR7 (password). The folder holds only the files that became links, so files that stayed attached under FR3 aren't included.
 

@@ -83,9 +83,9 @@ struct SettingsView: View {
     /// FR8, FR9 and D17.
     private var links: some View {
         Section {
-            Picker("Share files as", selection: $model.settings.sharing) {
-                Text("One link for all files in the email").tag(Settings.Sharing.folder)
-                Text("A link for each file").tag(Settings.Sharing.eachFile)
+            Picker("Create share as", selection: $model.settings.sharing) {
+                Text("One share for all files in the email").tag(Settings.Sharing.folder)
+                Text("Separate share for each file in the email").tag(Settings.Sharing.eachFile)
             }
             if model.settings.sharing == .folder {
                 Picker("Place links", selection: $model.settings.placement) {
@@ -124,7 +124,7 @@ struct SettingsView: View {
         case (.folder, .folderLinksOnly):
             return "The email lists the files' names and sizes, followed by links that view and download its folder."
         case (.eachFile, _):
-            return "Nextcloud allows 20 new links in 10 minutes, so an email with many files can fail to send until "
+            return "Nextcloud allows 20 new shares in 10 minutes, so an email with many files can fail to send until "
                 + "the server's admin raises that limit. See Setting up Mail."
         }
     }
@@ -288,7 +288,7 @@ private struct SetupHelp: View {
             + "NextcloudMailExtension doesn't sign anything: it offers Mail's Sign button only because a message "
             + "security extension is the only kind of Mail extension that can change an outgoing email, and Sign is "
             + "what makes Mail hand the email to it.",
-        "With a link for each file, an admin can raise Nextcloud's limit of 20 new links in 10 minutes in "
+        "With a separate share for each file, an admin can raise Nextcloud's limit of 20 new shares in 10 minutes in "
             + "config.php: 'ratelimit_overwrite' => ['files_sharing.shareapi.createshare' => ['user' => "
             + "['limit' => 200, 'period' => 600]]].",
     ]
