@@ -38,6 +38,11 @@ Judgment calls and known risks are tracked separately in `docs/RISKS.md`.
 
 ## 📋 Backlog (To Be Done)
 
+- **T16: Check the email's password in the popover.** Nextcloud's password policy app applies to link passwords; the test server asks for 10 characters and rejects common passwords and ones in Have I Been Pwned. Today a weak password shows only at send, when the server refuses it. The server advertises its rules and a `validate` API in its capabilities (`password_policy`), which the popover could call after the user stops typing. A `generate` API could also back a button that suggests a password; whether to have one is the user's call.
+  - **Acceptance:** to be written with the user before starting.
+- **T17: Show the extension as NextcloudMail.** macOS cuts the extension's name in its Local Network prompt to “NextcloudMailEx”, 15 characters. Set the extension's shown name, `CFBundleName`, to NextcloudMail, without renaming its files, since a new path makes macOS ask again and leaves the old entry stuck in the Local Network list. Update the texts that quote the prompt or the list: the setup help, the offline error, `docs/MAIL.md` and TESTING.
+  - **Acceptance:** after a fresh install on a clean state (uninstall, restart), macOS asks for “NextcloudMail”, System Settings lists the extension's entry under a name the texts give, and they match.
+
 ## 🧊 Icebox (Parked)
 
 Set aside until the user brings a task back. Agents don't start these.
@@ -47,6 +52,7 @@ Set aside until the user brings a task back. Agents don't start these.
 
 ## ✅ Completed Tasks (Done)
 
+- **T15: Setup texts (2026-11-07).** The user's corrections: the setup help says macOS asks for the local network only for a server on it, and names the app and the extension in the steps where each is asked; it says to choose the extension in the "Message security extension" popup only if Mail shows one; and it says the extension doesn't sign anything but needs Sign to see the outgoing email. Verified: lint and the build pass. T17 will change the quoted “NextcloudMailEx”.
 - **T14: Rename to NextcloudMailExtension (2026-11-07).** The app is NextcloudMailExtension, its extension NextcloudMailExtensionPlugIn, with bundle IDs and App Group `lv.warp.nextcloudmailextension…`, the abbreviation `ncme`, and OD12 resolved (D26). Renaming showed that the extension needs its own Local Network permission, which macOS only asks for without `NSLocalNetworkUsageDescription` and from the popover, so the popover now checks the connection as it opens (D27). Builds are kept as zips so that only the installed app is a bundle. Verified: no tracked file names the old product outside D26, lint passes, 144 unit tests and 11 server tests pass, the old app was logged out and removed, and after a fresh install macOS asked for the extension and the app separately. In Mail, the toolbar button is NextcloudMailExtension, and `folder-in-place`, `keep-attached`, `all-files`, `own-expiry`, `open-settings` and `t36` pass.
 - **Probing Mail with MailProbe (2026-11-05).** Four rounds of tests found what Mail does with an extension. See `probe/docs/` and `docs/MAIL.md`.
 - **T13: Popover, icons, version and settings wording (2026-11-06).** The popover chooses which of an email's files become links, gives it its own expiry and opens the app. The toolbar button shows Nextcloud's mark and the app has Nextcloud's icon. The version is 0.1.0 (2), shown in the app's footer. The size limit keeps decimals and can apply to all files together, and the settings use the user's wording (D21 to D24). Verified: 144 unit tests pass, in Mail `keep-attached`, `all-files`, `own-expiry`, `open-settings`, `t36`, `size-rule`, `size-together` and `size-together-under` pass, and the user approved both icons.
