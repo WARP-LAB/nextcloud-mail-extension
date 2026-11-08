@@ -22,6 +22,13 @@ Files that use the logo
   The app's icon, made with Icon Composer: the mark in white on a gradient of
   Nextcloud's brand colours, #0082C9 and #1CAFFF, as the icon of Nextcloud's
   macOS desktop client has them.
+- site/media/screenshots/mail-send-overview-annotated.png and
+  site/media/screenshots/mail-send-popup.png
+  Screenshots for the project's website, showing the extension's toolbar button,
+  with the mark above, in Mail's message window.
+- site/media/screenshots/server-dir.png
+  A screenshot of Nextcloud's own page for a shared folder, with Nextcloud's
+  logo and wording as the server shows them.
 
 
 Sources

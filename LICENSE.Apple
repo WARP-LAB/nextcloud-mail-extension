@@ -5,10 +5,11 @@ built with Apple's MailKit framework. This repository contains no code, artwork,
 icons or other files of Apple's, so this repository's MIT licence (LICENSE)
 covers only the project's own work. The symbols the app shows, such as the eye
 beside the password field, are SF Symbols, which macOS draws while the app runs.
+The website's screenshots show Apple's interface, as described below.
 
-Apple, AppleScript, Finder, iCloud, Keychain, Mac, macOS, Mail Drop, SF Symbols,
-Spotlight, Swift, SwiftUI and Xcode are trademarks of Apple Inc., registered in
-the U.S. and other countries and regions.
+Apple, AppleScript, Finder, iCloud, Keychain, Mac, macOS, Mail Drop, Safari,
+SF Symbols, Spotlight, Swift, SwiftUI and Xcode are trademarks of Apple Inc.,
+registered in the U.S. and other countries and regions.
 
 NextcloudMailExtension is not made, endorsed or supported by Apple Inc.
 
@@ -20,6 +21,26 @@ Mail and the tools
   (3901.100.1.1.12), © 1995–2025 Apple Inc. All rights reserved."
 - The project builds with Xcode and Apple's SDKs, which come under Apple's own
   licence agreements.
+
+
+The website's screenshots
+
+The project's website, in site/, shows how the extension works with Mail. Its
+screenshots, in site/media/screenshots/, are the project's own, taken on macOS,
+and show Apple's interface as macOS draws it:
+
+- mail-send-overview-annotated.png and mail-send-popup.png: Mail's message
+  window, its toolbar and its symbols.
+- mail-send-large-annotated.png: Mail's prompt that offers Mail Drop, with its
+  iCloud symbol.
+- mail-receive-overview.png: Mail's window showing a received message.
+- mail-settings-ext-merged.png: Mail's Settings window, on its Extensions tab.
+- server-dir.png: Safari's window and toolbar.
+- app-overview.png: the project's own app, in a macOS window.
+
+Apple's interface in them, its windows, controls, symbols and icons, is Apple's
+and isn't covered by this repository's MIT licence. The annotations, the example
+email and the project's app and extension are the project's own.
 
 
 Sources

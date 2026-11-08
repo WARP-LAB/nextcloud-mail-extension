@@ -122,14 +122,14 @@ What could go wrong, how we'd notice, and what's being done about it. Each entry
 
 - **Risk:** Nextcloud GmbH objects to its logo as the project's icons, or to Nextcloud in the project's name, and asks for them to go. Its trademark guidelines allow the logos only as links to nextcloud.com, and say that third-party apps shouldn't have its mark in their name.
 - **Signal:** a request from Nextcloud GmbH, or an app store refusing the app.
-- **Mitigation:** `LICENSE.Nextcloud` names the files that use the logo, their sources and the trademark, and says the project isn't official. The artwork is in three places, `Design/`, the toolbar's image set and `App/AppIcon.icon`, so it can be replaced in one change. The user asks Nextcloud GmbH for permission while the project is published (D25, T13b).
+- **Mitigation:** `LICENSE.Nextcloud` names the files that use the logo, their sources and the trademark, and says the project isn't official. The artwork is in three places, `Design/`, the toolbar's image set and `App/AppIcon.icon`, so it can be replaced in one change. The website's screenshots that show the toolbar button would then be retaken, and the one of Nextcloud's own share page can stay. The user asks Nextcloud GmbH for permission while the project is published (D25, T13b).
 - **Judgment call:** none on using, replacing or renaming, which is the user's call. An agent keeps `LICENSE.Nextcloud` up to date when Nextcloud artwork is added or changed.
 
 ### R23: Apple's trademarks
 
 - **Risk:** Apple objects to how the project names its products, or refuses the app in review. Its trademark guidelines don't allow Apple's trademarks in a third party's product name, only in phrases that say what a product works with.
 - **Signal:** a request from Apple, or a rejection in the Mac App Store's review.
-- **Mitigation:** `LICENSE.Apple` gives Apple's trademark notice, says the project isn't Apple's, and that it contains nothing of Apple's. The project was renamed from NextcloudAppleMail to NextcloudMailExtension, which contains no Apple trademark (D26).
+- **Mitigation:** `LICENSE.Apple` gives Apple's trademark notice, says the project isn't Apple's, that it contains nothing of Apple's, and what of Apple's interface the website's screenshots show, which the MIT licence doesn't cover. The project was renamed from NextcloudAppleMail to NextcloudMailExtension, which contains no Apple trademark (D26).
 - **Judgment call:** none on the name, which is the user's call. An agent never puts an Apple trademark in a name, describes compatibility in Apple's terms, such as "for Mail on macOS", and keeps `LICENSE.Apple`'s list of trademarks up to date when docs or the app start naming another one.
 
 ## Platform and server
