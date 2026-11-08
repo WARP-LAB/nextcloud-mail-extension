@@ -12,7 +12,7 @@ NextcloudMailExtension is an extension for Apple Mail on macOS. When you send an
   - [Per email, from the extension's toolbar button in Mail](#per-email-from-the-extensions-toolbar-button-in-mail)
 - [Good to know](#good-to-know)
 - [Privacy](#privacy)
-- [Rant on history and this extension](#rant-on-history-and-this-extension)
+- [Why Sign is used](#why-sign-is-used)
 
 ## How it works
 
@@ -88,10 +88,6 @@ When an email is over your email provider's size limit, Mail asks about **Mail D
 
 No telemetry. Files go only to the server you configured; message contents, addresses and passwords are never logged; credentials live only in the macOS Keychain.
 
-## Rant on history and this extension
+## Why Sign is used
 
-I was a user of [cargolifter-mail-plugin](https://github.com/WARP-LAB/cargolifter-mail-plugin) which I liked. Back then, doing something like this for Apple Mail involved accessing private APIs, monkey patching (`JRSwizzle`) etc., and naturally at one major Mail upgrade it had to end.
-
-[Sendent's Nextcloud for Mail](https://apps.apple.com/lv/app/nextcloud-for-mail/id6758224475?mt=12) exists, but it is exactly what I don't want - a situation of multiple followup emails to receiver about some files to download, I want everything contained in the mail, and also inline links. They probably went that direction exactly because direction I took is _grey_.
-
-NextcloudMailExtension uses public interface - MailKit's public extension point, no private APIs etc, **but still IMHO it is a hack**, as we are acting as if we are signing the email, although we are not. Semantics matter to me. That is the only way some Apple Mail extension can alter message data (the only way to change an outgoing email is the message security handler's `encode()`). If you are using something in Apple Mail to truly sign messages then you are out of luck, as Mail uses one message security extension at a time, so you can't sign with certificates while this one is chosen (GPG anyone?). Also, this thing might not be sustainable, because Apple changes things - let us hope that the change would be MailKit API that is meant for something like this by design. Then again I have tickets in Apple Radar since 2009 that are not yet resolved. Anyways, you're welcome.
+You might have question why Sign is used? Well, as of now that is the only way some Apple Mail extension officially can alter message data on send. For technical intro see project repo README.md that has rant on history and this extension. Anyway, you're welcome.
