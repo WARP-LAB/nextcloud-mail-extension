@@ -1648,3 +1648,6 @@ probe/Config/Local.xcconfig
 # NextcloudMailExtension
 Config/Local.xcconfig
 .swiftpm/
+
+# will be used for GitHub page
+!/site
