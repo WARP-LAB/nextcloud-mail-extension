@@ -1,0 +1,5 @@
+# Jekyll settings for the project's website, which .github/workflows/pages.yml builds and publishes (D30).
+# GitHub Pages renders Markdown files without front matter too, so the screenshots' notes are excluded: they're for
+# the repository, not the website.
+exclude:
+  - media/screenshots/SCREENSHOTS.md

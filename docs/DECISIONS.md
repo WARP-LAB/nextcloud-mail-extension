@@ -171,3 +171,8 @@ Settled decisions, and why they were made. The current design is in [ARCHITECTUR
 
 - **Decision:** `scripts/server-state.sh` may switch the test server into maintenance mode, take its PHP-FPM pool down, or switch its site off in nginx, over SSH with the `NCSERVER_*` keys in `.env`. Its `with <state> -- <command>` restores everything afterwards, also when the command fails or is interrupted, PHP-FPM first. Restarting PHP-FPM restarts every pool of that PHP version on the server, and reloading nginx reloads every site.
 - **Why:** the user's request, to see what users get when the server is unavailable (T21). The user set up the SSH access for it.
+
+## D30: The website is built from `site/` by a GitHub Actions workflow (2026-11-08)
+
+- **Decision:** the project's website, for users, is the Markdown in `site/`, with its screenshots in `site/media/screenshots/`. `.github/workflows/pages.yml` builds it with GitHub's `jekyll-build-pages` action, which uses GitHub Pages' own Jekyll setup and its default theme, and deploys it to GitHub Pages. It runs on pushes to main that change `site/` or the workflow, and by hand. `site/_config.yml` keeps the screenshots' notes, `SCREENSHOTS.md`, out of the site.
+- **Why:** the user chose `site/` as the website's source (T25). Publishing from a branch takes only the repository's root or `docs/`, and `docs/` holds the developer docs, so a workflow publishes it. GitHub's own actions need no Gemfile and add no dependencies to the project.

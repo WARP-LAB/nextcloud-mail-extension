@@ -66,8 +66,10 @@ Only what isn't obvious from directory names:
 - `Config/`: signing, entitlements and `Info.plist` files. The App Group is `<team ID>.lv.warp.nextcloudmailextension`, built from `$(TeamIdentifierPrefix)`, so the team ID appears only in `Local.xcconfig`.
 - `scripts/`: build, install, lint, and the Nextcloud tests and tool. `tools/ncme-nextcloud/`: that tool.
 - `Design/`: source artwork, such as Nextcloud's logo mark, which `Extension/Assets.xcassets` uses for the toolbar button.
-- `LICENSE.Nextcloud`: where Nextcloud's logo is used, its sources and its terms, which this repository's MIT licence doesn't cover. Keep it up to date when Nextcloud artwork changes (R22).
-- `LICENSE.Apple`: Apple's trademarks that the project names, and that it contains nothing of Apple's. Keep its list up to date (R23).
+- `site/`: the project's website, for users. `.github/workflows/pages.yml` publishes it to GitHub Pages on pushes to main (D30). `site/media/screenshots/SCREENSHOTS.md` says what each screenshot shows, and isn't published.
+- `.github/`: the issue templates, and the website's workflow.
+- `LICENSE.Nextcloud`: where Nextcloud's logo is used, the website's screenshots included, its sources and its terms, which this repository's MIT licence doesn't cover. Keep it up to date when Nextcloud artwork or those screenshots change (R22).
+- `LICENSE.Apple`: Apple's trademarks that the project names, that it contains nothing of Apple's, and what of Apple's the website's screenshots show. Keep it up to date (R23).
 - `probe/`: MailProbe. Frozen: change it only to probe Mail again.
 - `CLAUDE.md`: only imports this file, for Claude Code versions that don't read AGENTS.md (D15). Put instructions here, not there.
 - Ignored by git: `probe/test-results/`, which holds real emails, `probe/test-files/`, `build/`, `.build/`, `Config/Local.xcconfig` and `.env`.
@@ -109,6 +111,7 @@ Only what isn't obvious from directory names:
 - In zsh, `log` is a builtin, so `log show` fails with "too many arguments". Use `/usr/bin/log show`.
 - A changed app icon doesn't show in the Dock and Cmd-Tab while the installed bundle keeps its date: macOS's icon cache ignores the version and build number, and `ditto` keeps the build's date. `scripts/install.sh` touches the bundle for this. For a copy installed otherwise, `touch` it, run `lsregister -f` on it (the path is in `scripts/install.sh`) and `killall Dock`.
 - SwiftUI's `TextField(value:format: .number)` reads decimals by the region, ignoring custom number settings, so with Latvia's region "0.2" became 0. Number fields use `DecimalText`, which takes "." or ",".
+- A screenshot for `site/` that shows the server's address or the account name. The app's account section and its check, the popover's line "account on server", the From field and a browser's address bar all show them. Cover them with a solid fill before committing, since git history keeps the first version.
 
 ## Definition of done
 
