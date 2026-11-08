@@ -19,6 +19,15 @@ Risk register: `docs/RISKS.md`.
 > - Write Acceptance Criteria or a explicit Definition of Done
 > - Take tasks in order unless told otherwise. Do not start the next task without being asked.
 
+- 🔄 **T25: Draft the project's website (gh site draft).** The user's draft is in `site/`, for GitHub Pages. A branch can publish only from the repository's root or `docs/`, which holds these docs, so a GitHub Actions workflow publishes `site/`. The section "Rant on history and this extension" is the user's and stays as written.
+  - **Acceptance:**
+    - `site/index.md` matches the PRD and the app, with the review's corrections: what each file's view link opens with each kind of share, the links for all files, Sign, the Mail Drop prompt, the shares' default, keeping the files after Undo Send, the Local Network steps, signing with certificates, and the notes from the app's setup help.
+    - "Index" lists every section after it, as links that jump to them, and markdownlint's check of link fragments passes.
+    - `site/_config.yml` keeps `media/screenshots/SCREENSHOTS.md` out of the published site.
+    - `LICENSE.Apple` and `LICENSE.Nextcloud` name the screenshots that show Apple's interface and Nextcloud's logo, and R22 and R23 agree.
+    - `.github/workflows/pages.yml` builds `site/` with Jekyll and deploys it to GitHub Pages, on pushes to main that change it, and by hand.
+    - `scripts/lint.sh` passes. Checking the published site needs the user, as T25b.
+
 ## ❓ Open Decisions (human to resolve)
 
 Agents: do not guess these. Record questions here and stop.
