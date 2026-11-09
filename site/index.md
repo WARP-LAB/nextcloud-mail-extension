@@ -1,5 +1,7 @@
 # Nextcloud Mail Extension (for Apple Mail)
 
+![Nextcloud Mail Extension Icon](media/images/nextcloud-mail-extension-clip-site.svg)
+
 NextcloudMailExtension is an extension for Apple Mail on macOS. When you send an email, its attachments are uploaded to your Nextcloud server and replaced in the email by share links. Recipients download the files from your server, and your email stays small — no more bounces for oversized mail, no more dependence on Apple's Mail Drop or a provider's attachment limit.
 
 ## Index
