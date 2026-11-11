@@ -1,0 +1,8 @@
+{%- comment -%}
+Extra tags in each page's <head>. It replaces the Primer theme's own file, which holds only Google Analytics, unused
+here. jekyll-seo-tag writes no keywords, so they're written here: the page's `keywords`, or else the site's.
+{%- endcomment -%}
+{%- assign keywords = page.keywords | default: site.keywords -%}
+{%- if keywords %}
+<meta name="keywords" content="{{ keywords | join: ', ' | escape }}">
+{%- endif %}

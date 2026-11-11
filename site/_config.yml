@@ -1,4 +1,30 @@
 # Jekyll settings for the project's website, which .github/workflows/pages.yml builds and publishes (D30).
+
+# What search engines and link previews show (jekyll-seo-tag, which the theme runs). The title matches the page's
+# heading, or the theme prints the site's title above it as a second heading.
+title: Nextcloud Mail Extension (for Apple Mail)
+description: >-
+  An extension for Apple Mail on macOS that uploads an email's attachments to your Nextcloud server when you send it,
+  and replaces them with share links.
+# 1200 × 630 pixels, the size link previews use. Made from Design/nextcloud-mail-extension-clip-site.svg.
+image: /media/images/nextcloud-mail-extension-clip-site.png
+lang: en
+
+# The meta keywords, written by _includes/head-custom.html. A page's own `keywords:` front matter replaces them.
+keywords:
+  - Nextcloud
+  - Apple Mail
+  - Mail extension
+  - MailKit
+  - macOS
+  - email attachments
+  - share links
+  - large attachments
+  - Mail Drop alternative
+
+plugins:
+  - jekyll-sitemap
+
 # GitHub Pages renders Markdown files without front matter too, so the screenshots' notes are excluded: they're for
 # the repository, not the website.
 exclude:
