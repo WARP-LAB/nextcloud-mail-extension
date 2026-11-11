@@ -30,6 +30,9 @@ Files that use the logo
   has them.
 - site/media/images/nextcloud-mail-extension-clip-site.svg
   The website's icon, a copy of Design/nextcloud-mail-extension-clip-site.svg.
+- site/media/images/nextcloud-mail-extension-clip-site.png
+  The same artwork as a 1200 x 630 PNG on white, for the website's link
+  previews.
 - site/media/screenshots/mail-send-overview-annotated.png and
   site/media/screenshots/mail-send-popup.png
   Screenshots for the project's website, showing the extension's toolbar button,
