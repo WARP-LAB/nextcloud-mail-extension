@@ -119,7 +119,7 @@ See `docs/TASKS.md`
 
 ## Git
 
-Follow the git-workflow skill in `~/.agents/skills/git-workflow/`. This section repeats its rules for agents that don't have the skill.
+Follow the git-workflow skill in `~/.agents/skills/git-workflow/`. This section repeats its rules for agents that don't have the skill. Where the two differ, this section wins.
 
 ### Hosting platform and pull requests
 
