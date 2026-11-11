@@ -92,4 +92,4 @@ No telemetry. Files go only to the server you configured; message contents, addr
 
 ## Why Sign is used
 
-You might have question why Sign is used? Well, as of now that is the only way some Apple Mail extension officially can alter message data on send. For technical intro see project repo README.md that has rant on history and this extension. Anyway, you're welcome.
+You might ask why Sign is used. Well, as of now that is the only way an Apple Mail extension can officially alter message data on send. For a technical intro, see the project's [README](https://github.com/WARP-LAB/nextcloud-mail-extension#readme), which has a rant on history and this extension. Anyway, you're welcome.

@@ -18,10 +18,18 @@ Files that use the logo
 - Extension/Assets.xcassets/ToolbarIcon.imageset/nextcloud-mark.svg
   The same mark for the Mail toolbar button, without the editor's metadata and
   with padding around it.
+- Design/nextcloud-mail-extension-clip.svg
+  The project's own artwork made from the mark: the mark in white, with a
+  paperclip hooked on it, for the app's icon.
+- Design/nextcloud-mail-extension-clip-site.svg
+  The same artwork with the mark in Nextcloud's blue, #0082C9, for the website.
 - App/AppIcon.icon
-  The app's icon, made with Icon Composer: the mark in white on a gradient of
-  Nextcloud's brand colours, #0082C9 and #1CAFFF, as the icon of Nextcloud's
-  macOS desktop client has them.
+  The app's icon, made with Icon Composer from
+  Design/nextcloud-mail-extension-clip.svg, on a gradient of Nextcloud's brand
+  colours, #0082C9 and #1CAFFF, as the icon of Nextcloud's macOS desktop client
+  has them.
+- site/media/images/nextcloud-mail-extension-clip-site.svg
+  The website's icon, a copy of Design/nextcloud-mail-extension-clip-site.svg.
 - site/media/screenshots/mail-send-overview-annotated.png and
   site/media/screenshots/mail-send-popup.png
   Screenshots for the project's website, showing the extension's toolbar button,

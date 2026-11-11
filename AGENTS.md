@@ -65,7 +65,7 @@ Only what isn't obvious from directory names:
 - `Shared/`: code both use. `Package.swift` also builds it as a Swift package, and `tests/` holds that package's unit tests (D13).
 - `Config/`: signing, entitlements and `Info.plist` files. The App Group is `<team ID>.lv.warp.nextcloudmailextension`, built from `$(TeamIdentifierPrefix)`, so the team ID appears only in `Local.xcconfig`.
 - `scripts/`: build, install, lint, and the Nextcloud tests and tool. `tools/ncme-nextcloud/`: that tool.
-- `Design/`: source artwork, such as Nextcloud's logo mark, which `Extension/Assets.xcassets` uses for the toolbar button.
+- `Design/`: source artwork. Nextcloud's logo mark, which `Extension/Assets.xcassets` uses for the toolbar button, and the mark with a paperclip: `nextcloud-mail-extension-clip.svg` for the app's icon in `App/AppIcon.icon`, and `nextcloud-mail-extension-clip-site.svg` for the website's icon in `site/media/images/`. Copy a changed source to where it's used.
 - `site/`: the project's website, for users. `.github/workflows/pages.yml` publishes it to GitHub Pages on pushes to main (D30). `site/media/screenshots/SCREENSHOTS.md` says what each screenshot shows, and isn't published.
 - `.github/`: the issue templates, and the website's workflow.
 - `LICENSE.Nextcloud`: where Nextcloud's logo is used, the website's screenshots included, its sources and its terms, which this repository's MIT licence doesn't cover. Keep it up to date when Nextcloud artwork or those screenshots change (R22).
