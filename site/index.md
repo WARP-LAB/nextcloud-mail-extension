@@ -41,7 +41,7 @@ Attach files to an email in Mail as usual, make sure **Sign** is on, and hit Sen
 ## Installing
 
 1. [Download](_placeholder-link-to-latest-release-dmg_) prebuilt App (signed and notarized) from releases.
-2. Place the app into your `Applications` folder and start it once, to log in to your Nextcloud server and set your preferences. If macOS asks whether NextcloudMailExtension may find devices on your local network, allow it. macOS asks only when your Nextcloud server is on your local network.
+2. Drag the app into an Applications folder: `/Applications` for every user of the Mac, or `~/Applications` (the Applications folder in your home folder) for you only. Keep only that one copy, and delete any other, such as one left in Downloads, since macOS may use it instead. Start the app once, to log in to your Nextcloud server and set your preferences. If macOS asks whether NextcloudMailExtension may find devices on your local network, allow it. macOS asks only when your Nextcloud server is on your local network.
 3. In Mail, open **Settings → Extensions** and enable **NextcloudMailExtension**.
 4. If Mail shows a **"Message security extension"** popup, choose NextcloudMailExtension there. (The extension takes over the Sign button in the message window: with Sign on, Mail hands the outgoing message to the extension, which is what makes the upload possible.)
 5. Restart Mail.
