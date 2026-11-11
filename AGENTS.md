@@ -119,6 +119,8 @@ See `docs/TASKS.md`
 
 ## Git
 
+Follow the git-workflow skill in `~/.agents/skills/git-workflow/`. This section repeats its rules for agents that don't have the skill.
+
 ### Hosting platform and pull requests
 
 - Remote: the repository may have a remote on a Git hosting platform (GitLab, Gitea,
