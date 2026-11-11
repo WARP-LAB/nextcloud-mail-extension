@@ -122,7 +122,7 @@ What could go wrong, how we'd notice, and what's being done about it. Each entry
 
 - **Risk:** Nextcloud GmbH objects to its logo as the project's icons, or to Nextcloud in the project's name, and asks for them to go. Its trademark guidelines allow the logos only as links to nextcloud.com, and say that third-party apps shouldn't have its mark in their name.
 - **Signal:** a request from Nextcloud GmbH, or an app store refusing the app.
-- **Mitigation:** `LICENSE.Nextcloud` names the files that use the logo, their sources and the trademark, and says the project isn't official. The artwork is in three places, `Design/`, the toolbar's image set and `App/AppIcon.icon`, so it can be replaced in one change. The website's screenshots that show the toolbar button would then be retaken, and the one of Nextcloud's own share page can stay. The user asks Nextcloud GmbH for permission while the project is published (D25, T13b).
+- **Mitigation:** `LICENSE.Nextcloud` names the files that use the logo, their sources and the trademark, and says the project isn't official. The artwork's sources are in `Design/`: the mark, and the mark with a paperclip in two colours. They're used in three places, the toolbar's image set, `App/AppIcon.icon` and the website's `site/media/images/`, so the artwork can be replaced in one change. The website's screenshots that show the toolbar button would then be retaken, and the one of Nextcloud's own share page can stay. The user asks Nextcloud GmbH for permission while the project is published (D25, T13b).
 - **Judgment call:** none on using, replacing or renaming, which is the user's call. An agent keeps `LICENSE.Nextcloud` up to date when Nextcloud artwork is added or changed.
 
 ### R23: Apple's trademarks
