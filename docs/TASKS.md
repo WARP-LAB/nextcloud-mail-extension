@@ -9,7 +9,7 @@ Risk register: `docs/RISKS.md`.
 
 **M1: a first real link**, reached 2026-11-06 (T1–T5).
 
-**M2: a first release others can install.** Uploads keep working after an update (T19), the distribution is decided (D33) and set up, the non-functional requirements are confirmed (OD5), and the release is tagged, such as `v0.2.0`.
+**M2: a first release others can install.** Uploads keep working after an update (T19), the distribution is decided (D33) and set up, the non-functional requirements are confirmed (OD5), and the release is tagged, such as `v0.0.1`.
 
 ## ⏳ Active Tasks (In Progress)
 
