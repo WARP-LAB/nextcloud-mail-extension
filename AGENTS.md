@@ -47,6 +47,7 @@ scripts/lint.sh [--fix]     # all linters on every file git doesn't ignore, with
 scripts/build_app.sh -c debug -i yes # the same, then install it to ~/Applications and register the extension (see Boundaries)
 scripts/use-test-account.sh # log the installed Debug build in to the test server in .env, or --log-out
 scripts/build_dmg.sh [--sign yes] [--notarize yes] # Release build into dmg/NextcloudMailExtension.dmg (D33)
+scripts/build_validate.sh [dmg] # check a DMG is ready to distribute, one PASS or FAIL line per check (D33)
 python3 tests/mail-checks.py # the Mail checks, sending between the two accounts in .env (docs/TESTING.md)
 python3 tests/mail-window-checks.py # the checks that click in Mail's windows; needs Accessibility
 ~/Applications/NextcloudMailExtension.app/Contents/MacOS/NextcloudMailExtension --check-storage     # App Group and Keychain
