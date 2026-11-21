@@ -98,7 +98,7 @@ Settled decisions, and why they were made. The current design is in [ARCHITECTUR
 
 - **Decision:** this Mac is registered as a device with the free Personal Team, which resolves OD7. Xcode then makes a provisioning profile for each target, so both targets can have `keychain-access-groups` with `<team ID>.lv.warp.nextcloudmailextension`, the App Group's identifier, and share the app password's Keychain item.
 - **Why:** the user's choice. The alternative was R17's fallback, logging in from the extension.
-- **How:** registering needs a build with a destination, given in AGENTS.md's setup. Building in Xcode's window before the entitlement was added didn't register the Mac, because nothing needed a profile then. The Personal Team's profiles last 7 days, and `scripts/build.sh` renews them with `-allowProvisioningUpdates`.
+- **How:** registering needs a build with a destination, given in AGENTS.md's setup. Building in Xcode's window before the entitlement was added didn't register the Mac, because nothing needed a profile then. The Personal Team's profiles last 7 days, and `scripts/build_app.sh` renews them with `-allowProvisioningUpdates`.
 
 ## D17: Share the email's folder, or each file (2026-11-06)
 
@@ -181,3 +181,8 @@ Settled decisions, and why they were made. The current design is in [ARCHITECTUR
 
 - **Decision:** `site/_config.yml` sets the website's title, description, preview image and keywords. The theme's `jekyll-seo-tag` writes the title, the description and the image into the page's `<head>`, also as Open Graph and Twitter tags for link previews. It writes no keywords, so `site/_includes/head-custom.html`, which replaces the Primer theme's own, writes a `keywords` meta tag from the page's `keywords` front matter or else the site's. `jekyll-sitemap` writes `sitemap.xml`. The preview image is the website's icon as a 1200 × 630 PNG on white, since link previews don't show SVG and may show transparency as black.
 - **Why:** the user's request (T26). Search engines mostly ignore keywords, so the description, the title and the page's own text matter more, but the keywords are kept in one place for the user to manage. The title matches the page's heading, because otherwise the theme prints the site's title as a second heading.
+
+## D32: One script builds, zips and installs (2026-11-21)
+
+- **Decision:** `scripts/build_app.sh` takes `-c`/`--configuration debug|release` (default release), `-z`/`--zip yes|no` (default yes) and `-i`/`--install yes|no` (default no), and passes any other arguments to `xcodebuild`. Installing implies the zip, since the app is installed from it, and replaces `scripts/install.sh`, which is gone. With `--zip no` the bare bundle stays in `build/<configuration>/`, where macOS can take it for the installed app (AGENTS.md). The Mail checks, `scripts/use-test-account.sh` and the app's debug options need a Debug build, so the docs say `-c debug`.
+- **Why:** the user's request, after the scripts were renamed from `build.sh` and `install.sh`. One command builds and installs, and its options match the user's other build scripts.

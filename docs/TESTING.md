@@ -72,7 +72,7 @@ macOS asks for these permissions, for the app that runs the terminal, such as Vi
 | Local Network, for NextcloudMailExtension | Local Network | The app's first request to a server on the local network, opened normally rather than from a terminal | The app's login and Test connection with such a server |
 | Local Network, for NextcloudMailExtensionPlugIn | Local Network | The popover's first connection check, as “NextcloudMailEx” | The extension's uploads to such a server ([MAIL.md](MAIL.md#network)) |
 
-Mail itself needs the extension turned on, chosen in the "Message security extension" popup when Mail shows one, and Sign on, which AppleScript can't read or change. After `scripts/install.sh` replaces a build, quit and reopen Mail. Until then, sends stop with Mail's own alert, "An error occurred while trying to encrypt your message", because Mail can't reach the replaced extension.
+Mail itself needs the extension turned on, chosen in the "Message security extension" popup when Mail shows one, and Sign on, which AppleScript can't read or change. After `scripts/build_app.sh --install yes` replaces a build, quit and reopen Mail. Until then, sends stop with Mail's own alert, "An error occurred while trying to encrypt your message", because Mail can't reach the replaced extension.
 
 Without Accessibility, the checks that need Mail's windows stay with the user: Undo Send, Send Later, the Mail Drop prompt, the send warnings and the toolbar popover.
 

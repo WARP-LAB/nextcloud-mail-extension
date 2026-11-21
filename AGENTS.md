@@ -30,21 +30,21 @@ This file covers how to work in the repository.
 - macOS 27 and Xcode 27, on Apple silicon. The probing baseline is macOS 27.0.1 with Mail 16.0.
 - Linters: `brew install swiftlint shellcheck markdownlint-cli2`. swift-format comes with Xcode.
 - Signing: copy `Config/Local.example.xcconfig` to `Config/Local.xcconfig`, which git ignores, and fill in `DEVELOPMENT_TEAM`. The free Personal Team works for local builds (D11). Without the file, builds are ad-hoc signed and the App Group fails.
-- Provisioning: the shared Keychain item needs provisioning profiles, which need the Mac registered with the team (D16). Once per Mac, run `xcodebuild -project NextcloudMailExtension.xcodeproj -scheme NextcloudMailExtension -destination 'platform=macOS' -allowProvisioningUpdates -allowProvisioningDeviceRegistration build`, since `scripts/build.sh` builds without a destination, which can't register one. The Personal Team's profiles last 7 days, and `scripts/build.sh` renews them.
+- Provisioning: the shared Keychain item needs provisioning profiles, which need the Mac registered with the team (D16). Once per Mac, run `xcodebuild -project NextcloudMailExtension.xcodeproj -scheme NextcloudMailExtension -destination 'platform=macOS' -allowProvisioningUpdates -allowProvisioningDeviceRegistration build`, since `scripts/build_app.sh` builds without a destination, which can't register one. The Personal Team's profiles last 7 days, and `scripts/build_app.sh` renews them.
 - The Nextcloud test server and account (D14): copy `.env.example` to `.env`, which git ignores, and fill it in.
-- To use the extension in Mail: run `scripts/install.sh`, then in Mail open Settings > Extensions and enable NextcloudMailExtension. If the tab shows a "Message security extension" popup at the bottom, choose NextcloudMailExtension there. Then restart Mail.
+- To use the extension in Mail: run `scripts/build_app.sh -c debug -i yes`, then in Mail open Settings > Extensions and enable NextcloudMailExtension. If the tab shows a "Message security extension" popup at the bottom, choose NextcloudMailExtension there. Then restart Mail.
 
 ## Commands
 
 ```sh
-scripts/build.sh            # host app and extension, into build/Debug/NextcloudMailExtension.app.zip
+scripts/build_app.sh -c debug # host app and extension, into build/Debug/NextcloudMailExtension.app.zip; --help for options
 swift test                  # unit tests of Shared/, from tests/
 tests/make-fixtures.py      # remake the anonymised test messages from probe/test-results/ (local only)
 scripts/test-nextcloud.sh   # the server tests, against the test server in .env; --server-settings for the enforced ones
 scripts/nextcloud.sh        # run single Nextcloud requests by hand, with no arguments for the list
 scripts/server-state.sh     # take the test server down (maintenance, php, site) and back, over SSH (D29)
 scripts/lint.sh [--fix]     # all linters on every file git doesn't ignore, with --fix applying automatic fixes first
-scripts/install.sh          # copy the build to ~/Applications and register the extension (see Boundaries)
+scripts/build_app.sh -c debug -i yes # the same, then install it to ~/Applications and register the extension (see Boundaries)
 scripts/use-test-account.sh # log the installed Debug build in to the test server in .env, or --log-out
 python3 tests/mail-checks.py # the Mail checks, sending between the two accounts in .env (docs/TESTING.md)
 python3 tests/mail-window-checks.py # the checks that click in Mail's windows; needs Accessibility
@@ -100,7 +100,7 @@ Only what isn't obvious from directory names:
 - zsh doesn't split an unquoted `$VAR` into words, so `grep pattern $FILES` passes one argument. Use an array or `xargs -0`. In zsh, `echo ======` also fails, and the pipeline status array is `pipestatus`, not bash's `PIPESTATUS`.
 - A `.gitignore` rule containing `/` is anchored to the repository root, so `Config/Local.xcconfig` doesn't match `probe/Config/Local.xcconfig`.
 - macOS pads `wc -l` and `wc -c` output with spaces, and has no `timeout`. In zsh, `status` is a read-only variable, so `status=$?` fails.
-- macOS registers every bare `.app` and `.appex` on disk, the Trash included, and an old copy with the same bundle ID can stand in for the installed one: for its icon, its extension, or its Local Network rule. So only the installed copy is ever a bundle: `scripts/build.sh` keeps the build as a zip and deletes the bare bundles, and `scripts/install.sh` unpacks the zip into `~/Applications`. Don't leave a copy anywhere else, such as Xcode's DerivedData.
+- macOS registers every bare `.app` and `.appex` on disk, the Trash included, and an old copy with the same bundle ID can stand in for the installed one: for its icon, its extension, or its Local Network rule. So only the installed copy is ever a bundle: `scripts/build_app.sh` keeps the build as a zip and deletes the bare bundles, unless given `--zip no`, and its `--install yes` unpacks the zip into `~/Applications`. Don't leave a copy anywhere else, such as Xcode's DerivedData.
 - Adding `NSLocalNetworkUsageDescription` to either `Info.plist`: with it, macOS never asks for the extension and refuses its requests to a server on the local network (D27). Test Local Network changes from a clean state: uninstall the app, restart the Mac, then reinstall.
 - Running the Mail checks right after installing a build: with a server on the local network, macOS refuses the new extension until the Mac restarts (`docs/MAIL.md`). Ask the user to restart first, and expect the popover's red text until then.
 - Reading Mail's Sign state at compose start instead of at send, or detecting auto-saves by headers instead of the message's `state` (`docs/MAIL.md`).
@@ -109,7 +109,7 @@ Only what isn't obvious from directory names:
 - Running the server tests again and again: Nextcloud allows 20 new shares in 10 minutes, so the third run in a row fails with 429. Wait 10 minutes.
 - Narrowing the server tests with `scripts/test-nextcloud.sh --filter X`: `swift test` joins its filters with or, so that runs every server test and uses up the share limit. Load `.env` and run `swift test --filter X` alone.
 - In zsh, `log` is a builtin, so `log show` fails with "too many arguments". Use `/usr/bin/log show`.
-- A changed app icon doesn't show in the Dock and Cmd-Tab while the installed bundle keeps its date: macOS's icon cache ignores the version and build number, and `ditto` keeps the build's date. `scripts/install.sh` touches the bundle for this. For a copy installed otherwise, `touch` it, run `lsregister -f` on it (the path is in `scripts/install.sh`) and `killall Dock`.
+- A changed app icon doesn't show in the Dock and Cmd-Tab while the installed bundle keeps its date: macOS's icon cache ignores the version and build number, and `ditto` keeps the build's date. `scripts/build_app.sh --install yes` touches the bundle for this. For a copy installed otherwise, `touch` it, run `lsregister -f` on it (the path is in `scripts/build_app.sh`) and `killall Dock`.
 - SwiftUI's `TextField(value:format: .number)` reads decimals by the region, ignoring custom number settings, so with Latvia's region "0.2" became 0. Number fields use `DecimalText`, which takes "." or ",".
 - A screenshot for `site/` that shows the server's address or the account name. The app's account section and its check, the popover's line "account on server", the From field and a browser's address bar all show them. Cover them with a solid fill before committing, since git history keeps the first version.
 
