@@ -2,6 +2,9 @@
 
 This tracks what image contains what
 
+The screenshots are 2x, so each one in `site/index.md` carries `{: width="…" }` with half its pixel width; the site's
+theme then shrinks it on narrow windows.
+
 ## SCREENSHOTS.md
 
 This document.

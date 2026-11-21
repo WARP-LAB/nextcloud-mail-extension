@@ -1,0 +1,10 @@
+---
+---
+// Replaces the Primer theme's own stylesheet, which only imports the theme, so the site can add its own rules (D30).
+@import "{{ site.theme }}";
+
+// Screenshots are centred in the column. The icon at the top stays in line with the heading.
+.markdown-body img[src*="/screenshots/"] {
+  display: block;
+  margin: 0 auto;
+}

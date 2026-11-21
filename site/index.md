@@ -24,11 +24,11 @@ Attach files to an email in Mail as usual, make sure **Sign** is on, and hit Sen
 - With two or more files, the email can also get **View all files in email**, which opens the email's folder, and **Download all files in email**, which downloads all its files as one zip.
 - Nothing is ever sent half-way: if an upload fails, the email is not sent, and you keep your files in the message window. Mail shows what went wrong, and how to send the email with its files attached instead.
 
-![Compose as usual, with Sign on](media/screenshots/mail-send-overview-annotated.png)
+![Compose as usual, with Sign on](media/screenshots/mail-send-overview-annotated.png){: width="833"}
 
-![An email where the attachments became links](media/screenshots/mail-receive-overview.png)
+![An email where the attachments became links](media/screenshots/mail-receive-overview.png){: width="643"}
 
-![What recipients see when they open the links](media/screenshots/server-dir.png)
+![What recipients see when they open the links](media/screenshots/server-dir.png){: width="1156"}
 
 ## Requirements
 
@@ -40,19 +40,19 @@ Attach files to an email in Mail as usual, make sure **Sign** is on, and hit Sen
 
 ## Installing
 
-1. [Download](_placeholder-link-to-latest-release-dmg_) prebuilt App (signed and notarized) from releases.
-2. Drag the app into an Applications folder: `/Applications` for every user of the Mac, or `~/Applications` (the Applications folder in your home folder) for you only. Keep only that one copy, and delete any other, such as one left in Downloads, since macOS may use it instead. Start the app once, to log in to your Nextcloud server and set your preferences. If macOS asks whether NextcloudMailExtension may find devices on your local network, allow it. macOS asks only when your Nextcloud server is on your local network.
+1. [Download latest release](https://github.com/WARP-LAB/nextcloud-mail-extension/releases/latest/download/NextcloudMailExtension.dmg), or here are [release notes](https://github.com/WARP-LAB/nextcloud-mail-extension/releases/latest/) and you can find DMG under Assets
+2. Mount DMG and drag the app `NextcloudMailExtension.app` into an Applications folder: `/Applications` for every user of the Mac, or `~/Applications` (the Applications folder in your home folder) for you only. Keep only that one copy, and delete any other, such as one left in Downloads, since macOS may use it instead. Start the app once, to log in to your Nextcloud server and set your preferences. If macOS asks whether NextcloudMailExtension may find devices on your local network, allow it. macOS asks only when your Nextcloud server is on your local network.
 3. In Mail, open **Settings → Extensions** and enable **NextcloudMailExtension**.
 4. If Mail shows a **"Message security extension"** popup, choose NextcloudMailExtension there. (The extension takes over the Sign button in the message window: with Sign on, Mail hands the outgoing message to the extension, which is what makes the upload possible.)
 5. Restart Mail.
 6. Open a new message and click the extension's toolbar button, the one with Nextcloud's logo. If macOS asks whether "NextcloudMailEx" may find devices on your local network, allow it too. That's the extension in Mail, which needs a permission of its own, listed in System Settings as NextcloudMailExtensionPlugIn.
 7. Turn on **Sign**, the badge button at the right of the subject line. Files become links only while it's on, and it stays on for later messages.
 
-![Enabling the extension in Mail's settings](media/screenshots/mail-settings-ext-merged.png)
+![Enabling the extension in Mail's settings](media/screenshots/mail-settings-ext-merged.png){: width="1768"}
 
 When an email is over your email provider's size limit, Mail asks about **Mail Drop** before the extension gets its turn. Choose **Try Sending in Email**, and tick **Don't ask again for this account**. The files then travel via your Nextcloud, not via Mail Drop, and the email stays small. If you choose **Use Mail Drop** instead, the email goes out with Mail Drop's link, and the files already uploaded for it are deleted from Nextcloud.
 
-![Mail asking about Mail Drop for a large email](media/screenshots/mail-send-large-annotated.png)
+![Mail asking about Mail Drop for a large email](media/screenshots/mail-send-large-annotated.png){: width="833"}
 
 ## What you can control
 
@@ -70,7 +70,7 @@ When an email is over your email provider's size limit, Mail asks about **Mail D
 - **Warn if signing is disabled** — if Sign is off and files would have become links, Mail asks before sending them attached, instead of silently sending a large email (on by default).
 - **Forgotten attachment check** — words or phrases you list (say, "attachment" or "see attached") trigger an alert when your email text mentions one but no file is in the message. Only your own text is checked; quotes, subject and signature are ignored. With no words listed, there's no check.
 
-![The app holds login and all settings](media/screenshots/app-overview.png)
+![The app holds login and all settings](media/screenshots/app-overview.png){: width="428"}
 
 ### Per email, from the extension's toolbar button in Mail
 
@@ -78,7 +78,7 @@ When an email is over your email provider's size limit, Mail asks about **Mail D
 - Set an **expiry** for just this email's links.
 - Set a **password** for just this email's links. The password never goes into the email; tell your recipients some other way. A moment after you stop typing, the popover checks the password against your server's password policy and shows why it's refused, and it can generate a password the policy accepts, and copy it for you.
 
-![Per-email settings in the message window](media/screenshots/mail-send-popup.png)
+![Per-email settings in the message window](media/screenshots/mail-send-popup.png){: width="833"}
 
 ## Good to know
 
