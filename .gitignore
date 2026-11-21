@@ -1649,5 +1649,9 @@ probe/Config/Local.xcconfig
 Config/Local.xcconfig
 .swiftpm/
 
+# prodct dirs
+build/
+dmg/
+
 # will be used for GitHub page
 !/site
