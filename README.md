@@ -2,6 +2,12 @@
 
 NextcloudMailExtension is an extension for Apple Mail on macOS. When you send an email, its attachments are uploaded to your Nextcloud server and replaced in the email by share links. Recipients download the files from your server, and your email stays small — no more bounces for oversized mail, no more dependence on Apple's Mail Drop or a provider's attachment limit.
 
+## User's manual
+
+> [!TIP]
+> **[Read the user manual →](https://warp-lab.github.io/nextcloud-mail-extension/)**
+> How to install, use, config options
+
 ## Rant on history and this extension
 
 I was a user of [cargolifter-mail-plugin](https://github.com/WARP-LAB/cargolifter-mail-plugin) which I liked. Back then, doing something like this for Apple Mail involved accessing private APIs, monkey patching (`JRSwizzle`) etc., and naturally at one major Mail upgrade it had to end.
