@@ -9,7 +9,7 @@ Risk register: `docs/RISKS.md`.
 
 **M1: a first real link**, reached 2026-11-06 (T1–T5).
 
-**M2: a first release others can install.** Uploads keep working after an update (T19), the distribution is decided and set up (OD3), the non-functional requirements are confirmed (OD5), and the release is tagged, such as `v0.2.0`.
+**M2: a first release others can install.** Uploads keep working after an update (T19), the distribution is decided (D33) and set up, the non-functional requirements are confirmed (OD5), and the release is tagged, such as `v0.2.0`.
 
 ## ⏳ Active Tasks (In Progress)
 
@@ -24,7 +24,6 @@ Risk register: `docs/RISKS.md`.
 Agents: do not guess these. Record questions here and stop.
 Judgment calls and known risks are tracked separately in `docs/RISKS.md`.
 
-- **OD3: Distribution.** How the app is distributed: Developer ID, the Mac App Store, or local builds only. Both of the first two need the renewed paid membership (D11). The supported versions are decided (D12).
 - **OD5: Proposed requirements.** Confirm or change the non-functional requirements and the out-of-scope list in the PRD.
 - **OD6: Testing "Don't ask again".** Whether to test it in Mail's Mail Drop prompt, knowing it changes the account's behaviour and may be hard to undo (R2).
 

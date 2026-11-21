@@ -68,9 +68,11 @@ enum DebugCommands {
     static func renderWindow(loggedOut: Bool) -> Bool {
         _ = NSApplication.shared
         let model = AppModel()
-        if loggedOut {
-            model.showLoggedOutForDrawing()
-        }
+        #if DEBUG
+            if loggedOut {
+                model.showLoggedOutForDrawing()
+            }
+        #endif
         let view = NSHostingView(rootView: SettingsView(model: model))
         view.frame = NSRect(x: 0, y: 0, width: 640, height: 2000)
         let window = NSWindow(contentRect: view.frame, styleMask: [.titled], backing: .buffered, defer: false)

@@ -1,10 +1,13 @@
 // Signing for local builds. Without Config/Local.xcconfig, builds are ad-hoc signed, and the App Group then fails.
 // To sign with an Apple team (a free Personal Team is enough for local builds), copy Config/Local.example.xcconfig
-// to Config/Local.xcconfig, which git ignores, and fill in DEVELOPMENT_TEAM.
+// to Config/Local.xcconfig, which git ignores, and fill in its Debug section.
 
 CODE_SIGN_STYLE = Manual
 CODE_SIGN_IDENTITY = -
 DEVELOPMENT_TEAM =
+// xcodebuild build otherwise adds get-task-allow, which lets a debugger attach, to Release too, and notarization
+// refuses an app that has it (D33).
+CODE_SIGN_INJECT_BASE_ENTITLEMENTS[config=Release] = NO
 
 // The app's icon, App/AppIcon.icon, made with Icon Composer. Looked up by bundle ID, so that only the app target names
 // an icon, and this file stays the one place outside the project file for build settings both targets share.

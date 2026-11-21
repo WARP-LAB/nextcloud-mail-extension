@@ -1,10 +1,46 @@
 // The keys Config/Local.xcconfig sets, which Signing.xcconfig includes. Copy this file to Config/Local.xcconfig,
-// which git ignores, and fill in DEVELOPMENT_TEAM. Never put the team ID in this file.
+// which git ignores, and fill in the team IDs and names. Never put a real team ID in this file.
 
-// Let Xcode manage signing and provisioning profiles.
-CODE_SIGN_STYLE = Automatic
-CODE_SIGN_IDENTITY = Apple Development
+// ----------------
+// DEBUG
+// Local builds, signed with an Apple Development certificate. Xcode makes
+// the provisioning profiles that the shared Keychain item needs (D16), and
+// build_app.sh renews them. The free Personal Team is enough (D11). The team
+// ID is the OU of the Apple Development certificate.
+//   DEVELOPMENT_TEAM[config=Debug] = ABCDE12345
+//   CODE_SIGN_STYLE[config=Debug] = Automatic
+//   CODE_SIGN_IDENTITY[config=Debug] = Apple Development
 
-// Your 10-character Apple team ID. A free Personal Team is enough for local builds (D11). It's shown in Xcode,
-// Settings > Accounts, and in the certificate's Organizational Unit.
-DEVELOPMENT_TEAM =
+// ----------------
+// RELEASE
+// Signed with Developer ID + hardened runtime + secure timestamp, so that
+// build_dmg.sh can notarize it and it runs on other Macs (D33). Needs the
+// paid membership. The team ID is the one in the Developer ID identity's
+// parentheses, and can differ from Debug's, e.g. a personal development
+// team vs. an organisation's Developer ID team. Keeps CODE_SIGN_STYLE =
+// Manual from Signing.xcconfig: automatic signing refuses a Developer ID
+// identity.
+//   DEVELOPMENT_TEAM[config=Release] = FGHIJ67890
+//   CODE_SIGN_IDENTITY[config=Release] = Developer ID Application: Name or Company (FGHIJ67890)
+//   ENABLE_HARDENED_RUNTIME[config=Release] = YES
+//   OTHER_CODE_SIGN_FLAGS[config=Release] = --timestamp
+// keychain-access-groups needs a provisioning profile for each target, so
+// Xcode refuses to build without them. Make two "Developer ID" profiles in
+// the team's developer account, one for each App ID, lv.warp.nextcloudmailextension
+// and lv.warp.nextcloudmailextension.extension, download them and open them
+// once, then name them here. They're looked up by bundle ID, as in
+// Signing.xcconfig, since both targets share this file.
+//   PROVISIONING_PROFILE_SPECIFIER_lv_warp_nextcloudmailextension = NextcloudMailExtension Developer ID
+//   PROVISIONING_PROFILE_SPECIFIER_lv_warp_nextcloudmailextension_extension = NextcloudMailExtension PlugIn Developer ID
+//   PROVISIONING_PROFILE_SPECIFIER[config=Release] = $(PROVISIONING_PROFILE_SPECIFIER_$(PRODUCT_BUNDLE_IDENTIFIER:identifier))
+
+// ----------------
+// DMG
+// Read only by build_dmg.sh --notarize yes; Xcode ignores it. The DMG is
+// signed with the identity that signed the app. An environment variable of
+// the same name overrides it. NOTARY_PROFILE names a keychain profile,
+// stored once with
+//   xcrun notarytool store-credentials notarytool --apple-id <apple-id> --team-id FGHIJ67890
+// Never put a password or API key here: build settings end up in build
+// logs and in every build script's environment.
+//   NOTARY_PROFILE = notarytool

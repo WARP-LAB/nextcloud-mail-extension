@@ -122,22 +122,33 @@ products="build/${configuration}"
 zip_file="${products}/NextcloudMailExtension.app.zip"
 lsregister=/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister
 
-# A zip from an earlier build would no longer match the build, whether or not this one is zipped.
-rm -f "${zip_file}"
-xcodebuild -project NextcloudMailExtension.xcodeproj -target NextcloudMailExtension -configuration "${configuration}" \
-    SYMROOT="${PWD}/build" -allowProvisioningUpdates "$@" build -quiet
-
 # macOS registers every bare bundle it finds, and an old one with the same bundle ID can stand in for the installed
 # app: for its icon, its extension, or its Local Network rule (docs/MAIL.md). So only the installed copy stays a
 # bundle. The build is kept as a zip, which ditto makes with the signatures intact, and the bare bundles go.
+remove_bare_bundles() {
+    local bundle
+    for bundle in "${products}/NextcloudMailExtension.app" "${products}/NextcloudMailExtensionPlugIn.appex"; do
+        if [[ -e "${bundle}" ]]; then
+            pluginkit -r "${PWD}/${bundle}/Contents/PlugIns/NextcloudMailExtensionPlugIn.appex" 2> /dev/null || true
+            pluginkit -r "${PWD}/${bundle}" 2> /dev/null || true
+            "${lsregister}" -u "${PWD}/${bundle}" 2> /dev/null || true
+            rm -rf "${bundle}"
+        fi
+    done
+}
+
+# A zip from an earlier build would no longer match the build, whether or not this one is zipped.
+rm -f "${zip_file}"
+if ! xcodebuild -project NextcloudMailExtension.xcodeproj -target NextcloudMailExtension \
+    -configuration "${configuration}" SYMROOT="${PWD}/build" -allowProvisioningUpdates "$@" build -quiet; then
+    # A failed build can leave bundles too, such as the extension's when the app's step fails.
+    remove_bare_bundles
+    exit 1
+fi
+
 if [[ "${zip}" == yes ]]; then
     ditto -c -k --keepParent "${products}/NextcloudMailExtension.app" "${zip_file}"
-    for bundle in "${products}/NextcloudMailExtension.app" "${products}/NextcloudMailExtensionPlugIn.appex"; do
-        pluginkit -r "${PWD}/${bundle}/Contents/PlugIns/NextcloudMailExtensionPlugIn.appex" 2> /dev/null || true
-        pluginkit -r "${PWD}/${bundle}" 2> /dev/null || true
-        "${lsregister}" -u "${PWD}/${bundle}" 2> /dev/null || true
-        rm -rf "${bundle}"
-    done
+    remove_bare_bundles
     echo "Built ${zip_file}"
 else
     echo "Built ${products}/NextcloudMailExtension.app"
