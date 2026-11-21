@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.0.1] - 2026-11-21
+
 ### Added
 
 - NextcloudMailExtension, an extension for Apple Mail on macOS 27 or later, on Apple silicon, for Nextcloud 34 or later. When you send an email, its attachments are uploaded to your Nextcloud server, into a folder of their own for that email, and replaced in the email by share links.
@@ -22,4 +24,5 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - No telemetry. Files go only to your own server, and message contents, addresses and passwords are never logged.
 - A download as a DMG, signed with a Developer ID and notarized by Apple.
 
-[unreleased]: https://github.com/WARP-LAB/nextcloud-mail-extension/commits/main
+[unreleased]: https://github.com/WARP-LAB/nextcloud-mail-extension/compare/v0.0.1...HEAD
+[0.0.1]: https://github.com/WARP-LAB/nextcloud-mail-extension/releases/tag/v0.0.1
