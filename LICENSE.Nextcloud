@@ -23,6 +23,9 @@ Files that use the logo
   paperclip hooked on it, for the app's icon.
 - Design/nextcloud-mail-extension-clip-site.svg
   The same artwork with the mark in Nextcloud's blue, #0082C9, for the website.
+- Design/nextcloud-mail-extension-clip-github.png
+  The same artwork as a 1280 x 640 PNG on white, for the repository's social
+  preview on GitHub.
 - App/AppIcon.icon
   The app's icon, made with Icon Composer from
   Design/nextcloud-mail-extension-clip.svg, on a gradient of Nextcloud's brand
